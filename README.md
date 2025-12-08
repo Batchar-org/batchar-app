@@ -37,12 +37,13 @@ Batchar는 한밭대학교 구성원들을 위한 안전하고 투명한 모바�
 
 ---
 
-- **Core**: [Expo SDK](https://expo.dev/)
-- **Language**: TypeScript
-- **Navigation**: Expo Router + React Navigation Stack
-- **Styling**: [NativeWind](https://www.nativewind.dev/)
-- **Client State**: [Zustand](https://github.com/pmndrs/zustand)
-- **Server State**: [TanStack Query](https://tanstack.com/query/latest)
+- **React: 18.3.1**
+- **React Native: 0.76.9**
+- **TypeScript: ~5.5.0**
+- **Expo SDK: 52**
+- **expo-router: 4.0.9**
+- **NativeWind: 2.0.11**
+- **TailwindCSS: 3.3.2**
 
 </br>
 </br>
