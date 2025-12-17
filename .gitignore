@@ -953,3 +953,5 @@ hs_err_pid*
 !/gradle/wrapper/gradle-wrapper.jar
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,windows,web,webstorm,vs,visualstudiocode,react,reactnative,android,androidstudio,xcode
+# Allow ESLint config
+!.eslintrc.js
