@@ -16,7 +16,10 @@ export default function Home() {
       <TopBar />
       <SearchBar />
       <CategoryBar activeCategory={activeCategory} onCategoryPress={setActiveCategory} />
-      <ScrollView className="flex-1 px-5" scrollEventThrottle={16} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        className="flex-1 px-5"
+        scrollEventThrottle={16}
+        showsVerticalScrollIndicator={false}>
         <ProductList />
       </ScrollView>
       <TabBar activeTab={activeTab} onTabPress={setActiveTab} />
