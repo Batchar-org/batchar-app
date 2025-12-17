@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import {View, Text, TouchableOpacity, ScrollView} from 'react-native';
 
 interface CategoryBarProps {
     activeCategory: string;
@@ -6,14 +6,14 @@ interface CategoryBarProps {
 }
 
 const CATEGORIES = [
-    { id: 'all', label: '전체' },
-    { id: 'participating', label: '참여중' },
-    { id: 'popular', label: '인기' },
-    { id: 'deadline', label: '마감임박' },
-    { id: 'latest', label: '최신' },
+    {id: 'all', label: '전체'},
+    {id: 'participating', label: '참여중'},
+    {id: 'popular', label: '인기'},
+    {id: 'deadline', label: '마감임박'},
+    {id: 'latest', label: '최신'},
 ] as const;
 
-export default function CategoryBar({ activeCategory, onCategoryPress }: CategoryBarProps) {
+export default function CategoryBar({activeCategory, onCategoryPress}: CategoryBarProps) {
     const isActive = (id: string) => activeCategory === id;
 
     return (
@@ -21,9 +21,9 @@ export default function CategoryBar({ activeCategory, onCategoryPress }: Categor
             <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ gap: 6, paddingRight: 20 }}
+                contentContainerStyle={{gap: 6, paddingRight: 20}}
             >
-                {CATEGORIES.map(({ id, label }) => (
+                {CATEGORIES.map(({id, label}) => (
                     <TouchableOpacity
                         key={id}
                         onPress={() => onCategoryPress(id)}

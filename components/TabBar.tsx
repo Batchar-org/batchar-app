@@ -1,5 +1,5 @@
-import { View, TouchableOpacity } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import {View, TouchableOpacity} from 'react-native';
+import {MaterialCommunityIcons} from '@expo/vector-icons';
 
 interface Tab {
     id: string;
@@ -12,18 +12,18 @@ interface TabBarProps {
 }
 
 const TABS: Tab[] = [
-    { id: 'home', icon: 'home' },
-    { id: 'heart', icon: 'heart' },
-    { id: 'plus', icon: 'plus-circle' },
-    { id: 'message', icon: 'chat-outline' },
-    { id: 'profile', icon: 'account' },
+    {id: 'home', icon: 'home'},
+    {id: 'heart', icon: 'heart'},
+    {id: 'plus', icon: 'plus-circle'},
+    {id: 'message', icon: 'chat-outline'},
+    {id: 'profile', icon: 'account'},
 ];
 
 const ACTIVE_COLOR = '#12B76A';
 const INACTIVE_COLOR = '#D1D5DB';
 const ICON_SIZE = 36;
 
-export default function TabBar({ activeTab, onTabPress }: TabBarProps) {
+export default function TabBar({activeTab, onTabPress}: TabBarProps) {
     return (
         <View className="w-full flex-row items-center justify-around border-t border-gray-200 bg-white px-2 py-4">
             {TABS.map((tab) => (
