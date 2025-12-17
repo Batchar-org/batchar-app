@@ -4,10 +4,10 @@ module.exports = {
   theme: {
     extend: {
       spacing: {
-        '4.5': '18px',
+        4.5: '18px',
       },
       minWidth: {
-        '4.5': '18px',
+        4.5: '18px',
       },
     },
   },

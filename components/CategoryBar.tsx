@@ -21,21 +21,16 @@ export default function CategoryBar({ activeCategory, onCategoryPress }: Categor
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ gap: 6, paddingRight: 20 }}
-      >
+        contentContainerStyle={{ gap: 6, paddingRight: 20 }}>
         {CATEGORIES.map(({ id, label }) => (
           <TouchableOpacity
             key={id}
             onPress={() => onCategoryPress(id)}
             className={`rounded-full px-4 py-2 ${
               isActive(id) ? 'bg-green-500' : 'border border-gray-300 bg-white'
-            }`}
-          >
+            }`}>
             <Text
-              className={`text-sm font-semibold ${
-                isActive(id) ? 'text-white' : 'text-gray-600'
-              }`}
-            >
+              className={`text-sm font-semibold ${isActive(id) ? 'text-white' : 'text-gray-600'}`}>
               {label}
             </Text>
           </TouchableOpacity>
