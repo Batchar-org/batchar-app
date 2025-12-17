@@ -25,18 +25,18 @@ const formatPrice = (price: number): string => {
 };
 
 export default function Product({
-                                  title,
-                                  originalPrice,
-                                  currentPrice,
-                                  location,
-                                  participants,
-                                  image,
-                                  badge,
-                                  deadline,
-                                  isFavorite = false,
-                                  onPress,
-                                  onFavoritePress,
-                                }: ProductProps) {
+  title,
+  originalPrice,
+  currentPrice,
+  location,
+  participants,
+  image,
+  badge,
+  deadline,
+  isFavorite = false,
+  onPress,
+  onFavoritePress,
+}: ProductProps) {
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -48,8 +48,7 @@ export default function Product({
         shadowOpacity: 0.08,
         shadowRadius: 4,
         elevation: 3,
-      }}
-    >
+      }}>
       <View className="flex-row">
         {/* 상품 이미지 */}
         <View className="relative mr-3 h-24 w-24 overflow-hidden rounded-xl bg-gray-100">
@@ -57,14 +56,12 @@ export default function Product({
             <View
               className={`absolute left-2 top-2 z-10 rounded px-1.5 py-1 ${
                 badge === 'HOT' ? 'bg-orange-500' : 'bg-green-500'
-              }`}
-            >
+              }`}>
               <Text className="text-xs font-bold text-white">{badge}</Text>
             </View>
           )}
           {deadline && (
-            <View
-              className="absolute bottom-2 left-2 z-10 flex-row items-center rounded bg-black/70 px-1.5 py-0.5">
+            <View className="absolute bottom-2 left-2 z-10 flex-row items-center rounded bg-black/70 px-1.5 py-0.5">
               <MaterialCommunityIcons name="clock-outline" size={10} color="white" />
               <Text className="ml-1 text-xs font-semibold text-white">{deadline}</Text>
             </View>
@@ -77,8 +74,7 @@ export default function Product({
           <Text
             className="mb-1 text-base font-bold text-gray-900"
             numberOfLines={1}
-            ellipsizeMode="tail"
-          >
+            ellipsizeMode="tail">
             {title.length > 10 ? `${title.substring(0, 10)}...` : title}
           </Text>
           <View className="mb-3 flex-row items-center">
@@ -96,8 +92,7 @@ export default function Product({
                 ...(Platform.OS === 'web' && {
                   cursor: 'pointer',
                 }),
-              }}
-            >
+              }}>
               <Text className="text-xs text-gray-500">시작가</Text>
               <Text className="text-xs font-bold text-gray-700">
                 {formatPrice(originalPrice)}원
@@ -112,22 +107,15 @@ export default function Product({
                 ...(Platform.OS === 'web' && {
                   cursor: 'pointer',
                 }),
-              }}
-            >
+              }}>
               <Text className="text-xs text-white">현재가</Text>
-              <Text className="text-xs font-bold text-white">
-                {formatPrice(currentPrice)}원
-              </Text>
+              <Text className="text-xs font-bold text-white">{formatPrice(currentPrice)}원</Text>
             </TouchableOpacity>
           </View>
         </View>
 
         {/* 찜 버튼 */}
-        <TouchableOpacity
-          onPress={onFavoritePress}
-          activeOpacity={0.7}
-          className="ml-2"
-        >
+        <TouchableOpacity onPress={onFavoritePress} activeOpacity={0.7} className="ml-2">
           <MaterialCommunityIcons
             name={isFavorite ? 'heart' : 'heart-outline'}
             size={24}
