@@ -1,5 +1,5 @@
-import { View, Text, Image, TouchableOpacity, Platform } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import {View, Text, Image, TouchableOpacity, Platform} from 'react-native';
+import {MaterialCommunityIcons} from '@expo/vector-icons';
 
 interface ProductProps {
     id: string;
@@ -25,18 +25,18 @@ const formatPrice = (price: number): string => {
 };
 
 export default function Product({
-    title,
-    originalPrice,
-    currentPrice,
-    location,
-    participants,
-    image,
-    badge,
-    deadline,
-    isFavorite = false,
-    onPress,
-    onFavoritePress,
-}: ProductProps) {
+                                    title,
+                                    originalPrice,
+                                    currentPrice,
+                                    location,
+                                    participants,
+                                    image,
+                                    badge,
+                                    deadline,
+                                    isFavorite = false,
+                                    onPress,
+                                    onFavoritePress,
+                                }: ProductProps) {
     return (
         <TouchableOpacity
             onPress={onPress}
@@ -44,7 +44,7 @@ export default function Product({
             className="mb-4 rounded-2xl bg-white p-3"
             style={{
                 shadowColor: '#000',
-                shadowOffset: { width: 0, height: 2 },
+                shadowOffset: {width: 0, height: 2},
                 shadowOpacity: 0.08,
                 shadowRadius: 4,
                 elevation: 3,
@@ -63,12 +63,13 @@ export default function Product({
                         </View>
                     )}
                     {deadline && (
-                        <View className="absolute bottom-2 left-2 z-10 flex-row items-center rounded bg-black/70 px-1.5 py-0.5">
-                            <MaterialCommunityIcons name="clock-outline" size={10} color="white" />
+                        <View
+                            className="absolute bottom-2 left-2 z-10 flex-row items-center rounded bg-black/70 px-1.5 py-0.5">
+                            <MaterialCommunityIcons name="clock-outline" size={10} color="white"/>
                             <Text className="ml-1 text-xs font-semibold text-white">{deadline}</Text>
                         </View>
                     )}
-                    <Image source={{ uri: image }} className="h-full w-full" resizeMode="cover" />
+                    <Image source={{uri: image}} className="h-full w-full" resizeMode="cover"/>
                 </View>
 
                 {/* 상품 정보 */}
@@ -81,7 +82,7 @@ export default function Product({
                         {title.length > 10 ? `${title.substring(0, 10)}...` : title}
                     </Text>
                     <View className="mb-3 flex-row items-center">
-                        <MaterialCommunityIcons name="map-marker-outline" size={12} color="#9CA3AF" />
+                        <MaterialCommunityIcons name="map-marker-outline" size={12} color="#9CA3AF"/>
                         <Text className="ml-1 text-xs text-gray-500">{location}</Text>
                     </View>
 
@@ -137,7 +138,7 @@ export default function Product({
 
             {/* 참여자 수 */}
             <View className="mt-2 flex-row items-center pl-1">
-                <MaterialCommunityIcons name="account-outline" size={14} color="#9CA3AF" />
+                <MaterialCommunityIcons name="account-outline" size={14} color="#9CA3AF"/>
                 <Text className="ml-1 text-xs text-gray-500">{participants}명 참여중</Text>
             </View>
         </TouchableOpacity>
