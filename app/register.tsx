@@ -3,8 +3,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState } from 'react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import TabBar from '../components/TabBar';
+import { COLORS } from '../constants/theme';
 
-const ACTIVE_COLOR = '#12B76A';
 const MAX_DESCRIPTION_LENGTH = 2000;
 
 export default function Register() {
@@ -49,9 +49,9 @@ export default function Register() {
           {/* 사진/동영상 업로드 버튼 */}
           <TouchableOpacity
             className="mb-4 h-20 w-20 items-center justify-center rounded-lg border-2"
-            style={{ borderColor: ACTIVE_COLOR }}>
-            <MaterialCommunityIcons name="camera-outline" size={28} color={ACTIVE_COLOR} />
-            <Text className="mt-1 text-xs" style={{ color: ACTIVE_COLOR }}>
+            style={{ borderColor: COLORS.active }}>
+            <MaterialCommunityIcons name="camera-outline" size={28} color={COLORS.active} />
+            <Text className="mt-1 text-xs" style={{ color: COLORS.active }}>
               사진/동영상
             </Text>
           </TouchableOpacity>
@@ -123,7 +123,7 @@ export default function Register() {
                 {auctionTime || '00:00'}
               </Text>
             </View>
-            <MaterialCommunityIcons name="calendar-outline" size={24} color={ACTIVE_COLOR} />
+            <MaterialCommunityIcons name="calendar-outline" size={24} color={COLORS.active} />
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -133,7 +133,7 @@ export default function Register() {
         <TouchableOpacity
           onPress={handleSubmit}
           className="items-center justify-center rounded-full py-4"
-          style={{ backgroundColor: ACTIVE_COLOR }}>
+          style={{ backgroundColor: COLORS.active }}>
           <Text className="text-base font-bold text-white">등록 완료</Text>
         </TouchableOpacity>
       </View>
