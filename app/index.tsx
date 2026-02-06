@@ -8,7 +8,6 @@ import ProductList from '../components/ProductList';
 import TabBar from '../components/TabBar';
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState('home');
   const [activeCategory, setActiveCategory] = useState('all');
 
   return (
@@ -22,7 +21,7 @@ export default function Home() {
         showsVerticalScrollIndicator={false}>
         <ProductList />
       </ScrollView>
-      <TabBar activeTab={activeTab} onTabPress={setActiveTab} />
+      <TabBar />
     </SafeAreaView>
   );
 }
