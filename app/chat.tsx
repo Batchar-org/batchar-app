@@ -5,8 +5,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import TabBar from '../components/TabBar';
 import { useRouter } from 'expo-router';
 import { MOCK_CHATS } from '../mocks/chat';
-
-const ACTIVE_COLOR = '#12B76A';
+import { COLORS } from '../constants/theme';
 
 // 필터 타입
 type FilterType = 'all' | 'ongoing' | 'ended';
@@ -27,7 +26,7 @@ export default function Chat() {
       {/* 헤더 */}
       <View className="flex-row items-center justify-between px-4 py-4">
         <TouchableOpacity onPress={() => router.back()}>
-          <MaterialCommunityIcons name="chevron-left" size={28} color={ACTIVE_COLOR} />
+          <MaterialCommunityIcons name="chevron-left" size={28} color={COLORS.active} />
         </TouchableOpacity>
         <Text className="text-lg font-bold">채팅</Text>
         <View className="w-7" />
@@ -44,12 +43,12 @@ export default function Chat() {
             }`}
             style={
               activeFilter === filter.id
-                ? { borderColor: ACTIVE_COLOR, backgroundColor: `${ACTIVE_COLOR}10` }
+                ? { borderColor: COLORS.active, backgroundColor: COLORS.primaryLight }
                 : {}
             }>
             <Text
               className={`text-sm font-medium ${activeFilter === filter.id ? '' : 'text-gray-500'}`}
-              style={activeFilter === filter.id ? { color: ACTIVE_COLOR } : {}}>
+              style={activeFilter === filter.id ? { color: COLORS.active } : {}}>
               {filter.label}
             </Text>
           </TouchableOpacity>
