@@ -9,9 +9,9 @@ import type { TabId } from '../types/tab';
 const ROUTE_TO_TAB: Record<string, TabId> = {
   '/': 'home',
   '/register': 'plus',
+  '/chat': 'message',
   // 추후 다른 탭 경로 추가
   // '/wishlist': 'heart',
-  // '/chat': 'message',
   // '/profile': 'profile',
 };
 
@@ -19,9 +19,9 @@ const ROUTE_TO_TAB: Record<string, TabId> = {
 const TAB_TO_ROUTE: Partial<Record<TabId, string>> = {
   home: '/',
   plus: '/register',
+  message: '/chat',
   // 추후 다른 탭 경로 추가
   // heart: '/wishlist',
-  // message: '/chat',
   // profile: '/profile',
 };
 
