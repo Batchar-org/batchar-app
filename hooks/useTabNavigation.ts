@@ -10,9 +10,8 @@ const ROUTE_TO_TAB: Record<string, TabId> = {
   '/': 'home',
   '/register': 'plus',
   '/chat': 'message',
-  // 추후 다른 탭 경로 추가
+  '/mypage': 'profile',
   // '/wishlist': 'heart',
-  // '/profile': 'profile',
 };
 
 // 탭 ID → 경로 매핑
@@ -20,9 +19,8 @@ const TAB_TO_ROUTE: Partial<Record<TabId, string>> = {
   home: '/',
   plus: '/register',
   message: '/chat',
-  // 추후 다른 탭 경로 추가
+  profile: '/mypage',
   // heart: '/wishlist',
-  // profile: '/profile',
 };
 
 export function useTabNavigation() {
