@@ -2,7 +2,7 @@ import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState } from 'react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import TabBar from '../components/TabBar';
+import TabBar from '../components/layout/TabBar';
 import { useRouter } from 'expo-router';
 import { MOCK_CHATS } from '../mocks/chat';
 import { COLORS } from '../constants/theme';

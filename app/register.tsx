@@ -2,7 +2,7 @@ import { View, Text, ScrollView, TouchableOpacity, TextInput } from 'react-nativ
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState } from 'react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import TabBar from '../components/TabBar';
+import TabBar from '../components/layout/TabBar';
 import { COLORS } from '../constants/theme';
 
 const MAX_DESCRIPTION_LENGTH = 2000;
