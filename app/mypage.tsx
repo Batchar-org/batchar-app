@@ -1,6 +1,6 @@
 import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import TabBar from '../components/TabBar';
+import TabBar from '../components/layout/TabBar';
 import { COLORS } from '../constants/theme';
 import { MOCK_MILESTONES, MOCK_REWARDS, MOCK_FERTILITY } from '../mocks/mypage';
 
@@ -26,7 +26,7 @@ export default function MyPage() {
           {/* 캐릭터 이미지 */}
           <View className="items-center justify-center" style={{ height: 200 }}>
             <Image
-              source={require('../assets/mypage.png')}
+              source={require('../assets/public/mypage.png')}
               style={{ width: '100%', height: '100%' }}
               resizeMode="contain"
             />

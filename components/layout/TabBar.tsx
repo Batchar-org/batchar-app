@@ -1,8 +1,8 @@
 import { View, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useTabNavigation } from '../hooks/useTabNavigation';
-import type { TabId } from '../types/tab';
-import { COLORS, ICON_SIZES } from '../constants/theme';
+import { useTabNavigation } from '../../hooks/useTabNavigation';
+import type { TabId } from '../../types/tab';
+import { COLORS, ICON_SIZES } from '../../constants/theme';
 
 interface Tab {
   id: TabId;

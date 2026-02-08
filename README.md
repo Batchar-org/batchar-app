@@ -64,8 +64,8 @@ batchar-app/
 ├── components/          # 재사용 가능한 UI 컴포넌트
 ├── hooks/               # 커스텀 React Hooks
 ├── providers/           # Context Providers (QueryClientProvider 등)
-├── services/            # API 호출 및 외부 서비스 로직
-├── stores/              # 전역 상태 관리 (Zustand)
+├── apis/            # API 호출 및 외부 서비스 로직
+├── store/              # 전역 상태 관리 (Zustand)
 ├── types/               # TypeScript 인터페이스 및 타입 정의
 ├── utils/               # 유틸리티 함수 (Formatters, Validators)
 ├── assets/              # 이미지, 폰트, 아이콘 등 정적 파일
