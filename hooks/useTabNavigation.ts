@@ -2,7 +2,7 @@
 // TabBar 컴포넌트에서 사용 중
 import { useCallback, useEffect } from 'react';
 import { useRouter, usePathname } from 'expo-router';
-import { useActiveTab, useTabActions } from '../stores/useTabStore';
+import { useActiveTab, useTabActions } from '@/store/useTabStore';
 import type { TabId } from '../types/tab';
 
 // 경로 → 탭 ID 매핑

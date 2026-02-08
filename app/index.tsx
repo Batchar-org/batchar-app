@@ -1,11 +1,11 @@
 import { ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState } from 'react';
-import TopBar from '../components/TopBar';
-import SearchBar from '../components/SearchBar';
-import CategoryBar from '../components/CategoryBar';
-import ProductList from '../components/ProductList';
-import TabBar from '../components/TabBar';
+import TopBar from '../components/layout/TopBar';
+import SearchBar from '../components/layout/SearchBar';
+import CategoryBar from '../components/layout/CategoryBar';
+import ProductList from '../components/product/ProductList';
+import TabBar from '../components/layout/TabBar';
 
 export default function Home() {
   const [activeCategory, setActiveCategory] = useState('all');
