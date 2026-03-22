@@ -1,8 +1,8 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Modal, Pressable, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { COLORS } from '../../constants/theme';
 
-// 인증 코드 자릿수
+// 백엔드 명세 기준 6자리 코드를 입력받습니다.
 const CODE_LENGTH = 6;
 
 interface EmailVerifyModalProps {
@@ -10,10 +10,14 @@ interface EmailVerifyModalProps {
   visible: boolean;
   /** 모달 닫기 콜백 */
   onClose: () => void;
-  /** 로그인 완료 버튼 콜백 (API 연동 전까지 단순 콜백) */
-  onVerifyComplete: () => void;
-  /** [TODO] 인증 코드 재전송 콜백 */
+  /** 인증 완료 버튼 콜백 */
+  onVerifyComplete: (code: string) => void;
+  /** 인증 번호 재전송 콜백 */
   onResend?: () => void;
+  /** 남은 인증 유효 시간(초) */
+  remainingSeconds: number;
+  /** 인증 중 여부 */
+  isSubmitting?: boolean;
 }
 
 /**
@@ -32,17 +36,25 @@ export default function EmailVerifyModal({
   onClose,
   onVerifyComplete,
   onResend,
+  remainingSeconds,
+  isSubmitting = false,
 }: EmailVerifyModalProps) {
   const [code, setCode] = useState<string[]>(Array(CODE_LENGTH).fill(''));
   const inputRefs = useRef<(TextInput | null)[]>(Array(CODE_LENGTH).fill(null));
 
-  // 모달이 닫힐 때 코드 초기화
+  useEffect(() => {
+    if (!visible) {
+      setCode(Array(CODE_LENGTH).fill(''));
+    }
+  }, [visible]);
+
+  // 모달 종료 시 입력값을 비워 다음 인증 요청과 섞이지 않게 합니다.
   const handleClose = () => {
     setCode(Array(CODE_LENGTH).fill(''));
     onClose();
   };
 
-  // 숫자 입력: 다음 칸으로 자동 포커스 이동
+  // 한 자리씩 입력하고 다음 칸으로 이동합니다.
   const handleCodeChange = (text: string, index: number) => {
     const digit = text.replace(/[^0-9]/g, '').slice(-1);
     const newCode = [...code];
@@ -54,24 +66,36 @@ export default function EmailVerifyModal({
     }
   };
 
-  // 백스페이스: 현재 칸이 비어있으면 이전 칸으로 포커스 복귀
+  // 빈 칸에서 백스페이스를 누르면 이전 칸으로 이동합니다.
   const handleCodeKeyPress = (key: string, index: number) => {
     if (key === 'Backspace' && !code[index] && index > 0) {
       inputRefs.current[index - 1]?.focus();
     }
   };
 
-  // 인증 번호 재전송: 코드 초기화 후 첫 번째 칸 포커스
+  // 재전송 시 입력값을 초기화하고 첫 칸부터 다시 입력받습니다.
   const handleResend = () => {
     setCode(Array(CODE_LENGTH).fill(''));
     inputRefs.current[0]?.focus();
     onResend?.();
   };
 
-  // 로그인 완료 버튼
+  // 만료 전 6자리가 모두 입력된 경우에만 인증을 시도합니다.
   const handleVerifyComplete = () => {
-    setCode(Array(CODE_LENGTH).fill(''));
-    onVerifyComplete();
+    const joinedCode = code.join('');
+
+    if (joinedCode.length !== CODE_LENGTH || remainingSeconds <= 0) {
+      return;
+    }
+
+    onVerifyComplete(joinedCode);
+  };
+
+  const formatRemainingTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+
+    return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
   };
 
   return (
@@ -108,7 +132,7 @@ export default function EmailVerifyModal({
 
           {/* 안내 문구 */}
           <Text style={{ fontSize: 13, color: '#6B7280', lineHeight: 20, marginBottom: 24 }}>
-            {'로그인 보호를 위해 이메일로 전송된 6자리 인증\n코드를 입력해 주세요.'}
+            {'회원가입을 위해 이메일로 전송된 6자리 인증\n코드를 입력해 주세요.'}
           </Text>
 
           {/* 6자리 코드 입력 박스 */}
@@ -150,15 +174,23 @@ export default function EmailVerifyModal({
               ))}
           </View>
 
-          {/* 재전송 안내 */}
+          {/* 남은 시간과 재전송 액션을 함께 표시합니다. */}
           <View
             style={{
               flexDirection: 'row',
               justifyContent: 'center',
               alignItems: 'center',
-              gap: 4,
+              gap: 8,
               marginBottom: 24,
             }}>
+            <Text
+              style={{
+                fontSize: 12,
+                fontWeight: '600',
+                color: remainingSeconds > 0 ? '#111827' : '#DC2626',
+              }}>
+              {remainingSeconds > 0 ? formatRemainingTime(remainingSeconds) : '인증 만료'}
+            </Text>
             <Text style={{ fontSize: 12, color: '#9CA3AF' }}>인증 번호를 받지 못하셨나요?</Text>
             <TouchableOpacity onPress={handleResend}>
               <Text style={{ fontSize: 12, fontWeight: '600', color: COLORS.primary }}>
@@ -167,18 +199,20 @@ export default function EmailVerifyModal({
             </TouchableOpacity>
           </View>
 
-          {/* 로그인 완료 버튼 */}
-          {/* [TODO] 6자리 코드 검증 API 호출 후 성공 시 onVerifyComplete 실행 */}
+          {/* 실제 검증 요청은 부모 화면에서 수행합니다. */}
           <TouchableOpacity
             onPress={handleVerifyComplete}
+            disabled={isSubmitting || remainingSeconds <= 0}
             style={{
-              backgroundColor: COLORS.primary,
+              backgroundColor: isSubmitting || remainingSeconds <= 0 ? '#A3A3A3' : COLORS.primary,
               borderRadius: 999,
               paddingVertical: 16,
               alignItems: 'center',
               marginBottom: 12,
             }}>
-            <Text style={{ color: 'white', fontSize: 16, fontWeight: '600' }}>로그인 완료</Text>
+            <Text style={{ color: 'white', fontSize: 16, fontWeight: '600' }}>
+              {isSubmitting ? '인증 중...' : '이메일 인증 완료'}
+            </Text>
           </TouchableOpacity>
 
           {/* 취소 버튼 */}
