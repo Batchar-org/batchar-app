@@ -6,7 +6,14 @@ import { getRefreshToken, removeRefreshToken, setRefreshToken } from '../lib/sec
 
 type AuthStatus = 'idle' | 'authenticated' | 'unauthenticated';
 
-const initialState = {
+type AuthStoreState = {
+  userId: number | null;
+  accessToken: string | null;
+  status: AuthStatus;
+  isInitialized: boolean;
+};
+
+const initialState: AuthStoreState = {
   userId: null,
   accessToken: null,
   status: 'idle' as AuthStatus,
