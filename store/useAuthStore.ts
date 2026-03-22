@@ -1,18 +1,17 @@
 import { create } from 'zustand';
-import { devtools, combine } from 'zustand/middleware';
+import { combine, devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
+import { logoutApi, refreshApi } from '../api/auth';
+import { getRefreshToken, removeRefreshToken, setRefreshToken } from '../lib/secureStore';
 
-// ──────────────────────────────────────────────────────────────────
-// [TODO] 실제 토큰 연동 시 아래 단계 적용:
-//  1. `persist` 미들웨어 추가 (zustand/middleware)
-//  2. storage: AsyncStorage (from @react-native-async-storage/async-storage)
-//  3. initialState에 token: string | null 필드 추가
-//  4. setToken / clearToken 액션 추가
-// ──────────────────────────────────────────────────────────────────
+type AuthStatus = 'idle' | 'authenticated' | 'unauthenticated';
 
 const initialState = {
-  // 로그인 여부 — 토큰 구현 전 임시 boolean 플래그
-  isLoggedIn: false,
+  userId: null,
+  accessToken: null,
+  status: 'idle' as AuthStatus,
+  // 초기 세션 복원이 끝나기 전에는 라우팅을 보류합니다.
+  isInitialized: false,
 };
 
 const useAuthStore = create(
@@ -20,17 +19,79 @@ const useAuthStore = create(
     immer(
       combine(initialState, (set) => ({
         actions: {
-          // 로그인 처리 (추후 토큰 저장 로직 추가)
-          login: () =>
+          setSession: ({ userId, accessToken }: { userId: number; accessToken: string }) =>
             set((state) => {
-              state.isLoggedIn = true;
+              state.userId = userId;
+              state.accessToken = accessToken;
+              state.status = 'authenticated';
             }),
 
-          // 로그아웃 처리 (추후 토큰 삭제 로직 추가)
-          logout: () =>
+          clearSession: () =>
             set((state) => {
-              state.isLoggedIn = false;
+              state.userId = null;
+              state.accessToken = null;
+              state.status = 'unauthenticated';
             }),
+
+          initializeAuth: async () => {
+            try {
+              // 앱 재실행 시에는 저장된 RT로 세션을 복구합니다.
+              const refreshToken = await getRefreshToken();
+
+              if (!refreshToken) {
+                set((state) => {
+                  state.userId = null;
+                  state.accessToken = null;
+                  state.status = 'unauthenticated';
+                  state.isInitialized = true;
+                });
+                return;
+              }
+
+              const response = await refreshApi({ refreshToken });
+              const { accessToken, refreshToken: nextRefreshToken } = response.data;
+
+              // refresh 응답의 RT는 항상 최신 값으로 교체합니다.
+              await setRefreshToken(nextRefreshToken);
+
+              set((state) => {
+                state.userId = null;
+                state.accessToken = accessToken;
+                state.status = 'authenticated';
+                state.isInitialized = true;
+              });
+            } catch {
+              // 세션 복구에 실패하면 저장된 RT를 제거하고 비로그인 상태로 전환합니다.
+              await removeRefreshToken();
+
+              set((state) => {
+                state.userId = null;
+                state.accessToken = null;
+                state.status = 'unauthenticated';
+                state.isInitialized = true;
+              });
+            }
+          },
+
+          logout: async () => {
+            try {
+              const refreshToken = await getRefreshToken();
+
+              if (refreshToken) {
+                await logoutApi({ refreshToken });
+              }
+            } catch {
+              // 서버 응답과 무관하게 앱 쪽 세션은 반드시 종료합니다.
+            } finally {
+              await removeRefreshToken();
+
+              set((state) => {
+                state.userId = null;
+                state.accessToken = null;
+                state.status = 'unauthenticated';
+              });
+            }
+          },
         },
       }))
     ),
@@ -38,8 +99,10 @@ const useAuthStore = create(
   )
 );
 
-// 리렌더링 최적화를 위한 선택적 구독 커스텀 훅
-export const useIsLoggedIn = () => useAuthStore((state) => state.isLoggedIn);
+export default useAuthStore;
 
-// 액션 훅
+export const useAuthStatus = () => useAuthStore((state) => state.status);
+export const useAccessToken = () => useAuthStore((state) => state.accessToken);
+export const useIsInitialized = () => useAuthStore((state) => state.isInitialized);
+export const useIsLoggedIn = () => useAuthStore((state) => state.status === 'authenticated');
 export const useAuthActions = () => useAuthStore((state) => state.actions);
