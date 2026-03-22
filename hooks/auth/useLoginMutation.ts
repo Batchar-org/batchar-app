@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import { loginApi } from '../../api/auth';
-import { setRefreshToken } from '../../lib/secureStore';
+import { setRefreshToken, setStoredUserId } from '../../lib/secureStore';
 import { useAuthActions } from '../../store/useAuthStore';
 
 function readStringCandidate(source: Record<string, unknown>, keys: string[]) {
@@ -50,8 +50,7 @@ export function useLoginMutation() {
 
       const userId =
         (nestedData && readNumberCandidate(nestedData, ['userId', 'user_id'])) ??
-        readNumberCandidate(responseRecord, ['userId', 'user_id']) ??
-        0;
+        readNumberCandidate(responseRecord, ['userId', 'user_id']);
 
       // 토큰 형식이 맞지 않으면 저장 전에 명확한 에러로 중단합니다.
       if (!accessToken) {
@@ -64,8 +63,14 @@ export function useLoginMutation() {
         throw new Error('로그인 응답의 refreshToken 형식이 올바르지 않습니다.');
       }
 
+      if (typeof userId !== 'number') {
+        console.log('invalid login userId', response);
+        throw new Error('로그인 응답의 userId 형식이 올바르지 않습니다.');
+      }
+
       // 로그인 성공 시 RT는 SecureStore, AT는 메모리 상태로 분리 저장합니다.
       await setRefreshToken(refreshToken);
+      await setStoredUserId(userId);
       setSession({ userId, accessToken });
     },
   });
