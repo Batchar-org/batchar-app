@@ -1,3 +1,7 @@
+declare const process: {
+  env: Record<string, string | undefined>;
+};
+
 // Expo public env는 번들 시점에 주입되므로 앱 재시작이 필요합니다.
 const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL?.trim() ?? '';
 
