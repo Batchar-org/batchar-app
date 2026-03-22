@@ -8,7 +8,7 @@ import type { TabId } from '../types/tab';
 // 경로 → 탭 ID 매핑
 const ROUTE_TO_TAB: Record<string, TabId> = {
   '/': 'home',
-  '/register': 'plus',
+  '/productregister': 'plus',
   '/chat': 'message',
   '/mypage': 'profile',
   // '/wishlist': 'heart',
@@ -17,7 +17,7 @@ const ROUTE_TO_TAB: Record<string, TabId> = {
 // 탭 ID → 경로 매핑
 const TAB_TO_ROUTE: Partial<Record<TabId, string>> = {
   home: '/',
-  plus: '/register',
+  plus: '/productregister',
   message: '/chat',
   profile: '/mypage',
   // heart: '/wishlist',

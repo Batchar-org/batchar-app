@@ -1,4 +1,5 @@
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { COLORS } from '../../constants/theme';
 
 interface CategoryBarProps {
   activeCategory: string;
@@ -26,11 +27,15 @@ export default function CategoryBar({ activeCategory, onCategoryPress }: Categor
           <TouchableOpacity
             key={id}
             onPress={() => onCategoryPress(id)}
-            className={`rounded-full px-4 py-2 ${
-              isActive(id) ? 'bg-green-500' : 'border border-gray-300 bg-white'
-            }`}>
+            className="rounded-full px-4 py-2"
+            style={{
+              backgroundColor: isActive(id) ? COLORS.primary : 'white',
+              borderWidth: isActive(id) ? 0 : 1,
+              borderColor: '#D1D5DB',
+            }}>
             <Text
-              className={`text-sm font-semibold ${isActive(id) ? 'text-white' : 'text-gray-600'}`}>
+              className="text-sm font-semibold"
+              style={{ color: isActive(id) ? 'white' : '#4B5563' }}>
               {label}
             </Text>
           </TouchableOpacity>
