@@ -2,7 +2,13 @@ import { create } from 'zustand';
 import { combine, devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import { logoutApi, refreshApi } from '../api/auth';
-import { getRefreshToken, removeRefreshToken, setRefreshToken } from '../lib/secureStore';
+import {
+  getRefreshToken,
+  getStoredUserId,
+  removeRefreshToken,
+  removeStoredUserId,
+  setRefreshToken,
+} from '../lib/secureStore';
 
 type AuthStatus = 'idle' | 'authenticated' | 'unauthenticated';
 
@@ -42,10 +48,11 @@ const useAuthStore = create(
 
           initializeAuth: async () => {
             try {
-              // 앱 재실행 시에는 저장된 RT로 세션을 복구합니다.
+              // 앱 재실행 시에는 저장된 RT와 userId로 세션을 복구합니다.
               const refreshToken = await getRefreshToken();
+              const storedUserId = await getStoredUserId();
 
-              if (!refreshToken) {
+              if (!refreshToken || storedUserId === null) {
                 set((state) => {
                   state.userId = null;
                   state.accessToken = null;
@@ -62,7 +69,7 @@ const useAuthStore = create(
               await setRefreshToken(nextRefreshToken);
 
               set((state) => {
-                state.userId = null;
+                state.userId = storedUserId;
                 state.accessToken = accessToken;
                 state.status = 'authenticated';
                 state.isInitialized = true;
@@ -70,6 +77,7 @@ const useAuthStore = create(
             } catch {
               // 세션 복구에 실패하면 저장된 RT를 제거하고 비로그인 상태로 전환합니다.
               await removeRefreshToken();
+              await removeStoredUserId();
 
               set((state) => {
                 state.userId = null;
@@ -91,6 +99,7 @@ const useAuthStore = create(
               // 서버 응답과 무관하게 앱 쪽 세션은 반드시 종료합니다.
             } finally {
               await removeRefreshToken();
+              await removeStoredUserId();
 
               set((state) => {
                 state.userId = null;

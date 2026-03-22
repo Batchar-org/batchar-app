@@ -81,7 +81,7 @@ export default function LoginPage() {
               <View className="flex-row items-center border-b border-gray-300">
                 <TextInput
                   className="flex-1 py-2 text-base text-gray-900"
-                  placeholder=""
+                  placeholder="비밀번호를 입력해주세요"
                   placeholderTextColor="#9CA3AF"
                   value={password}
                   onChangeText={setPassword}
