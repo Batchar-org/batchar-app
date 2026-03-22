@@ -1,12 +1,13 @@
 // 앱 전역 테마 색상 상수
+// 브랜드 메인 컬러: #0DDA8A — 버튼, 아이콘, 강조 요소 등 모든 주요 색상에 통일 적용
 
 export const COLORS = {
   // 브랜드 색상
-  primary: '#12B76A',
-  primaryLight: '#12B76A10',
+  primary: '#0DDA8A',
+  primaryLight: '#0DDA8A18',
 
   // 상태 색상
-  active: '#12B76A',
+  active: '#0DDA8A',
   inactive: '#D1D5DB',
 
   // 텍스트 색상

@@ -1,11 +1,21 @@
 import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
+import { Feather } from '@expo/vector-icons';
 import TabBar from '../components/layout/TabBar';
 import { COLORS } from '../constants/theme';
 import { MOCK_MILESTONES, MOCK_REWARDS, MOCK_FERTILITY } from '../mocks/mypage';
+import { useAuthActions } from '../store/useAuthStore';
 
 export default function MyPage() {
+  const router = useRouter();
+  const { logout } = useAuthActions();
   const fertilityProgress = MOCK_FERTILITY.progress;
+
+  // 로그아웃: isLoggedIn = false 설정 후 RouteGuard가 /login으로 자동 리다이렉트
+  const handleLogout = () => {
+    logout();
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50" edges={['top', 'bottom']}>
@@ -107,6 +117,17 @@ export default function MyPage() {
               </TouchableOpacity>
             </View>
           ))}
+        </View>
+
+        {/* 로그아웃 버튼 */}
+        <View className="mx-4 mb-4 mt-8">
+          <TouchableOpacity
+            onPress={handleLogout}
+            className="flex-row items-center justify-center rounded-full py-4"
+            style={{ backgroundColor: COLORS.primary }}>
+            <Feather name="log-out" size={18} color="white" style={{ marginRight: 8 }} />
+            <Text className="text-base font-semibold text-white">로그아웃</Text>
+          </TouchableOpacity>
         </View>
 
         {/* 하단 여백 */}
