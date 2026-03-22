@@ -1,5 +1,6 @@
 import { View, Text, Image, TouchableOpacity, Platform } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { COLORS } from '../../constants/theme';
 
 interface ProductProps {
   id: string;
@@ -54,9 +55,8 @@ export default function Product({
         <View className="relative mr-3 h-24 w-24 overflow-hidden rounded-xl bg-gray-100">
           {badge && (
             <View
-              className={`absolute left-2 top-2 z-10 rounded px-1.5 py-1 ${
-                badge === 'HOT' ? 'bg-orange-500' : 'bg-green-500'
-              }`}>
+              className={`absolute left-2 top-2 z-10 rounded px-1.5 py-1`}
+              style={{ backgroundColor: badge === 'HOT' ? '#F97316' : COLORS.primary }}>
               <Text className="text-xs font-bold text-white">{badge}</Text>
             </View>
           )}
@@ -102,8 +102,9 @@ export default function Product({
             {/* 현재가 */}
             <TouchableOpacity
               activeOpacity={0.7}
-              className="flex-1 items-center rounded-lg bg-green-500 px-2.5 py-1.5"
+              className="flex-1 items-center rounded-lg px-2.5 py-1.5"
               style={{
+                backgroundColor: COLORS.primary,
                 ...(Platform.OS === 'web' && {
                   cursor: 'pointer',
                 }),
@@ -119,7 +120,7 @@ export default function Product({
           <MaterialCommunityIcons
             name={isFavorite ? 'heart' : 'heart-outline'}
             size={24}
-            color={isFavorite ? '#12B76A' : '#D1D5DB'}
+            color={isFavorite ? COLORS.primary : '#D1D5DB'}
           />
         </TouchableOpacity>
       </View>
