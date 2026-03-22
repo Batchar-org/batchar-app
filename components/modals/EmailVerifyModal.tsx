@@ -48,9 +48,8 @@ export default function EmailVerifyModal({
     }
   }, [visible]);
 
-  // 모달 종료 시 입력값을 비워 다음 인증 요청과 섞이지 않게 합니다.
+  // visible 변화에 맞춰 초기화되므로 닫기 함수는 부모 상태만 변경합니다.
   const handleClose = () => {
-    setCode(Array(CODE_LENGTH).fill(''));
     onClose();
   };
 
