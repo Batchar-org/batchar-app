@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import {
   View,
   Text,
@@ -11,45 +10,129 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { useEffect, useMemo, useState } from 'react';
 import { COLORS } from '../constants/theme';
-import { useAuthActions } from '../store/useAuthStore';
 import EmailVerifyModal from '../components/modals/EmailVerifyModal';
+import { useSendEmailCodeMutation } from '../hooks/auth/useSendEmailCodeMutation';
+import { useSignupMutation } from '../hooks/auth/useSignupMutation';
+import { useVerifyEmailCodeMutation } from '../hooks/auth/useVerifyEmailCodeMutation';
+
+const EMAIL_VERIFY_EXPIRE_SECONDS = 10 * 60;
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { login } = useAuthActions();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
-
-  // 이메일 인증 모달 상태
   const [isVerifyModalVisible, setIsVerifyModalVisible] = useState(false);
+  const [isEmailVerified, setIsEmailVerified] = useState(false);
+  const [verifiedEmail, setVerifiedEmail] = useState('');
+  const [expireAt, setExpireAt] = useState<number | null>(null);
+  const [now, setNow] = useState(Date.now());
+
+  const sendEmailCodeMutation = useSendEmailCodeMutation();
+  const verifyEmailCodeMutation = useVerifyEmailCodeMutation();
+  const signupMutation = useSignupMutation();
+
+  // 남은 인증 시간을 초 단위로 계산합니다.
+  const remainingSeconds = useMemo(() => {
+    if (!expireAt) {
+      return 0;
+    }
+
+    const seconds = Math.ceil((expireAt - now) / 1000);
+    return seconds > 0 ? seconds : 0;
+  }, [expireAt, now]);
+
+  useEffect(() => {
+    if (!expireAt || remainingSeconds === 0) {
+      return;
+    }
+
+    // 모달 타이머 표기를 1초마다 갱신합니다.
+    const timer = setInterval(() => {
+      setNow(Date.now());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [expireAt, remainingSeconds]);
 
   // 뒤로가기 → 로그인 페이지
   const handleBack = () => {
     router.back();
   };
 
-  // 이메일 인증하기 버튼
   const handleOpenVerifyModal = () => {
-    setIsVerifyModalVisible(true);
-    // [TODO] 이메일 인증 코드 발송 API 호출
+    const normalizedEmail = email.trim();
+
+    if (!normalizedEmail) {
+      return;
+    }
+
+    sendEmailCodeMutation.mutate(
+      { email: normalizedEmail },
+      {
+        onSuccess: () => {
+          // 재전송 시에는 이전 인증 결과와 만료 시간을 모두 초기화합니다.
+          setIsEmailVerified(false);
+          setVerifiedEmail('');
+          setExpireAt(Date.now() + EMAIL_VERIFY_EXPIRE_SECONDS * 1000);
+          setNow(Date.now());
+          setIsVerifyModalVisible(true);
+        },
+      }
+    );
   };
 
-  // 인증 완료 → login() 호출, RouteGuard가 / 로 리다이렉트
-  // [TODO] 인증 코드 검증 API 성공 후 호출하도록 수정
-  const handleVerifyComplete = () => {
-    setIsVerifyModalVisible(false);
-    login();
+  const handleVerifyComplete = (code: string) => {
+    const normalizedEmail = email.trim();
+
+    verifyEmailCodeMutation.mutate(
+      { email: normalizedEmail, code },
+      {
+        onSuccess: () => {
+          // 현재 입력한 이메일만 인증 완료 상태로 인정합니다.
+          setIsEmailVerified(true);
+          setVerifiedEmail(normalizedEmail);
+          setIsVerifyModalVisible(false);
+        },
+      }
+    );
   };
 
-  // 회원가입 버튼 클릭 (추후 API 연동)
   const handleRegister = () => {
-    // [TODO] 회원가입 API 호출 후 성공 시 handleVerifyComplete 호출
-    console.log('회원가입 버튼 클릭', { email, password, name, address });
+    const normalizedEmail = email.trim();
+
+    if (!isEmailVerified || verifiedEmail !== normalizedEmail) {
+      return;
+    }
+
+    signupMutation.mutate(
+      {
+        email: normalizedEmail,
+        password,
+        name: name.trim(),
+        address: address.trim(),
+      },
+      {
+        onSuccess: () => {
+          // 이번 정책에서는 가입 직후 로그인하지 않고 로그인 화면으로 이동합니다.
+          router.replace('/login');
+        },
+      }
+    );
   };
+
+  const isRegisterDisabled =
+    !email.trim() ||
+    !password.trim() ||
+    !name.trim() ||
+    !address.trim() ||
+    !isEmailVerified ||
+    verifiedEmail !== email.trim() ||
+    signupMutation.isPending;
 
   return (
     <SafeAreaView className="flex-1 bg-white" edges={['top', 'bottom']}>
@@ -104,7 +187,13 @@ export default function RegisterPage() {
                   placeholder="예) 12345678@hanbat.edu.kr"
                   placeholderTextColor="#9CA3AF"
                   value={email}
-                  onChangeText={setEmail}
+                  onChangeText={(value) => {
+                    // 이메일이 바뀌면 이전 인증 결과는 더 이상 유효하지 않습니다.
+                    setEmail(value);
+                    setIsEmailVerified(false);
+                    setVerifiedEmail('');
+                    setExpireAt(null);
+                  }}
                   keyboardType="email-address"
                   autoCapitalize="none"
                   autoCorrect={false}
@@ -112,12 +201,38 @@ export default function RegisterPage() {
                 {/* 이메일 인증하기 버튼 — 입력 필드 우측 */}
                 <TouchableOpacity
                   onPress={handleOpenVerifyModal}
+                  disabled={sendEmailCodeMutation.isPending}
                   className="ml-2 rounded-full px-3 py-1"
-                  style={{ backgroundColor: COLORS.primary }}>
-                  <Text className="text-xs font-semibold text-white">이메일 인증</Text>
+                  style={{
+                    backgroundColor: sendEmailCodeMutation.isPending ? '#A3A3A3' : COLORS.primary,
+                  }}>
+                  <Text className="text-xs font-semibold text-white">
+                    {sendEmailCodeMutation.isPending ? '전송 중' : '이메일 인증'}
+                  </Text>
                 </TouchableOpacity>
               </View>
             </View>
+
+            {isEmailVerified && verifiedEmail === email.trim() && (
+              // 검증한 이메일과 현재 입력값이 같을 때만 인증 완료로 표시합니다.
+              <Text className="mb-6 text-sm text-green-600">이메일 인증이 완료되었습니다.</Text>
+            )}
+
+            {sendEmailCodeMutation.isError && (
+              <Text className="mb-6 text-sm text-red-500">
+                {sendEmailCodeMutation.error instanceof Error
+                  ? sendEmailCodeMutation.error.message
+                  : '인증 메일 발송에 실패했습니다.'}
+              </Text>
+            )}
+
+            {verifyEmailCodeMutation.isError && (
+              <Text className="mb-6 text-sm text-red-500">
+                {verifyEmailCodeMutation.error instanceof Error
+                  ? verifyEmailCodeMutation.error.message
+                  : '이메일 인증에 실패했습니다.'}
+              </Text>
+            )}
 
             {/* 비밀번호 입력 */}
             <View className="mb-6">
@@ -157,12 +272,23 @@ export default function RegisterPage() {
               </View>
             </View>
 
+            {signupMutation.isError && (
+              <Text className="mb-6 text-sm text-red-500">
+                {signupMutation.error instanceof Error
+                  ? signupMutation.error.message
+                  : '회원가입에 실패했습니다.'}
+              </Text>
+            )}
+
             {/* 회원가입 버튼 */}
             <TouchableOpacity
               onPress={handleRegister}
+              disabled={isRegisterDisabled}
               className="items-center rounded-full py-4"
-              style={{ backgroundColor: COLORS.primary }}>
-              <Text className="text-base font-semibold text-white">회원가입</Text>
+              style={{ backgroundColor: isRegisterDisabled ? '#A3A3A3' : COLORS.primary }}>
+              <Text className="text-base font-semibold text-white">
+                {signupMutation.isPending ? '회원가입 중...' : '회원가입'}
+              </Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -173,10 +299,9 @@ export default function RegisterPage() {
         visible={isVerifyModalVisible}
         onClose={() => setIsVerifyModalVisible(false)}
         onVerifyComplete={handleVerifyComplete}
-        onResend={() => {
-          // [TODO] 인증 코드 재발송 API 호출
-          console.log('인증 번호 재전송');
-        }}
+        onResend={handleOpenVerifyModal}
+        remainingSeconds={remainingSeconds}
+        isSubmitting={verifyEmailCodeMutation.isPending}
       />
     </SafeAreaView>
   );

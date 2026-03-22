@@ -11,21 +11,25 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useAuthActions } from '../store/useAuthStore';
 import { COLORS } from '../constants/theme';
+import { useLoginMutation } from '../hooks/auth/useLoginMutation';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login } = useAuthActions();
+  const loginMutation = useLoginMutation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
-  // 로그인 버튼 클릭 시 isLoggedIn = true 설정
-  // RouteGuard가 상태 변경을 감지하여 자동으로 / 으로 리다이렉트합니다.
-  // [TODO] 실제 API 호출 후 성공 시 login() 호출하도록 수정 필요
   const handleLogin = () => {
-    login();
+    if (!email.trim() || !password.trim()) {
+      return;
+    }
+
+    loginMutation.mutate({
+      email: email.trim(),
+      password,
+    });
   };
 
   // 회원가입 버튼 클릭 시 회원가입 페이지로 이동
@@ -93,12 +97,23 @@ export default function LoginPage() {
               </View>
             </View>
 
+            {loginMutation.isError && (
+              <Text className="mb-4 text-sm text-red-500">
+                {loginMutation.error instanceof Error
+                  ? loginMutation.error.message
+                  : '로그인에 실패했습니다.'}
+              </Text>
+            )}
+
             {/* 로그인 버튼 */}
             <TouchableOpacity
               onPress={handleLogin}
+              disabled={loginMutation.isPending}
               className="mb-6 items-center rounded-full py-4"
-              style={{ backgroundColor: COLORS.primary }}>
-              <Text className="text-base font-semibold text-white">로그인</Text>
+              style={{ backgroundColor: loginMutation.isPending ? '#A3A3A3' : COLORS.primary }}>
+              <Text className="text-base font-semibold text-white">
+                {loginMutation.isPending ? '로그인 중...' : '로그인'}
+              </Text>
             </TouchableOpacity>
 
             {/* 회원가입 링크 */}

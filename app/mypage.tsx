@@ -1,6 +1,5 @@
 import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import TabBar from '../components/layout/TabBar';
 import { COLORS } from '../constants/theme';
@@ -8,7 +7,6 @@ import { MOCK_MILESTONES, MOCK_REWARDS, MOCK_FERTILITY } from '../mocks/mypage';
 import { useAuthActions } from '../store/useAuthStore';
 
 export default function MyPage() {
-  const router = useRouter();
   const { logout } = useAuthActions();
   const fertilityProgress = MOCK_FERTILITY.progress;
 
