@@ -1,17 +1,35 @@
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import { useMemo } from 'react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import TabBar from '../components/layout/TabBar';
 import WishlistProduct from '../components/product/WishlistProduct';
 import { MOCK_PRODUCTS } from '../mocks/product';
+import type { ProductData } from '../mocks/product';
 import { COLORS } from '../constants/theme';
 
 export default function Wishlist() {
   const router = useRouter();
 
-  // isFavorite가 true인 상품만 필터링
-  const favoriteProducts = MOCK_PRODUCTS.filter((p) => p.isFavorite);
+  // isFavorite가 true인 상품만 필터링 (메모이제이션)
+  const favoriteProducts = useMemo(() => MOCK_PRODUCTS.filter((p) => p.isFavorite), []);
+
+  const renderItem = ({ item }: { item: ProductData }) => (
+    <WishlistProduct
+      id={item.id}
+      title={item.title}
+      currentPrice={item.currentPrice}
+      participants={item.participants}
+      image={item.image}
+      badge={item.badge}
+      deadline={item.deadline}
+      likes={item.likes}
+      comments={item.comments}
+      onPress={() => router.push(`/product/${item.id}`)}
+      onFavoritePress={() => console.log('찜 해제:', item.title)}
+    />
+  );
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50" edges={['top', 'bottom']}>
@@ -24,27 +42,14 @@ export default function Wishlist() {
       </View>
 
       {/* 관심 상품 목록 */}
-      <ScrollView
+      <FlatList
+        data={favoriteProducts}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.id}
         className="flex-1 px-4"
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingVertical: 12 }}>
-        {favoriteProducts.map((product) => (
-          <WishlistProduct
-            key={product.id}
-            id={product.id}
-            title={product.title}
-            currentPrice={product.currentPrice}
-            participants={product.participants}
-            image={product.image}
-            badge={product.badge}
-            deadline={product.deadline}
-            likes={product.likes}
-            comments={product.comments}
-            onPress={() => router.push(`/product/${product.id}`)}
-            onFavoritePress={() => console.log('찜 해제:', product.title)}
-          />
-        ))}
-      </ScrollView>
+        contentContainerStyle={{ paddingVertical: 12 }}
+      />
 
       {/* 하단 탭바 */}
       <TabBar />

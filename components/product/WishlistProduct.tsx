@@ -1,6 +1,7 @@
 import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { COLORS } from '../../constants/theme';
+import { formatPrice } from '../../utils/format';
 
 interface WishlistProductProps {
   id: string;
@@ -15,14 +16,6 @@ interface WishlistProductProps {
   onPress?: () => void;
   onFavoritePress?: () => void;
 }
-
-const formatPrice = (price: number): string => {
-  if (price >= 1000000) {
-    const man = Math.floor(price / 10000);
-    return `${man}만`;
-  }
-  return `${price.toLocaleString()}`;
-};
 
 export default function WishlistProduct({
   title,
@@ -90,16 +83,20 @@ export default function WishlistProduct({
           {/* 하단: 참여자 + 좋아요/댓글 */}
           <View className="flex-row items-center justify-between">
             <View className="flex-row items-center">
-              <MaterialCommunityIcons name="account-group-outline" size={14} color="#9CA3AF" />
+              <MaterialCommunityIcons
+                name="account-group-outline"
+                size={14}
+                color={COLORS.textMuted}
+              />
               <Text className="ml-1 text-xs text-gray-400">{participants}명 참여중</Text>
             </View>
             <View className="flex-row items-center gap-2">
               <View className="flex-row items-center">
-                <MaterialCommunityIcons name="heart-outline" size={14} color="#9CA3AF" />
+                <MaterialCommunityIcons name="heart-outline" size={14} color={COLORS.textMuted} />
                 <Text className="ml-0.5 text-xs text-gray-400">{likes}</Text>
               </View>
               <View className="flex-row items-center">
-                <MaterialCommunityIcons name="chat-outline" size={14} color="#9CA3AF" />
+                <MaterialCommunityIcons name="chat-outline" size={14} color={COLORS.textMuted} />
                 <Text className="ml-0.5 text-xs text-gray-400">{comments}</Text>
               </View>
             </View>
