@@ -5,6 +5,7 @@ import { useState, useRef } from 'react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { getProductById } from '../../mocks/product';
 import { COLORS } from '../../constants/theme';
+import { formatPrice } from '../../utils/format';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -58,10 +59,6 @@ export default function ProductDetail() {
   const handleCancelPriceOffer = () => {
     setHasPriceOffer(false);
     setIsHighestOfferer(false);
-  };
-
-  const formatPrice = (price: number): string => {
-    return price.toLocaleString();
   };
 
   return (

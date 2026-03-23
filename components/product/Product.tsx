@@ -1,6 +1,7 @@
 import { View, Text, Image, TouchableOpacity, Platform } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { COLORS } from '../../constants/theme';
+import { formatPrice } from '../../utils/format';
 
 interface ProductProps {
   id: string;
@@ -16,14 +17,6 @@ interface ProductProps {
   onPress?: () => void;
   onFavoritePress?: () => void;
 }
-
-const formatPrice = (price: number): string => {
-  if (price >= 1000000) {
-    const man = Math.floor(price / 10000);
-    return `${man}만`;
-  }
-  return `${price.toLocaleString()}`;
-};
 
 export default function Product({
   title,
@@ -78,7 +71,7 @@ export default function Product({
             {title.length > 10 ? `${title.substring(0, 10)}...` : title}
           </Text>
           <View className="mb-3 flex-row items-center">
-            <MaterialCommunityIcons name="map-marker-outline" size={12} color="#9CA3AF" />
+            <MaterialCommunityIcons name="map-marker-outline" size={12} color={COLORS.textMuted} />
             <Text className="ml-1 text-xs text-gray-500">{location}</Text>
           </View>
 
@@ -127,7 +120,7 @@ export default function Product({
 
       {/* 참여자 수 */}
       <View className="mt-2 flex-row items-center pl-1">
-        <MaterialCommunityIcons name="account-outline" size={14} color="#9CA3AF" />
+        <MaterialCommunityIcons name="account-outline" size={14} color={COLORS.textMuted} />
         <Text className="ml-1 text-xs text-gray-500">{participants}명 참여중</Text>
       </View>
     </TouchableOpacity>
