@@ -11,6 +11,9 @@ export interface ProductData {
   badge?: 'HOT' | 'NEW';
   deadline?: string;
   isFavorite?: boolean;
+  // 관심목록용 필드
+  likes?: number;
+  comments?: number;
   // 상세 페이지용 추가 필드
   images?: string[];
   description?: string;
@@ -32,6 +35,8 @@ export const MOCK_PRODUCTS: ProductData[] = [
     image: 'https://picsum.photos/200/200?random=1',
     badge: 'HOT',
     isFavorite: true,
+    likes: 5,
+    comments: 8,
     images: [
       'https://picsum.photos/400/300?random=1',
       'https://picsum.photos/400/300?random=11',
@@ -53,6 +58,8 @@ export const MOCK_PRODUCTS: ProductData[] = [
     participants: 8,
     image: 'https://picsum.photos/200/200?random=2',
     deadline: '2시간 남음',
+    likes: 18,
+    comments: 8,
     images: [
       'https://picsum.photos/400/300?random=2',
       'https://picsum.photos/400/300?random=21',
@@ -74,6 +81,8 @@ export const MOCK_PRODUCTS: ProductData[] = [
     participants: 5,
     image: 'https://picsum.photos/200/200?random=3',
     badge: 'NEW',
+    likes: 3,
+    comments: 2,
     images: [
       'https://picsum.photos/400/300?random=3',
       'https://picsum.photos/400/300?random=31',
@@ -96,6 +105,8 @@ export const MOCK_PRODUCTS: ProductData[] = [
     image: 'https://picsum.photos/200/200?random=4',
     deadline: '1시간 남음',
     isFavorite: true,
+    likes: 18,
+    comments: 8,
     images: [
       'https://picsum.photos/400/300?random=4',
       'https://picsum.photos/400/300?random=41',
@@ -118,6 +129,8 @@ export const MOCK_PRODUCTS: ProductData[] = [
     participants: 7,
     image: 'https://picsum.photos/200/200?random=5',
     badge: 'HOT',
+    likes: 12,
+    comments: 8,
     images: [
       'https://picsum.photos/400/300?random=5',
       'https://picsum.photos/400/300?random=51',
@@ -181,6 +194,8 @@ export const MOCK_PRODUCTS: ProductData[] = [
     participants: 20,
     image: 'https://picsum.photos/200/200?random=8',
     isFavorite: true,
+    likes: 24,
+    comments: 5,
     images: [
       'https://picsum.photos/400/300?random=8',
       'https://picsum.photos/400/300?random=81',

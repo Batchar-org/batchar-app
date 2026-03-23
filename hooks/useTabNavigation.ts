@@ -11,7 +11,7 @@ const ROUTE_TO_TAB: Record<string, TabId> = {
   '/productregister': 'plus',
   '/chat': 'message',
   '/mypage': 'profile',
-  // '/wishlist': 'heart',
+  '/wishlist': 'heart',
 };
 
 // 탭 ID → 경로 매핑
@@ -20,7 +20,7 @@ const TAB_TO_ROUTE: Partial<Record<TabId, string>> = {
   plus: '/productregister',
   message: '/chat',
   profile: '/mypage',
-  // heart: '/wishlist',
+  heart: '/wishlist',
 };
 
 export function useTabNavigation() {
