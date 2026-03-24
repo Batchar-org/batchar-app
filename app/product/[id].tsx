@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, Image, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, ScrollView, Image, TouchableOpacity, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState, useRef } from 'react';
@@ -6,8 +6,6 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { getProductById } from '../../mocks/product';
 import { COLORS } from '../../constants/theme';
 import { formatPrice } from '../../utils/format';
-
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 // 가격 추이 mock 데이터
 const PRICE_HISTORY = [
@@ -26,6 +24,7 @@ const PRICE_OFFER_HISTORY = [
 ];
 
 export default function ProductDetail() {
+  const { width: screenWidth } = useWindowDimensions();
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -47,7 +46,7 @@ export default function ProductDetail() {
 
   const handleScroll = (event: any) => {
     const offsetX = event.nativeEvent.contentOffset.x;
-    const index = Math.round(offsetX / SCREEN_WIDTH);
+    const index = Math.round(offsetX / screenWidth);
     setCurrentImageIndex(index);
   };
 
@@ -68,11 +67,11 @@ export default function ProductDetail() {
         <TouchableOpacity onPress={() => router.back()}>
           <MaterialCommunityIcons name="chevron-left" size={28} color={COLORS.active} />
         </TouchableOpacity>
-        <View className="flex-row items-center gap-5">
+        <View className="flex-row items-center">
           <TouchableOpacity onPress={() => router.push('/')}>
             <MaterialCommunityIcons name="home-outline" size={22} color={COLORS.active} />
           </TouchableOpacity>
-          <TouchableOpacity>
+          <TouchableOpacity style={{ marginLeft: 20 }}>
             <MaterialCommunityIcons name="share-variant-outline" size={22} color={COLORS.active} />
           </TouchableOpacity>
         </View>
@@ -92,7 +91,7 @@ export default function ProductDetail() {
               <Image
                 key={index}
                 source={{ uri: img }}
-                style={{ width: SCREEN_WIDTH, height: 280 }}
+                style={{ width: screenWidth, height: 280 }}
                 resizeMode="cover"
               />
             ))}
@@ -137,8 +136,8 @@ export default function ProductDetail() {
         </View>
 
         {/* 가격 정보 */}
-        <View className="flex-row gap-2 bg-white px-4 pb-4">
-          <View className="flex-1 items-center rounded-xl bg-gray-100 py-3">
+        <View className="flex-row bg-white px-4 pb-4">
+          <View className="mr-2 flex-1 items-center rounded-xl bg-gray-100 py-3">
             <Text className="text-xs text-gray-500">시작가</Text>
             <Text className="mt-1 text-lg font-bold text-gray-900">
               {formatPrice(product.originalPrice)}원

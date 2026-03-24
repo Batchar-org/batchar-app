@@ -22,7 +22,7 @@ export default function Chat() {
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
 
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={['top', 'bottom']}>
+    <SafeAreaView className="flex-1 bg-white" edges={['top']}>
       {/* 헤더 */}
       <View className="flex-row items-center justify-between px-4 py-4">
         <TouchableOpacity onPress={() => router.back()}>
@@ -33,8 +33,8 @@ export default function Chat() {
       </View>
 
       {/* 필터 탭 */}
-      <View className="flex-row gap-2 px-4 pb-4">
-        {FILTERS.map((filter) => (
+      <View className="flex-row px-4 pb-4">
+        {FILTERS.map((filter, index) => (
           <TouchableOpacity
             key={filter.id}
             onPress={() => setActiveFilter(filter.id)}
@@ -43,8 +43,12 @@ export default function Chat() {
             }`}
             style={
               activeFilter === filter.id
-                ? { borderColor: COLORS.active, backgroundColor: COLORS.primaryLight }
-                : {}
+                ? {
+                    marginRight: index === FILTERS.length - 1 ? 0 : 8,
+                    borderColor: COLORS.active,
+                    backgroundColor: COLORS.primaryLight,
+                  }
+                : { marginRight: index === FILTERS.length - 1 ? 0 : 8 }
             }>
             <Text
               className={`text-sm font-medium ${activeFilter === filter.id ? '' : 'text-gray-500'}`}

@@ -32,7 +32,7 @@ export default function Wishlist() {
   );
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50" edges={['top', 'bottom']}>
+    <SafeAreaView className="flex-1 bg-white" edges={['top']}>
       {/* 헤더 */}
       <View className="flex-row items-center justify-center bg-white px-5 py-4">
         <Text className="text-lg font-bold text-gray-900">관심목록</Text>
@@ -46,7 +46,7 @@ export default function Wishlist() {
         data={favoriteProducts}
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
-        className="flex-1 px-4"
+        className="flex-1 bg-gray-50 px-4"
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingVertical: 12 }}
       />

@@ -16,13 +16,13 @@ export default function MyPage() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50" edges={['top', 'bottom']}>
+    <SafeAreaView className="flex-1 bg-white" edges={['top']}>
       {/* 헤더 */}
-      <View className="items-center justify-center py-4">
+      <View className="items-center justify-center bg-white py-4">
         <Text className="text-lg font-bold text-gray-900">마이페이지</Text>
       </View>
 
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+      <ScrollView className="flex-1 bg-gray-50" showsVerticalScrollIndicator={false}>
         {/* 밭 비옥도 카드 */}
         <View className="mx-4 overflow-hidden rounded-2xl" style={{ backgroundColor: '#E8E4DC' }}>
           {/* 비옥도 정보 */}

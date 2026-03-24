@@ -3,6 +3,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useEffect } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { StatusBar } from 'expo-status-bar';
 import { useAuthActions, useIsInitialized, useIsLoggedIn } from '../store/useAuthStore';
 
 // ──────────────────────────────────────────────────────────────────
@@ -67,6 +68,7 @@ export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <SafeAreaProvider>
+        <StatusBar style="dark" backgroundColor="#FFFFFF" />
         {/* Stack을 먼저 렌더링하여 네비게이터를 마운트한 뒤 RouteGuard 실행 */}
         <Stack screenOptions={{ headerShown: false }} />
         <RouteGuard />

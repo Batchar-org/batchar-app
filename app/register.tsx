@@ -11,7 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { COLORS } from '../constants/theme';
+import { COLORS, INPUT_STYLE, LAYOUT } from '../constants/theme';
 import EmailVerifyModal from '../components/modals/EmailVerifyModal';
 import { useSendEmailCodeMutation } from '../hooks/auth/useSendEmailCodeMutation';
 import { useSignupMutation } from '../hooks/auth/useSignupMutation';
@@ -167,13 +167,14 @@ export default function RegisterPage() {
               <Text className="mb-2 text-sm font-medium text-gray-700">이름</Text>
               <View className="border-b border-gray-300">
                 <TextInput
-                  className="py-2 text-base text-gray-900"
+                  className="text-base text-gray-900"
                   placeholder="이름을 입력해주세요"
                   placeholderTextColor="#9CA3AF"
                   value={name}
                   onChangeText={setName}
                   autoCapitalize="none"
                   autoCorrect={false}
+                  style={INPUT_STYLE}
                 />
               </View>
             </View>
@@ -183,7 +184,7 @@ export default function RegisterPage() {
               <Text className="mb-2 text-sm font-medium text-gray-700">이메일 주소</Text>
               <View className="flex-row items-center border-b border-gray-300">
                 <TextInput
-                  className="flex-1 py-2 text-base text-gray-900"
+                  className="flex-1 text-base text-gray-900"
                   placeholder="예) 12345678@hanbat.edu.kr"
                   placeholderTextColor="#9CA3AF"
                   value={email}
@@ -197,6 +198,7 @@ export default function RegisterPage() {
                   keyboardType="email-address"
                   autoCapitalize="none"
                   autoCorrect={false}
+                  style={INPUT_STYLE}
                 />
                 {/* 이메일 인증하기 버튼 — 입력 필드 우측 */}
                 <TouchableOpacity
@@ -204,6 +206,7 @@ export default function RegisterPage() {
                   disabled={sendEmailCodeMutation.isPending}
                   className="ml-2 rounded-full px-3 py-1"
                   style={{
+                    minHeight: LAYOUT.touchTargetMinHeight,
                     backgroundColor: sendEmailCodeMutation.isPending ? '#A3A3A3' : COLORS.primary,
                   }}>
                   <Text className="text-xs font-semibold text-white">
@@ -239,7 +242,7 @@ export default function RegisterPage() {
               <Text className="mb-2 text-sm font-medium text-gray-700">비밀번호</Text>
               <View className="flex-row items-center border-b border-gray-300">
                 <TextInput
-                  className="flex-1 py-2 text-base text-gray-900"
+                  className="flex-1 text-base text-gray-900"
                   placeholder="비밀번호를 입력해주세요"
                   placeholderTextColor="#9CA3AF"
                   value={password}
@@ -247,10 +250,12 @@ export default function RegisterPage() {
                   secureTextEntry={!isPasswordVisible}
                   autoCapitalize="none"
                   autoCorrect={false}
+                  style={INPUT_STYLE}
                 />
                 <TouchableOpacity
                   onPress={() => setIsPasswordVisible(!isPasswordVisible)}
-                  className="p-1">
+                  style={{ minHeight: LAYOUT.touchTargetMinHeight }}
+                  className="items-center justify-center p-1">
                   <Feather name={isPasswordVisible ? 'eye' : 'eye-off'} size={20} color="#9CA3AF" />
                 </TouchableOpacity>
               </View>
@@ -261,13 +266,14 @@ export default function RegisterPage() {
               <Text className="mb-2 text-sm font-medium text-gray-700">주소</Text>
               <View className="border-b border-gray-300">
                 <TextInput
-                  className="py-2 text-base text-gray-900"
+                  className="text-base text-gray-900"
                   placeholder="주소를 입력해주세요"
                   placeholderTextColor="#9CA3AF"
                   value={address}
                   onChangeText={setAddress}
                   autoCapitalize="none"
                   autoCorrect={false}
+                  style={INPUT_STYLE}
                 />
               </View>
             </View>
