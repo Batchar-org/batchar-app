@@ -8,6 +8,12 @@ export interface ChatData {
   unreadCount: number;
   avatarColor: string;
   thumbnail: string | null;
+  // 채팅 상세 페이지용 필드
+  productId: string;
+  productName: string;
+  productPrice: number;
+  productImage: string;
+  lastActiveTime: string;
 }
 
 export const MOCK_CHATS: ChatData[] = [
@@ -19,6 +25,11 @@ export const MOCK_CHATS: ChatData[] = [
     unreadCount: 2,
     avatarColor: '#6B7280',
     thumbnail: null,
+    productId: '4',
+    productName: '의자',
+    productPrice: 80000,
+    productImage: 'https://picsum.photos/200/200?random=4',
+    lastActiveTime: '3시간 전 접속',
   },
   {
     id: '2',
@@ -28,6 +39,11 @@ export const MOCK_CHATS: ChatData[] = [
     unreadCount: 0,
     avatarColor: '#F59E0B',
     thumbnail: 'https://picsum.photos/100/100?random=1',
+    productId: '2',
+    productName: '맥북 프로 m4 13인치',
+    productPrice: 1200000,
+    productImage: 'https://picsum.photos/200/200?random=2',
+    lastActiveTime: '1일 전 접속',
   },
   {
     id: '3',
@@ -37,5 +53,15 @@ export const MOCK_CHATS: ChatData[] = [
     unreadCount: 0,
     avatarColor: '#22C55E',
     thumbnail: 'https://picsum.photos/100/100?random=2',
+    productId: '3',
+    productName: '점퍼',
+    productPrice: 140000,
+    productImage: 'https://picsum.photos/200/200?random=3',
+    lastActiveTime: '2일 전 접속',
   },
 ];
+
+// ID로 채팅 찾기
+export const getChatById = (id: string): ChatData | undefined => {
+  return MOCK_CHATS.find((chat) => chat.id === id);
+};
