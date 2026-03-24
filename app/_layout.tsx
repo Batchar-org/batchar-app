@@ -5,6 +5,7 @@ import { ActivityIndicator, View } from 'react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { StatusBar } from 'expo-status-bar';
 import { useAuthActions, useIsInitialized, useIsLoggedIn } from '../store/useAuthStore';
+import { COLORS } from '../constants/theme';
 
 // ──────────────────────────────────────────────────────────────────
 // 라우트 가드 컴포넌트
@@ -68,7 +69,7 @@ export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <SafeAreaProvider>
-        <StatusBar style="dark" backgroundColor="#FFFFFF" />
+        <StatusBar style="dark" backgroundColor={COLORS.background} />
         {/* Stack을 먼저 렌더링하여 네비게이터를 마운트한 뒤 RouteGuard 실행 */}
         <Stack screenOptions={{ headerShown: false }} />
         <RouteGuard />

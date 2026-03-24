@@ -4,7 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState, useRef } from 'react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { getProductById } from '../../mocks/product';
-import { COLORS } from '../../constants/theme';
+import { COLORS, LAYOUT } from '../../constants/theme';
 import { formatPrice } from '../../utils/format';
 
 // 가격 추이 mock 데이터
@@ -71,7 +71,7 @@ export default function ProductDetail() {
           <TouchableOpacity onPress={() => router.push('/')}>
             <MaterialCommunityIcons name="home-outline" size={22} color={COLORS.active} />
           </TouchableOpacity>
-          <TouchableOpacity style={{ marginLeft: 20 }}>
+          <TouchableOpacity style={{ marginLeft: LAYOUT.screenPadding }}>
             <MaterialCommunityIcons name="share-variant-outline" size={22} color={COLORS.active} />
           </TouchableOpacity>
         </View>
