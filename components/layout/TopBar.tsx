@@ -10,9 +10,9 @@ export default function TopBar() {
         밭-찰!
       </Text>
 
-      <View className="flex-row items-center gap-3">
+      <View className="flex-row items-center">
         {/* 알림 버튼 */}
-        <TouchableOpacity>
+        <TouchableOpacity activeOpacity={0.8}>
           <View
             className="relative h-10 w-10 items-center justify-center rounded-full border-2"
             style={{ borderColor: COLORS.primary }}>
@@ -24,7 +24,7 @@ export default function TopBar() {
         </TouchableOpacity>
 
         {/* 위치 버튼 */}
-        <TouchableOpacity>
+        <TouchableOpacity activeOpacity={0.8} style={{ marginLeft: 12 }}>
           <View
             className="h-10 w-10 items-center justify-center rounded-full border-2"
             style={{ borderColor: COLORS.primary }}>

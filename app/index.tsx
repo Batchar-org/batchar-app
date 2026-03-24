@@ -1,4 +1,4 @@
-import { ScrollView } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState } from 'react';
 import TopBar from '../components/layout/TopBar';
@@ -11,12 +11,14 @@ export default function Home() {
   const [activeCategory, setActiveCategory] = useState('all');
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50" edges={['top', 'bottom']}>
-      <TopBar />
-      <SearchBar />
-      <CategoryBar activeCategory={activeCategory} onCategoryPress={setActiveCategory} />
+    <SafeAreaView className="flex-1 bg-white" edges={['top']}>
+      <View className="bg-white">
+        <TopBar />
+        <SearchBar />
+        <CategoryBar activeCategory={activeCategory} onCategoryPress={setActiveCategory} />
+      </View>
       <ScrollView
-        className="flex-1 px-5"
+        className="flex-1 bg-gray-50 px-5"
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}>
         <ProductList />

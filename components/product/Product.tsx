@@ -1,6 +1,6 @@
 import { View, Text, Image, TouchableOpacity, Platform } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { COLORS } from '../../constants/theme';
+import { COLORS, SHADOWS } from '../../constants/theme';
 import { formatPrice } from '../../utils/format';
 
 interface ProductProps {
@@ -36,13 +36,7 @@ export default function Product({
       onPress={onPress}
       activeOpacity={0.7}
       className="mb-4 rounded-2xl bg-white p-3"
-      style={{
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.08,
-        shadowRadius: 4,
-        elevation: 3,
-      }}>
+      style={SHADOWS.card}>
       <View className="flex-row">
         {/* 상품 이미지 */}
         <View className="relative mr-3 h-24 w-24 overflow-hidden rounded-xl bg-gray-100">
@@ -76,12 +70,13 @@ export default function Product({
           </View>
 
           {/* 가격 정보 */}
-          <View className="flex-row items-center gap-2">
+          <View className="flex-row items-center">
             {/* 시작가 */}
             <TouchableOpacity
               activeOpacity={0.7}
               className="flex-1 items-center rounded-lg bg-gray-100 px-2.5 py-1.5"
               style={{
+                marginRight: 8,
                 ...(Platform.OS === 'web' && {
                   cursor: 'pointer',
                 }),

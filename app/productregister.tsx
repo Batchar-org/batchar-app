@@ -3,17 +3,17 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState } from 'react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import TabBar from '../components/layout/TabBar';
-import { COLORS } from '../constants/theme';
+import { COLORS, INPUT_STYLE, LAYOUT } from '../constants/theme';
 
 const MAX_DESCRIPTION_LENGTH = 2000;
 
 export default function Register() {
   const [productName, setProductName] = useState('');
-  const [category, setCategory] = useState('');
+  const [category] = useState('');
   const [description, setDescription] = useState('');
   const [startingPrice, setStartingPrice] = useState('');
-  const [auctionDate, setAuctionDate] = useState('');
-  const [auctionTime, setAuctionTime] = useState('');
+  const [auctionDate] = useState('');
+  const [auctionTime] = useState('');
 
   const handleSubmit = () => {
     // 등록 로직 구현 예정
@@ -64,6 +64,7 @@ export default function Register() {
               placeholderTextColor="#9CA3AF"
               value={productName}
               onChangeText={setProductName}
+              style={INPUT_STYLE}
             />
           </View>
 
@@ -88,6 +89,11 @@ export default function Register() {
               onChangeText={handleDescriptionChange}
               multiline
               textAlignVertical="top"
+              style={{
+                ...INPUT_STYLE,
+                minHeight: 128,
+                paddingTop: 12,
+              }}
             />
             <Text className="mt-2 text-right text-sm text-gray-400">
               {description.length}/{MAX_DESCRIPTION_LENGTH}
@@ -106,6 +112,7 @@ export default function Register() {
               value={startingPrice}
               onChangeText={setStartingPrice}
               keyboardType="numeric"
+              style={INPUT_STYLE}
             />
           </View>
         </View>
@@ -132,8 +139,8 @@ export default function Register() {
       <View className="px-5 pb-2">
         <TouchableOpacity
           onPress={handleSubmit}
-          className="items-center justify-center rounded-full py-4"
-          style={{ backgroundColor: COLORS.active }}>
+          style={{ minHeight: LAYOUT.inputMinHeight, backgroundColor: COLORS.active }}
+          className="items-center justify-center rounded-full py-4">
           <Text className="text-base font-bold text-white">등록 완료</Text>
         </TouchableOpacity>
       </View>

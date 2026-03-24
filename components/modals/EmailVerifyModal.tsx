@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Modal, Pressable, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { COLORS } from '../../constants/theme';
+import { COLORS, INPUT_STYLE, LAYOUT } from '../../constants/theme';
 
 // 백엔드 명세 기준 6자리 코드를 입력받습니다.
 const CODE_LENGTH = 6;
@@ -135,7 +135,7 @@ export default function EmailVerifyModal({
           </Text>
 
           {/* 6자리 코드 입력 박스 */}
-          <View style={{ flexDirection: 'row', gap: 8, marginBottom: 20 }}>
+          <View style={{ flexDirection: 'row', marginBottom: 20 }}>
             {Array(CODE_LENGTH)
               .fill(null)
               .map((_, index) => (
@@ -143,13 +143,14 @@ export default function EmailVerifyModal({
                   key={index}
                   style={{
                     flex: 1,
+                    marginRight: index === CODE_LENGTH - 1 ? 0 : 8,
                     borderWidth: 2,
                     borderRadius: 12,
                     borderColor: code[index] ? COLORS.primary : '#E5E7EB',
                     backgroundColor: code[index] ? '#F0FDF4' : '#F9FAFB',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    paddingVertical: 12,
+                    minHeight: LAYOUT.inputMinHeight,
                   }}>
                   <TextInput
                     ref={(ref) => {
@@ -164,6 +165,7 @@ export default function EmailVerifyModal({
                     style={{
                       width: '100%',
                       textAlign: 'center',
+                      ...INPUT_STYLE,
                       fontSize: 20,
                       fontWeight: 'bold',
                       color: '#111827',
@@ -179,7 +181,6 @@ export default function EmailVerifyModal({
               flexDirection: 'row',
               justifyContent: 'center',
               alignItems: 'center',
-              gap: 8,
               marginBottom: 24,
             }}>
             <Text
@@ -190,8 +191,10 @@ export default function EmailVerifyModal({
               }}>
               {remainingSeconds > 0 ? formatRemainingTime(remainingSeconds) : '인증 만료'}
             </Text>
-            <Text style={{ fontSize: 12, color: '#9CA3AF' }}>인증 번호를 받지 못하셨나요?</Text>
-            <TouchableOpacity onPress={handleResend}>
+            <Text style={{ marginLeft: 8, fontSize: 12, color: '#9CA3AF' }}>
+              인증 번호를 받지 못하셨나요?
+            </Text>
+            <TouchableOpacity onPress={handleResend} style={{ marginLeft: 8 }}>
               <Text style={{ fontSize: 12, fontWeight: '600', color: COLORS.primary }}>
                 인증 번호 재전송
               </Text>

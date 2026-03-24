@@ -1,8 +1,9 @@
-import { View, Text, TouchableOpacity } from 'react-native';
+import { Platform, View, Text, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTabNavigation } from '../../hooks/useTabNavigation';
 import type { TabId } from '../../types/tab';
-import { COLORS, ICON_SIZES } from '../../constants/theme';
+import { COLORS, ICON_SIZES, LAYOUT } from '../../constants/theme';
 
 interface Tab {
   id: TabId;
@@ -20,15 +21,25 @@ const TABS: Tab[] = [
 
 export default function TabBar() {
   const { activeTab, handleTabPress } = useTabNavigation();
+  const insets = useSafeAreaInsets();
 
   return (
     <View
-      style={{ borderTopColor: COLORS.border, backgroundColor: COLORS.background }}
-      className="w-full flex-row items-center justify-around border-t px-2 py-3">
+      style={{
+        borderTopColor: COLORS.border,
+        backgroundColor: COLORS.background,
+        paddingBottom: Platform.OS === 'ios' ? Math.max(insets.bottom, 8) : 8,
+        paddingTop: 10,
+        minHeight:
+          LAYOUT.tabBarMinHeight + (Platform.OS === 'ios' ? Math.max(insets.bottom, 0) : 0),
+      }}
+      className="w-full flex-row items-center justify-around border-t px-2">
       {TABS.map((tab) => (
         <TouchableOpacity
           key={tab.id}
           onPress={() => handleTabPress(tab.id)}
+          activeOpacity={0.8}
+          style={{ minHeight: LAYOUT.touchTargetMinHeight }}
           className="flex-1 items-center justify-center py-1">
           <MaterialCommunityIcons
             name={tab.icon}
@@ -37,7 +48,10 @@ export default function TabBar() {
           />
           <Text
             className="mt-1 text-xs"
-            style={{ color: activeTab === tab.id ? COLORS.active : COLORS.inactive }}>
+            style={{
+              lineHeight: 16,
+              color: activeTab === tab.id ? COLORS.active : COLORS.inactive,
+            }}>
             {tab.label}
           </Text>
         </TouchableOpacity>

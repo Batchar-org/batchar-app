@@ -11,7 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { COLORS } from '../constants/theme';
+import { COLORS, INPUT_STYLE, LAYOUT } from '../constants/theme';
 import { useLoginMutation } from '../hooks/auth/useLoginMutation';
 
 export default function LoginPage() {
@@ -63,7 +63,7 @@ export default function LoginPage() {
               <Text className="mb-2 text-sm font-medium text-gray-700">이메일 주소</Text>
               <View className="border-b border-gray-300">
                 <TextInput
-                  className="py-2 text-base text-gray-900"
+                  className="text-base text-gray-900"
                   placeholder="예) 12345678@hanbat.edu.kr"
                   placeholderTextColor="#9CA3AF"
                   value={email}
@@ -71,6 +71,7 @@ export default function LoginPage() {
                   keyboardType="email-address"
                   autoCapitalize="none"
                   autoCorrect={false}
+                  style={INPUT_STYLE}
                 />
               </View>
             </View>
@@ -80,7 +81,7 @@ export default function LoginPage() {
               <Text className="mb-2 text-sm font-medium text-gray-700">비밀번호</Text>
               <View className="flex-row items-center border-b border-gray-300">
                 <TextInput
-                  className="flex-1 py-2 text-base text-gray-900"
+                  className="flex-1 text-base text-gray-900"
                   placeholder="비밀번호를 입력해주세요"
                   placeholderTextColor="#9CA3AF"
                   value={password}
@@ -88,10 +89,12 @@ export default function LoginPage() {
                   secureTextEntry={!isPasswordVisible}
                   autoCapitalize="none"
                   autoCorrect={false}
+                  style={INPUT_STYLE}
                 />
                 <TouchableOpacity
                   onPress={() => setIsPasswordVisible(!isPasswordVisible)}
-                  className="p-1">
+                  style={{ minHeight: LAYOUT.touchTargetMinHeight }}
+                  className="items-center justify-center p-1">
                   <Feather name={isPasswordVisible ? 'eye' : 'eye-off'} size={20} color="#9CA3AF" />
                 </TouchableOpacity>
               </View>
