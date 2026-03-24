@@ -2,10 +2,10 @@ import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState } from 'react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import TabBar from '../components/layout/TabBar';
+import TabBar from '../../components/layout/TabBar';
 import { useRouter } from 'expo-router';
-import { MOCK_CHATS } from '../mocks/chat';
-import { COLORS } from '../constants/theme';
+import { MOCK_CHATS } from '../../mocks/chat';
+import { COLORS } from '../../constants/theme';
 
 // 필터 타입
 type FilterType = 'all' | 'ongoing' | 'ended';
@@ -22,7 +22,7 @@ export default function Chat() {
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
 
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-white" edges={['top', 'bottom']}>
       {/* 헤더 */}
       <View className="flex-row items-center justify-between px-4 py-4">
         <TouchableOpacity onPress={() => router.back()}>
@@ -33,8 +33,8 @@ export default function Chat() {
       </View>
 
       {/* 필터 탭 */}
-      <View className="flex-row px-4 pb-4">
-        {FILTERS.map((filter, index) => (
+      <View className="flex-row gap-2 px-4 pb-4">
+        {FILTERS.map((filter) => (
           <TouchableOpacity
             key={filter.id}
             onPress={() => setActiveFilter(filter.id)}
@@ -43,12 +43,8 @@ export default function Chat() {
             }`}
             style={
               activeFilter === filter.id
-                ? {
-                    marginRight: index === FILTERS.length - 1 ? 0 : 8,
-                    borderColor: COLORS.active,
-                    backgroundColor: COLORS.primaryLight,
-                  }
-                : { marginRight: index === FILTERS.length - 1 ? 0 : 8 }
+                ? { borderColor: COLORS.active, backgroundColor: COLORS.primaryLight }
+                : {}
             }>
             <Text
               className={`text-sm font-medium ${activeFilter === filter.id ? '' : 'text-gray-500'}`}
@@ -64,9 +60,9 @@ export default function Chat() {
         {MOCK_CHATS.map((chat) => (
           <TouchableOpacity
             key={chat.id}
-            onPress={() => router.push(`/chat/${chat.id}`)}
             className="flex-row items-center px-4 py-4"
-            activeOpacity={0.7}>
+            activeOpacity={0.7}
+            onPress={() => router.push(`/chat/${chat.id}`)}>
             {/* 프로필 아바타 */}
             <View
               className="h-12 w-12 rounded-full"
