@@ -27,7 +27,7 @@ export default function Register() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={['top', 'bottom']}>
+    <SafeAreaView className="flex-1 bg-white" edges={['top']}>
       {/* 헤더 영역 */}
       <View className="flex-row items-center justify-between px-4 py-4">
         <View className="w-8" />
