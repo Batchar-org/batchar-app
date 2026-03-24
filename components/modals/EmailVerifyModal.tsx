@@ -108,7 +108,7 @@ export default function EmailVerifyModal({
       <Pressable
         style={{
           flex: 1,
-          backgroundColor: 'rgba(0,0,0,0.45)',
+          backgroundColor: COLORS.overlay,
           justifyContent: 'center',
           alignItems: 'center',
         }}
@@ -125,12 +125,14 @@ export default function EmailVerifyModal({
             paddingVertical: 32,
           }}>
           {/* 제목 */}
-          <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#111827', marginBottom: 8 }}>
+          <Text
+            style={{ fontSize: 20, fontWeight: 'bold', color: COLORS.cardTitle, marginBottom: 8 }}>
             인증 코드 입력
           </Text>
 
           {/* 안내 문구 */}
-          <Text style={{ fontSize: 13, color: '#6B7280', lineHeight: 20, marginBottom: 24 }}>
+          <Text
+            style={{ fontSize: 13, color: COLORS.textSecondary, lineHeight: 20, marginBottom: 24 }}>
             {'회원가입을 위해 이메일로 전송된 6자리 인증\n코드를 입력해 주세요.'}
           </Text>
 
@@ -166,7 +168,7 @@ export default function EmailVerifyModal({
                       textAlign: 'center',
                       fontSize: 20,
                       fontWeight: 'bold',
-                      color: '#111827',
+                      color: COLORS.cardTitle,
                     }}
                   />
                 </View>
@@ -186,7 +188,7 @@ export default function EmailVerifyModal({
               style={{
                 fontSize: 12,
                 fontWeight: '600',
-                color: remainingSeconds > 0 ? '#111827' : '#DC2626',
+                color: remainingSeconds > 0 ? COLORS.cardTitle : '#DC2626',
               }}>
               {remainingSeconds > 0 ? formatRemainingTime(remainingSeconds) : '인증 만료'}
             </Text>
@@ -203,7 +205,8 @@ export default function EmailVerifyModal({
             onPress={handleVerifyComplete}
             disabled={isSubmitting || remainingSeconds <= 0}
             style={{
-              backgroundColor: isSubmitting || remainingSeconds <= 0 ? '#A3A3A3' : COLORS.primary,
+              backgroundColor:
+                isSubmitting || remainingSeconds <= 0 ? COLORS.disabled : COLORS.primary,
               borderRadius: 999,
               paddingVertical: 16,
               alignItems: 'center',

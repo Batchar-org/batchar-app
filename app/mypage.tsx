@@ -49,7 +49,7 @@ export default function MyPage() {
               className="absolute left-0 top-0 h-2 rounded-full"
               style={{
                 backgroundColor: COLORS.primary,
-                width: `${(fertilityProgress / 20) * 100}%`,
+                width: `${(fertilityProgress / MOCK_FERTILITY.maxValue) * 100}%`,
               }}
             />
             {/* 마일스톤 점들 */}
@@ -58,7 +58,7 @@ export default function MyPage() {
                 key={milestone.id}
                 className="absolute top-1/2 h-4 w-4 -translate-y-1/2 rounded-full border-2 border-white"
                 style={{
-                  left: `${(milestone.value / 20) * 100}%`,
+                  left: `${(milestone.value / MOCK_FERTILITY.maxValue) * 100}%`,
                   marginLeft: -8,
                   backgroundColor: milestone.completed ? COLORS.primary : '#E5E7EB',
                 }}

@@ -94,7 +94,7 @@ export default function ChatDetail() {
           {/* 상품 금액 */}
           <View className="px-4 pb-3">
             <Text className="text-sm" style={{ color: COLORS.textSecondary }}>
-              상품금액: {chat.productPrice.toLocaleString()}원
+              상품금액: {formatPrice(chat.productPrice)}원
             </Text>
           </View>
 
@@ -106,7 +106,7 @@ export default function ChatDetail() {
                 borderWidth: 1,
                 borderColor: COLORS.primary,
               }}
-              onPress={() => router.push(`/product/${chat.productId}` as any)}>
+              onPress={() => router.push(`/product/${chat.productId}`)}>
               <Text className="text-sm font-semibold" style={{ color: COLORS.primary }}>
                 상품상세 보기
               </Text>

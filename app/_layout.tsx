@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAuthActions, useIsInitialized, useIsLoggedIn } from '../store/useAuthStore';
+import { COLORS } from '../constants/theme';
 
 // ──────────────────────────────────────────────────────────────────
 // 라우트 가드 컴포넌트
@@ -55,7 +56,7 @@ function RouteGuard() {
     return (
       // 세션 복원 중에는 잠깐 로딩만 보여줍니다.
       <View className="absolute inset-0 items-center justify-center bg-white">
-        <ActivityIndicator size="large" color="#4B8B3B" />
+        <ActivityIndicator size="large" color={COLORS.primary} />
       </View>
     );
   }

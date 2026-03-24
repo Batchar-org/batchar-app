@@ -68,7 +68,7 @@ export default function Product({
             className="mb-1 text-base font-bold text-gray-900"
             numberOfLines={1}
             ellipsizeMode="tail">
-            {title.length > 10 ? `${title.substring(0, 10)}...` : title}
+            {title}
           </Text>
           <View className="mb-3 flex-row items-center">
             <MaterialCommunityIcons name="map-marker-outline" size={12} color={COLORS.textMuted} />

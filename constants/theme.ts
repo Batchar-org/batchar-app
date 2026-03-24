@@ -21,9 +21,20 @@ export const COLORS = {
 
   // 기타 UI 색상
   border: '#E5E7EB',
+  disabled: '#A3A3A3',
   error: '#EF4444',
   warning: '#F59E0B',
   success: '#22C55E',
+
+  // 모달/오버레이
+  overlay: 'rgba(0,0,0,0.45)',
+  cardTitle: '#111827',
+
+  // 상태 알림 배경
+  successLight: '#E8F5E9',
+  warningLight: '#FFF8E1',
+  warningText: '#F57C00',
+  warningIcon: '#FFA000',
 } as const;
 
 // 아이콘 크기

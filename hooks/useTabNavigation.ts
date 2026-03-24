@@ -48,7 +48,7 @@ export function useTabNavigation() {
       // 해당 탭에 매핑된 경로가 있으면 이동
       const route = TAB_TO_ROUTE[tab];
       if (route) {
-        router.push(route as any);
+        router.push(route);
       }
     },
     [activeTab, setActiveTab, router]

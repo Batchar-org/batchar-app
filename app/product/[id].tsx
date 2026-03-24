@@ -158,15 +158,17 @@ export default function ProductDetail() {
         {hasPriceOffer && (
           <View
             className="mx-4 mb-2 flex-row items-center rounded-xl px-4 py-3"
-            style={{ backgroundColor: isHighestOfferer ? '#E8F5E9' : '#FFF8E1' }}>
+            style={{
+              backgroundColor: isHighestOfferer ? COLORS.successLight : COLORS.warningLight,
+            }}>
             <MaterialCommunityIcons
               name={isHighestOfferer ? 'check-circle' : 'alert-circle-outline'}
               size={20}
-              color={isHighestOfferer ? COLORS.active : '#FFA000'}
+              color={isHighestOfferer ? COLORS.active : COLORS.warningIcon}
             />
             <Text
               className="ml-2 flex-1 text-sm font-medium"
-              style={{ color: isHighestOfferer ? COLORS.active : '#F57C00' }}>
+              style={{ color: isHighestOfferer ? COLORS.active : COLORS.warningText }}>
               {isHighestOfferer
                 ? '안심하세요, 1등을 유지하고 있어요'
                 : '다른 사람이 더 높은 금액을 제시했어요'}

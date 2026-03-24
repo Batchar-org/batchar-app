@@ -204,7 +204,9 @@ export default function RegisterPage() {
                   disabled={sendEmailCodeMutation.isPending}
                   className="ml-2 rounded-full px-3 py-1"
                   style={{
-                    backgroundColor: sendEmailCodeMutation.isPending ? '#A3A3A3' : COLORS.primary,
+                    backgroundColor: sendEmailCodeMutation.isPending
+                      ? COLORS.disabled
+                      : COLORS.primary,
                   }}>
                   <Text className="text-xs font-semibold text-white">
                     {sendEmailCodeMutation.isPending ? '전송 중' : '이메일 인증'}
@@ -285,7 +287,7 @@ export default function RegisterPage() {
               onPress={handleRegister}
               disabled={isRegisterDisabled}
               className="items-center rounded-full py-4"
-              style={{ backgroundColor: isRegisterDisabled ? '#A3A3A3' : COLORS.primary }}>
+              style={{ backgroundColor: isRegisterDisabled ? COLORS.disabled : COLORS.primary }}>
               <Text className="text-base font-semibold text-white">
                 {signupMutation.isPending ? '회원가입 중...' : '회원가입'}
               </Text>

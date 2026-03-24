@@ -62,7 +62,7 @@ export default function Chat() {
             key={chat.id}
             className="flex-row items-center px-4 py-4"
             activeOpacity={0.7}
-            onPress={() => router.push(`/chat/${chat.id}` as any)}>
+            onPress={() => router.push(`/chat/${chat.id}`)}>
             {/* 프로필 아바타 */}
             <View
               className="h-12 w-12 rounded-full"

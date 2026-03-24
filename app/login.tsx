@@ -110,7 +110,9 @@ export default function LoginPage() {
               onPress={handleLogin}
               disabled={loginMutation.isPending}
               className="mb-6 items-center rounded-full py-4"
-              style={{ backgroundColor: loginMutation.isPending ? '#A3A3A3' : COLORS.primary }}>
+              style={{
+                backgroundColor: loginMutation.isPending ? COLORS.disabled : COLORS.primary,
+              }}>
               <Text className="text-base font-semibold text-white">
                 {loginMutation.isPending ? '로그인 중...' : '로그인'}
               </Text>
