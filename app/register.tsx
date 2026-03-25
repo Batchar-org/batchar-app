@@ -11,8 +11,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { COLORS, INPUT_STYLE, LAYOUT } from '../constants/theme';
+import { COLORS, INPUT_STYLE } from '../constants/theme';
 import EmailVerifyModal from '../components/modals/EmailVerifyModal';
+import { useCheckNicknameDuplicateMutation } from '../hooks/auth/useCheckNicknameDuplicateMutation';
 import { useSendEmailCodeMutation } from '../hooks/auth/useSendEmailCodeMutation';
 import { useSignupMutation } from '../hooks/auth/useSignupMutation';
 import { useVerifyEmailCodeMutation } from '../hooks/auth/useVerifyEmailCodeMutation';
@@ -26,12 +27,15 @@ export default function RegisterPage() {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
+  const [isNicknameChecked, setIsNicknameChecked] = useState(false);
+  const [checkedNickname, setCheckedNickname] = useState('');
   const [isVerifyModalVisible, setIsVerifyModalVisible] = useState(false);
   const [isEmailVerified, setIsEmailVerified] = useState(false);
   const [verifiedEmail, setVerifiedEmail] = useState('');
   const [expireAt, setExpireAt] = useState<number | null>(null);
   const [now, setNow] = useState(Date.now());
 
+  const checkNicknameDuplicateMutation = useCheckNicknameDuplicateMutation();
   const sendEmailCodeMutation = useSendEmailCodeMutation();
   const verifyEmailCodeMutation = useVerifyEmailCodeMutation();
   const signupMutation = useSignupMutation();
@@ -86,6 +90,24 @@ export default function RegisterPage() {
     );
   };
 
+  const handleCheckNickname = () => {
+    const normalizedNickname = name.trim();
+
+    if (!normalizedNickname) {
+      return;
+    }
+
+    checkNicknameDuplicateMutation.mutate(
+      { name: normalizedNickname },
+      {
+        onSuccess: () => {
+          setIsNicknameChecked(true);
+          setCheckedNickname(normalizedNickname);
+        },
+      }
+    );
+  };
+
   const handleVerifyComplete = (code: string) => {
     const normalizedEmail = email.trim();
 
@@ -130,6 +152,8 @@ export default function RegisterPage() {
     !password.trim() ||
     !name.trim() ||
     !address.trim() ||
+    !isNicknameChecked ||
+    checkedNickname !== name.trim() ||
     !isEmailVerified ||
     verifiedEmail !== email.trim() ||
     signupMutation.isPending;
@@ -162,22 +186,51 @@ export default function RegisterPage() {
             {/* 타이틀 */}
             <Text className="mb-6 text-xl font-bold text-gray-900">회원가입</Text>
 
-            {/* 이름 입력 */}
+            {/* 닉네임 입력 */}
             <View className="mb-6">
-              <Text className="mb-2 text-sm font-medium text-gray-700">이름</Text>
-              <View className="border-b border-gray-300">
+              <Text className="mb-2 text-sm font-medium text-gray-700">닉네임</Text>
+              <View className="flex-row items-center border-b border-gray-300">
                 <TextInput
-                  className="text-base text-gray-900"
-                  placeholder="이름을 입력해주세요"
+                  className="flex-1 text-base text-gray-900"
+                  placeholder="닉네임을 입력해주세요"
                   placeholderTextColor="#9CA3AF"
                   value={name}
-                  onChangeText={setName}
+                  onChangeText={(value) => {
+                    setName(value);
+                    setIsNicknameChecked(false);
+                    setCheckedNickname('');
+                  }}
                   autoCapitalize="none"
                   autoCorrect={false}
                   style={INPUT_STYLE}
                 />
+                <TouchableOpacity
+                  onPress={handleCheckNickname}
+                  disabled={checkNicknameDuplicateMutation.isPending}
+                  className="ml-2 rounded-full px-3 py-1"
+                  style={{
+                    backgroundColor: checkNicknameDuplicateMutation.isPending
+                      ? '#A3A3A3'
+                      : COLORS.primary,
+                  }}>
+                  <Text className="text-xs font-semibold text-white">
+                    {checkNicknameDuplicateMutation.isPending ? '검사 중' : '중복 검사'}
+                  </Text>
+                </TouchableOpacity>
               </View>
             </View>
+
+            {isNicknameChecked && checkedNickname === name.trim() && (
+              <Text className="mb-6 text-sm text-green-600">사용 가능한 닉네임입니다.</Text>
+            )}
+
+            {checkNicknameDuplicateMutation.isError && (
+              <Text className="mb-6 text-sm text-red-500">
+                {checkNicknameDuplicateMutation.error instanceof Error
+                  ? checkNicknameDuplicateMutation.error.message
+                  : '닉네임 중복 검사에 실패했습니다.'}
+              </Text>
+            )}
 
             {/* 이메일 입력 */}
             <View className="mb-6">
@@ -206,7 +259,6 @@ export default function RegisterPage() {
                   disabled={sendEmailCodeMutation.isPending}
                   className="ml-2 rounded-full px-3 py-1"
                   style={{
-                    minHeight: LAYOUT.touchTargetMinHeight,
                     backgroundColor: sendEmailCodeMutation.isPending ? '#A3A3A3' : COLORS.primary,
                   }}>
                   <Text className="text-xs font-semibold text-white">
@@ -254,7 +306,6 @@ export default function RegisterPage() {
                 />
                 <TouchableOpacity
                   onPress={() => setIsPasswordVisible(!isPasswordVisible)}
-                  style={{ minHeight: LAYOUT.touchTargetMinHeight }}
                   className="items-center justify-center p-1">
                   <Feather name={isPasswordVisible ? 'eye' : 'eye-off'} size={20} color="#9CA3AF" />
                 </TouchableOpacity>

@@ -15,6 +15,10 @@ export type SignupRequest = {
   address: string;
 };
 
+export type CheckNicknameDuplicateRequest = {
+  name: string;
+};
+
 export type SendEmailCodeRequest = {
   email: string;
 };
@@ -47,6 +51,7 @@ export type RefreshResponse = ApiResponse<{
 }>;
 
 export type SendEmailCodeResponse = ApiResponse<string>;
+export type CheckNicknameDuplicateResponse = ApiResponse<null>;
 
 export type VerifyEmailCodeResponse = ApiResponse<{
   email: string;

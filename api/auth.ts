@@ -1,5 +1,6 @@
 import { apiFetch } from './client';
 import type {
+  CheckNicknameDuplicateResponse,
   LoginRequest,
   LoginResponse,
   LogoutRequest,
@@ -8,6 +9,7 @@ import type {
   RefreshResponse,
   SendEmailCodeRequest,
   SendEmailCodeResponse,
+  CheckNicknameDuplicateRequest,
   SignupRequest,
   SignupResponse,
   VerifyEmailCodeRequest,
@@ -26,6 +28,17 @@ export function signupApi(body: SignupRequest) {
     method: 'POST',
     body: JSON.stringify(body),
   });
+}
+
+export function checkNicknameDuplicateApi({ name }: CheckNicknameDuplicateRequest) {
+  const searchParams = new URLSearchParams({ name });
+
+  return apiFetch<CheckNicknameDuplicateResponse>(
+    `/api/users/name/duplicate?${searchParams.toString()}`,
+    {
+      method: 'GET',
+    }
+  );
 }
 
 export function sendEmailCodeApi(body: SendEmailCodeRequest) {
