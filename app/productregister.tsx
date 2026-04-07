@@ -1,23 +1,140 @@
-import { View, Text, ScrollView, TouchableOpacity, TextInput } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  TextInput,
+  Image,
+  Alert,
+  Platform,
+  Modal,
+  FlatList,
+  ActivityIndicator,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState } from 'react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
+import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
+import { useRouter } from 'expo-router';
 import TabBar from '../components/layout/TabBar';
 import { COLORS, INPUT_STYLE, LAYOUT } from '../constants/theme';
+import { useCreateProductMutation } from '../hooks/product/useCreateProductMutation';
+import { useIsLoggedIn } from '../store/useAuthStore';
 
 const MAX_DESCRIPTION_LENGTH = 2000;
+const MAX_IMAGE_COUNT = 10;
+
+const CATEGORIES = [
+  '전자기기',
+  '패션/의류',
+  '가구/인테리어',
+  '스포츠/레저',
+  '도서/음반',
+  '생활/주방',
+  '뷰티/미용',
+  '자동차/오토바이',
+  '게임/취미',
+  '기타',
+];
 
 export default function Register() {
+  const router = useRouter();
+  const isLoggedIn = useIsLoggedIn();
+  const { mutate: createProduct, isPending } = useCreateProductMutation();
+
   const [productName, setProductName] = useState('');
-  const [category] = useState('');
+  const [category, setCategory] = useState('');
   const [description, setDescription] = useState('');
   const [startingPrice, setStartingPrice] = useState('');
-  const [auctionDate] = useState('');
-  const [auctionTime] = useState('');
+  const [images, setImages] = useState<ImagePicker.ImagePickerAsset[]>([]);
 
-  const handleSubmit = () => {
-    // 등록 로직 구현 예정
-    console.log('등록 완료 버튼 클릭');
+  // 경매 종료 시간
+  const [endTime, setEndTime] = useState<Date | null>(null);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  const [tempDate, setTempDate] = useState(new Date());
+
+  // 카테고리 모달
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
+
+  const handlePickImages = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('권한 필요', '사진 라이브러리 접근 권한이 필요합니다.');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images', 'videos'],
+      allowsMultipleSelection: true,
+      selectionLimit: MAX_IMAGE_COUNT - images.length,
+      quality: 0.8,
+    });
+
+    if (!result.canceled && result.assets.length > 0) {
+      const total = [...images, ...result.assets].slice(0, MAX_IMAGE_COUNT);
+      setImages(total);
+    }
+  };
+
+  const handleRemoveImage = (index: number) => {
+    setImages((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleDateChange = (_: DateTimePickerEvent, selectedDate?: Date) => {
+    if (Platform.OS === 'android') {
+      setShowDatePicker(false);
+      if (selectedDate) {
+        setTempDate(selectedDate);
+        setShowTimePicker(true);
+      }
+      return;
+    }
+    if (selectedDate) {
+      setTempDate(selectedDate);
+    }
+  };
+
+  const handleTimeChange = (_: DateTimePickerEvent, selectedTime?: Date) => {
+    if (Platform.OS === 'android') {
+      setShowTimePicker(false);
+      if (selectedTime) {
+        setEndTime(selectedTime);
+      }
+      return;
+    }
+    if (selectedTime) {
+      setTempDate(selectedTime);
+    }
+  };
+
+  const handleConfirmDateTime = () => {
+    setEndTime(tempDate);
+    setShowDatePicker(false);
+    setShowTimePicker(false);
+  };
+
+  const handleOpenDatePicker = () => {
+    setTempDate(endTime ?? new Date());
+    if (Platform.OS === 'ios') {
+      setShowDatePicker(true);
+    } else {
+      setShowDatePicker(true);
+    }
+  };
+
+  const formatDate = (date: Date) => {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  };
+
+  const formatTime = (date: Date) => {
+    const h = String(date.getHours()).padStart(2, '0');
+    const min = String(date.getMinutes()).padStart(2, '0');
+    return `${h}:${min}`;
   };
 
   const handleDescriptionChange = (text: string) => {
@@ -26,15 +143,83 @@ export default function Register() {
     }
   };
 
+  const isFormValid =
+    productName.trim() &&
+    category &&
+    description.trim() &&
+    startingPrice.trim() &&
+    endTime &&
+    images.length > 0 &&
+    !isPending;
+
+  const handleSubmit = () => {
+    if (!isLoggedIn) {
+      Alert.alert('로그인 필요', '상품을 등록하려면 로그인이 필요합니다.');
+      return;
+    }
+
+    if (!productName.trim()) {
+      Alert.alert('입력 오류', '상품명을 입력해주세요.');
+      return;
+    }
+    if (!category) {
+      Alert.alert('입력 오류', '카테고리를 선택해주세요.');
+      return;
+    }
+    if (!description.trim()) {
+      Alert.alert('입력 오류', '상품 설명을 입력해주세요.');
+      return;
+    }
+    if (!startingPrice.trim() || Number(startingPrice) < 0) {
+      Alert.alert('입력 오류', '올바른 시작가를 입력해주세요.');
+      return;
+    }
+    if (!endTime) {
+      Alert.alert('입력 오류', '경매 종료 시간을 선택해주세요.');
+      return;
+    }
+    if (endTime <= new Date()) {
+      Alert.alert('입력 오류', '경매 종료 시간은 현재보다 미래여야 합니다.');
+      return;
+    }
+    if (images.length === 0) {
+      Alert.alert('입력 오류', '사진을 최소 1장 이상 등록해주세요.');
+      return;
+    }
+
+    createProduct(
+      {
+        request: {
+          title: productName.trim(),
+          description: description.trim(),
+          category,
+          startPrice: Number(startingPrice),
+          endTime: endTime.toISOString(),
+        },
+        files: images,
+      },
+      {
+        onSuccess: () => {
+          Alert.alert('등록 완료', '상품이 등록되었습니다.', [
+            { text: '확인', onPress: () => router.back() },
+          ]);
+        },
+        onError: (error) => {
+          Alert.alert('등록 실패', error.message);
+        },
+      }
+    );
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-white" edges={['top']}>
       {/* 헤더 영역 */}
       <View className="flex-row items-center justify-between px-4 py-4">
-        <View className="w-8" />
-        <Text className="text-lg font-bold">경매품 등록</Text>
-        <TouchableOpacity>
-          <MaterialCommunityIcons name="dots-horizontal" size={24} color="#9CA3AF" />
+        <TouchableOpacity onPress={() => router.back()}>
+          <MaterialCommunityIcons name="arrow-left" size={24} color={COLORS.text} />
         </TouchableOpacity>
+        <Text className="text-lg font-bold">경매품 등록</Text>
+        <View className="w-8" />
       </View>
 
       {/* 스크롤 콘텐츠 영역 */}
@@ -46,15 +231,31 @@ export default function Register() {
         <View className="py-4">
           <Text className="mb-4 text-base font-bold">상세정보</Text>
 
-          {/* 사진/동영상 업로드 버튼 */}
-          <TouchableOpacity
-            className="mb-4 h-20 w-20 items-center justify-center rounded-lg border-2"
-            style={{ borderColor: COLORS.active }}>
-            <MaterialCommunityIcons name="camera-outline" size={28} color={COLORS.active} />
-            <Text className="mt-1 text-xs" style={{ color: COLORS.active }}>
-              사진/동영상
-            </Text>
-          </TouchableOpacity>
+          {/* 사진/동영상 업로드 */}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-4">
+            <View className="flex-row items-center gap-3">
+              <TouchableOpacity
+                onPress={handlePickImages}
+                className="h-20 w-20 items-center justify-center rounded-lg border-2"
+                style={{ borderColor: COLORS.active }}>
+                <MaterialCommunityIcons name="camera-outline" size={28} color={COLORS.active} />
+                <Text className="mt-1 text-xs" style={{ color: COLORS.active }}>
+                  {images.length}/{MAX_IMAGE_COUNT}
+                </Text>
+              </TouchableOpacity>
+
+              {images.map((img, index) => (
+                <View key={img.uri} className="relative">
+                  <Image source={{ uri: img.uri }} className="h-20 w-20 rounded-lg" />
+                  <TouchableOpacity
+                    onPress={() => handleRemoveImage(index)}
+                    className="absolute -right-2 -top-2 h-5 w-5 items-center justify-center rounded-full bg-black/70">
+                    <MaterialCommunityIcons name="close" size={14} color="#FFFFFF" />
+                  </TouchableOpacity>
+                </View>
+              ))}
+            </View>
+          </ScrollView>
 
           {/* 상품명 입력 */}
           <View className="border-b border-gray-200 py-3">
@@ -69,7 +270,9 @@ export default function Register() {
           </View>
 
           {/* 카테고리 선택 */}
-          <TouchableOpacity className="flex-row items-center justify-between border-b border-gray-200 py-3">
+          <TouchableOpacity
+            onPress={() => setShowCategoryModal(true)}
+            className="flex-row items-center justify-between border-b border-gray-200 py-3">
             <Text className={category ? 'text-base text-black' : 'text-base text-gray-400'}>
               {category || '카테고리'}
             </Text>
@@ -120,14 +323,16 @@ export default function Register() {
         {/* 경매 기간 섹션 */}
         <View className="py-4">
           <Text className="mb-4 text-base font-bold">경매 기간</Text>
-          <TouchableOpacity className="flex-row items-center justify-between rounded-lg border border-gray-200 px-4 py-3">
+          <TouchableOpacity
+            onPress={handleOpenDatePicker}
+            className="flex-row items-center justify-between rounded-lg border border-gray-200 px-4 py-3">
             <View className="flex-row items-center">
-              <Text className={auctionDate ? 'text-base text-black' : 'text-base text-gray-400'}>
-                {auctionDate || 'YYYY-MM-DD'}
+              <Text className={endTime ? 'text-base text-black' : 'text-base text-gray-400'}>
+                {endTime ? formatDate(endTime) : 'YYYY-MM-DD'}
               </Text>
               <Text className="mx-3 text-gray-300">|</Text>
-              <Text className={auctionTime ? 'text-base text-black' : 'text-base text-gray-400'}>
-                {auctionTime || '00:00'}
+              <Text className={endTime ? 'text-base text-black' : 'text-base text-gray-400'}>
+                {endTime ? formatTime(endTime) : '00:00'}
               </Text>
             </View>
             <MaterialCommunityIcons name="calendar-outline" size={24} color={COLORS.active} />
@@ -139,14 +344,111 @@ export default function Register() {
       <View className="px-5 pb-2">
         <TouchableOpacity
           onPress={handleSubmit}
-          style={{ minHeight: LAYOUT.inputMinHeight, backgroundColor: COLORS.active }}
+          disabled={!isFormValid}
+          style={{
+            minHeight: LAYOUT.inputMinHeight,
+            backgroundColor: isFormValid ? COLORS.active : COLORS.inactive,
+          }}
           className="items-center justify-center rounded-full py-4">
-          <Text className="text-base font-bold text-white">등록 완료</Text>
+          {isPending ? (
+            <ActivityIndicator color="#FFFFFF" />
+          ) : (
+            <Text className="text-base font-bold text-white">등록 완료</Text>
+          )}
         </TouchableOpacity>
       </View>
 
       {/* 하단 탭바 */}
       <TabBar />
+
+      {/* 카테고리 선택 모달 */}
+      <Modal visible={showCategoryModal} transparent animationType="slide">
+        <TouchableOpacity
+          activeOpacity={1}
+          onPress={() => setShowCategoryModal(false)}
+          className="flex-1 justify-end bg-black/40">
+          <View className="rounded-t-2xl bg-white pb-8 pt-4">
+            <Text className="mb-4 px-5 text-lg font-bold">카테고리 선택</Text>
+            <FlatList
+              data={CATEGORIES}
+              keyExtractor={(item) => item}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  onPress={() => {
+                    setCategory(item);
+                    setShowCategoryModal(false);
+                  }}
+                  className="px-5 py-3">
+                  <Text
+                    className="text-base"
+                    style={{
+                      color: category === item ? COLORS.active : COLORS.text,
+                      fontWeight: category === item ? 'bold' : 'normal',
+                    }}>
+                    {item}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            />
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
+      {/* iOS DateTimePicker 모달 */}
+      {Platform.OS === 'ios' && showDatePicker && (
+        <Modal transparent animationType="slide">
+          <TouchableOpacity
+            activeOpacity={1}
+            onPress={() => setShowDatePicker(false)}
+            className="flex-1 justify-end bg-black/40">
+            <View className="rounded-t-2xl bg-white pb-8 pt-4">
+              <View className="mb-2 flex-row items-center justify-between px-5">
+                <TouchableOpacity onPress={() => setShowDatePicker(false)}>
+                  <Text className="text-base" style={{ color: COLORS.textSecondary }}>
+                    취소
+                  </Text>
+                </TouchableOpacity>
+                <Text className="text-base font-bold">경매 종료 시간</Text>
+                <TouchableOpacity onPress={handleConfirmDateTime}>
+                  <Text className="text-base font-bold" style={{ color: COLORS.active }}>
+                    확인
+                  </Text>
+                </TouchableOpacity>
+              </View>
+              <DateTimePicker
+                value={tempDate}
+                mode="datetime"
+                display="spinner"
+                minimumDate={new Date()}
+                onChange={(event, date) => {
+                  if (date) setTempDate(date);
+                }}
+              />
+            </View>
+          </TouchableOpacity>
+        </Modal>
+      )}
+
+      {/* Android DatePicker */}
+      {Platform.OS === 'android' && showDatePicker && (
+        <DateTimePicker
+          value={tempDate}
+          mode="date"
+          display="default"
+          minimumDate={new Date()}
+          onChange={handleDateChange}
+        />
+      )}
+
+      {/* Android TimePicker */}
+      {Platform.OS === 'android' && showTimePicker && (
+        <DateTimePicker
+          value={tempDate}
+          mode="time"
+          display="default"
+          onChange={handleTimeChange}
+        />
+      )}
     </SafeAreaView>
   );
 }

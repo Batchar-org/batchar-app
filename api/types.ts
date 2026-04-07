@@ -58,3 +58,15 @@ export type VerifyEmailCodeResponse = ApiResponse<{
 }>;
 
 export type LogoutResponse = ApiResponse<string>;
+
+// ── Product ──
+
+export type ProductCreateRequest = {
+  title: string;
+  description: string;
+  category: string;
+  startPrice: number;
+  endTime: string;
+};
+
+export type ProductCreateResponse = ApiResponse<{ product_id: number }>;
