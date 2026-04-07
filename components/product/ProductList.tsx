@@ -6,10 +6,15 @@ import { useProductsQuery } from '../../hooks/product/useProductsQuery';
 import { useWishlistQuery } from '../../hooks/wish/useWishlistQuery';
 import { useToggleWishMutation } from '../../hooks/wish/useToggleWishMutation';
 import { COLORS } from '../../constants/theme';
+import { ProductViewType } from '../../api/types';
 
-export default function ProductList() {
+interface ProductListProps {
+  viewType?: ProductViewType;
+}
+
+export default function ProductList({ viewType = 'ALL' }: ProductListProps) {
   const router = useRouter();
-  const { data, isLoading, isError } = useProductsQuery();
+  const { data, isLoading, isError } = useProductsQuery({ view: viewType });
   const { data: wishlistData } = useWishlistQuery({ size: 100 });
   const { mutate: toggleWish } = useToggleWishMutation();
 

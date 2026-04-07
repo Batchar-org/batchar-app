@@ -1,18 +1,19 @@
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { COLORS } from '../../constants/theme';
+import { ProductViewType } from '../../api/types';
 
 interface CategoryBarProps {
-  activeCategory: string;
-  onCategoryPress: (category: string) => void;
+  activeCategory: ProductViewType;
+  onCategoryPress: (category: ProductViewType) => void;
 }
 
-const CATEGORIES = [
-  { id: 'all', label: '전체' },
-  { id: 'participating', label: '참여중' },
-  { id: 'popular', label: '인기' },
-  { id: 'deadline', label: '마감임박' },
-  { id: 'latest', label: '최신' },
-] as const;
+const CATEGORIES: { id: ProductViewType; label: string }[] = [
+  { id: 'ALL', label: '전체' },
+  { id: 'MY_BIDS', label: '참여중' },
+  { id: 'POPULAR', label: '인기' },
+  { id: 'ENDING_SOON', label: '마감임박' },
+  { id: 'LATEST', label: '최신' },
+];
 
 export default function CategoryBar({ activeCategory, onCategoryPress }: CategoryBarProps) {
   const isActive = (id: string) => activeCategory === id;
