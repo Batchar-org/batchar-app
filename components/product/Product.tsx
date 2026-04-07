@@ -64,10 +64,18 @@ export default function Product({
             ellipsizeMode="tail">
             {title.length > 10 ? `${title.substring(0, 10)}...` : title}
           </Text>
-          <View className="mb-3 flex-row items-center">
-            <MaterialCommunityIcons name="map-marker-outline" size={12} color={COLORS.textMuted} />
-            <Text className="ml-1 text-xs text-gray-500">{location}</Text>
-          </View>
+          {location ? (
+            <View className="mb-3 flex-row items-center">
+              <MaterialCommunityIcons
+                name="map-marker-outline"
+                size={12}
+                color={COLORS.textMuted}
+              />
+              <Text className="ml-1 text-xs text-gray-500">{location}</Text>
+            </View>
+          ) : (
+            <View className="mb-3" style={{ height: 16 }} />
+          )}
 
           {/* 가격 정보 */}
           <View className="flex-row items-center">
@@ -114,10 +122,12 @@ export default function Product({
       </View>
 
       {/* 참여자 수 */}
-      <View className="mt-2 flex-row items-center pl-1">
-        <MaterialCommunityIcons name="account-outline" size={14} color={COLORS.textMuted} />
-        <Text className="ml-1 text-xs text-gray-500">{participants}명 참여중</Text>
-      </View>
+      {participants > 0 && (
+        <View className="mt-2 flex-row items-center pl-1">
+          <MaterialCommunityIcons name="account-outline" size={14} color={COLORS.textMuted} />
+          <Text className="ml-1 text-xs text-gray-500">{participants}명 참여중</Text>
+        </View>
+      )}
     </TouchableOpacity>
   );
 }
