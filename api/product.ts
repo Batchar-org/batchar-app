@@ -4,9 +4,12 @@ import { ImagePickerAsset } from 'expo-image-picker';
 import {
   ProductCreateRequest,
   ProductCreateResponse,
+  ProductDeleteResponse,
   ProductDetailResponse,
   ProductListParams,
   ProductListResponse,
+  ProductUpdateRequest,
+  ProductUpdateResponse,
 } from './types';
 import { apiFetch } from './client';
 
@@ -115,4 +118,86 @@ export async function getProductDetailApi(
   accessToken?: string | null
 ): Promise<ProductDetailResponse> {
   return apiFetch<ProductDetailResponse>(`/api/products/${productId}`, { accessToken });
+}
+
+export async function updateProductApi(
+  productId: number,
+  request: ProductUpdateRequest,
+  files: ImagePickerAsset[],
+  accessToken: string
+): Promise<ProductUpdateResponse> {
+  if (!BASE_URL) {
+    throw new Error('EXPO_PUBLIC_API_BASE_URL이 없습니다. Metro 서버를 재시작해 주세요.');
+  }
+
+  const payload: Record<string, unknown> = {};
+  if (request.title !== undefined) payload.title = request.title;
+  if (request.description !== undefined) payload.description = request.description;
+  if (request.category !== undefined) payload.category = request.category;
+  if (request.endTime !== undefined) payload.end_time = request.endTime.replace('Z', '');
+  if (request.deleteMediaIds !== undefined) payload.delete_media_ids = request.deleteMediaIds;
+
+  const jsonUri = `${FileSystem.cacheDirectory}product_update_${Date.now()}.json`;
+  await FileSystem.writeAsStringAsync(jsonUri, JSON.stringify(payload));
+
+  const formData = new FormData();
+
+  formData.append('request', {
+    uri: jsonUri,
+    name: 'request.json',
+    type: 'application/json',
+  } as unknown as Blob);
+
+  for (const file of files) {
+    const uri = file.uri;
+    const name = uri.split('/').pop() ?? 'image.jpg';
+    const ext = name.split('.').pop()?.toLowerCase() ?? 'jpg';
+
+    const mimeMap: Record<string, string> = {
+      jpg: 'image/jpeg',
+      jpeg: 'image/jpeg',
+      png: 'image/png',
+      gif: 'image/gif',
+      webp: 'image/webp',
+      mp4: 'video/mp4',
+      mov: 'video/quicktime',
+      avi: 'video/x-msvideo',
+      webm: 'video/webm',
+    };
+
+    formData.append('files', {
+      uri,
+      name,
+      type: mimeMap[ext] ?? 'image/jpeg',
+    } as unknown as Blob);
+  }
+
+  const response = await fetch(`${BASE_URL}/api/products/${productId}`, {
+    method: 'PATCH',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: formData,
+  });
+
+  const contentType = response.headers.get('content-type');
+  const isJson = contentType?.includes('application/json');
+  const data = isJson ? await response.json() : null;
+
+  if (!response.ok) {
+    const message = data?.message ?? `상품 수정에 실패했습니다. status=${response.status}`;
+    throw new Error(message);
+  }
+
+  return data as ProductUpdateResponse;
+}
+
+export async function deleteProductApi(
+  productId: number,
+  accessToken: string
+): Promise<ProductDeleteResponse> {
+  return apiFetch<ProductDeleteResponse>(`/api/products/${productId}`, {
+    method: 'DELETE',
+    accessToken,
+  });
 }

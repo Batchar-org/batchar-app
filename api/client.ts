@@ -35,7 +35,6 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): 
   const data = isJson ? await response.json() : null;
 
   if (!response.ok) {
-    console.error(`[apiFetch] ${response.status} ${normalizedBaseUrl}${path}`, data);
     const message = data?.message ?? `요청에 실패했습니다. status=${response.status}`;
     throw new Error(message);
   }
