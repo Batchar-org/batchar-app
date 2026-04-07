@@ -121,7 +121,7 @@ export default function ChatDetail() {
 
       <KeyboardAvoidingView
         className="flex-1"
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={0}>
         {/* 메시지 영역 */}
         <ScrollView
