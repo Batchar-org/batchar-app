@@ -6,9 +6,10 @@ import SearchBar from '../components/layout/SearchBar';
 import CategoryBar from '../components/layout/CategoryBar';
 import ProductList from '../components/product/ProductList';
 import TabBar from '../components/layout/TabBar';
+import { ProductViewType } from '../api/types';
 
 export default function Home() {
-  const [activeCategory, setActiveCategory] = useState('all');
+  const [activeCategory, setActiveCategory] = useState<ProductViewType>('ALL');
 
   return (
     <SafeAreaView className="flex-1 bg-white" edges={['top']}>
@@ -21,7 +22,7 @@ export default function Home() {
         className="flex-1 bg-gray-50 px-5"
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}>
-        <ProductList />
+        <ProductList viewType={activeCategory} />
       </ScrollView>
       <TabBar />
     </SafeAreaView>
