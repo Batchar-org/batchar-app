@@ -31,7 +31,7 @@ export async function createProductApi(
   // JSON을 임시 파일로 저장 후 application/json 타입으로 FormData에 첨부
   // React Native FormData는 문자열을 text/plain으로 보내기 때문에
   // Spring @RequestPart가 역직렬화하지 못함 → 파일 객체로 전송해야 함
-  const jsonUri = `${FileSystem.cacheDirectory}product_request.json`;
+  const jsonUri = `${FileSystem.cacheDirectory}product_request_${Date.now()}.json`;
   await FileSystem.writeAsStringAsync(jsonUri, JSON.stringify(payload));
 
   const formData = new FormData();
