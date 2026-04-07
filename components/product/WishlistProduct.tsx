@@ -4,31 +4,38 @@ import { COLORS, SHADOWS } from '../../constants/theme';
 import { formatPrice } from '../../utils/format';
 
 interface WishlistProductProps {
-  id: string;
+  productId: number;
   title: string;
   currentPrice: number;
-  participants: number;
+  category: string;
+  endTime: string;
   image: string;
-  badge?: 'HOT' | 'NEW';
-  deadline?: string;
-  likes?: number;
-  comments?: number;
   onPress?: () => void;
-  onFavoritePress?: () => void;
+  onWishRemove?: () => void;
 }
 
 export default function WishlistProduct({
   title,
   currentPrice,
-  participants,
+  category,
+  endTime,
   image,
-  badge,
-  deadline,
-  likes = 0,
-  comments = 0,
   onPress,
-  onFavoritePress,
+  onWishRemove,
 }: WishlistProductProps) {
+  const formatRemainingTime = (endTimeStr: string): string => {
+    const end = new Date(endTimeStr);
+    const now = new Date();
+    const diff = end.getTime() - now.getTime();
+    if (diff <= 0) return '마감됨';
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    if (days > 0) return `${days}일 ${hours}시간`;
+    if (hours > 0) return `${hours}시간 ${minutes}분`;
+    return `${minutes}분`;
+  };
+
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -37,20 +44,7 @@ export default function WishlistProduct({
       style={SHADOWS.cardSubtle}>
       <View className="flex-row">
         {/* 상품 이미지 */}
-        <View className="relative mr-3 h-24 w-24 overflow-hidden rounded-xl bg-gray-100">
-          {badge && (
-            <View
-              className="absolute left-1.5 top-1.5 z-10 rounded px-1.5 py-0.5"
-              style={{ backgroundColor: badge === 'HOT' ? '#F97316' : COLORS.primary }}>
-              <Text className="text-xs font-bold text-white">{badge}</Text>
-            </View>
-          )}
-          {deadline && (
-            <View className="absolute bottom-1.5 left-1.5 z-10 flex-row items-center rounded bg-black/70 px-1.5 py-0.5">
-              <MaterialCommunityIcons name="clock-outline" size={10} color="white" />
-              <Text className="ml-1 text-xs font-semibold text-white">{deadline}</Text>
-            </View>
-          )}
+        <View className="mr-3 h-24 w-24 overflow-hidden rounded-xl bg-gray-100">
           <Image source={{ uri: image }} className="h-full w-full" resizeMode="cover" />
         </View>
 
@@ -64,37 +58,24 @@ export default function WishlistProduct({
               ellipsizeMode="tail">
               {title}
             </Text>
-            <TouchableOpacity onPress={onFavoritePress} activeOpacity={0.7} className="ml-2">
+            <TouchableOpacity onPress={onWishRemove} activeOpacity={0.7} className="ml-2">
               <MaterialCommunityIcons name="heart" size={24} color={COLORS.primary} />
             </TouchableOpacity>
+          </View>
+
+          {/* 카테고리 */}
+          <Text className="text-xs text-gray-500">{category}</Text>
+
+          {/* 남은 시간 */}
+          <View className="flex-row items-center">
+            <MaterialCommunityIcons name="clock-outline" size={12} color={COLORS.textMuted} />
+            <Text className="ml-1 text-xs text-gray-500">{formatRemainingTime(endTime)}</Text>
           </View>
 
           {/* 가격 */}
           <Text className="text-base font-extrabold" style={{ color: COLORS.primary }}>
             {formatPrice(currentPrice)} 원
           </Text>
-
-          {/* 하단: 참여자 + 좋아요/댓글 */}
-          <View className="flex-row items-center justify-between">
-            <View className="flex-row items-center">
-              <MaterialCommunityIcons
-                name="account-group-outline"
-                size={14}
-                color={COLORS.textMuted}
-              />
-              <Text className="ml-1 text-xs text-gray-400">{participants}명 참여중</Text>
-            </View>
-            <View className="flex-row items-center">
-              <View className="flex-row items-center">
-                <MaterialCommunityIcons name="heart-outline" size={14} color={COLORS.textMuted} />
-                <Text className="ml-0.5 text-xs text-gray-400">{likes}</Text>
-              </View>
-              <View className="ml-2 flex-row items-center">
-                <MaterialCommunityIcons name="chat-outline" size={14} color={COLORS.textMuted} />
-                <Text className="ml-0.5 text-xs text-gray-400">{comments}</Text>
-              </View>
-            </View>
-          </View>
         </View>
       </View>
     </TouchableOpacity>

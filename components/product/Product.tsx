@@ -12,10 +12,24 @@ interface ProductProps {
   participants: number;
   image: string;
   badge?: 'HOT' | 'NEW';
+  endTime?: string;
   deadline?: string;
   isFavorite?: boolean;
   onPress?: () => void;
   onFavoritePress?: () => void;
+}
+
+function formatRemainingTime(endTimeStr: string): string {
+  const end = new Date(endTimeStr);
+  const now = new Date();
+  const diff = end.getTime() - now.getTime();
+  if (diff <= 0) return '마감됨';
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  if (days > 0) return `${days}일 ${hours}시간`;
+  if (hours > 0) return `${hours}시간 ${minutes}분`;
+  return `${minutes}분`;
 }
 
 export default function Product({
@@ -26,6 +40,7 @@ export default function Product({
   participants,
   image,
   badge,
+  endTime,
   deadline,
   isFavorite = false,
   onPress,
@@ -64,14 +79,10 @@ export default function Product({
             ellipsizeMode="tail">
             {title.length > 10 ? `${title.substring(0, 10)}...` : title}
           </Text>
-          {location ? (
+          {endTime ? (
             <View className="mb-3 flex-row items-center">
-              <MaterialCommunityIcons
-                name="map-marker-outline"
-                size={12}
-                color={COLORS.textMuted}
-              />
-              <Text className="ml-1 text-xs text-gray-500">{location}</Text>
+              <MaterialCommunityIcons name="clock-outline" size={12} color={COLORS.textMuted} />
+              <Text className="ml-1 text-xs text-gray-500">{formatRemainingTime(endTime)}</Text>
             </View>
           ) : (
             <View className="mb-3" style={{ height: 16 }} />
