@@ -128,6 +128,34 @@ export type ProductDetail = {
 
 export type ProductDetailResponse = ApiResponse<ProductDetail>;
 
+// ── Wish ──
+
+export type WishSummary = {
+  wish_id: number;
+  product_id: number;
+  title: string;
+  category: string;
+  current_price: number;
+  end_time: string;
+  media_url: string;
+  wished_at: string;
+};
+
+export type WishListParams = {
+  page?: number;
+  size?: number;
+};
+
+export type WishListResponse = ApiResponse<{
+  content: WishSummary[];
+  has_next: boolean;
+}>;
+
+export type WishAddResponse = ApiResponse<{ wish_id: number }>;
+export type WishRemoveResponse = ApiResponse<null>;
+
+// ── Product Update/Delete ──
+
 export type ProductUpdateRequest = {
   title?: string;
   description?: string;

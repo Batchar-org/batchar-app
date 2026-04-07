@@ -1,33 +1,33 @@
-import { View, Text, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { useMemo } from 'react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import TabBar from '../components/layout/TabBar';
 import WishlistProduct from '../components/product/WishlistProduct';
-import { MOCK_PRODUCTS } from '../mocks/product';
-import type { ProductData } from '../mocks/product';
+import { useWishlistQuery } from '../hooks/wish/useWishlistQuery';
+import { useToggleWishMutation } from '../hooks/wish/useToggleWishMutation';
 import { COLORS } from '../constants/theme';
+import type { WishSummary } from '../api/types';
 
 export default function Wishlist() {
   const router = useRouter();
+  const { data, isLoading, isError } = useWishlistQuery({ size: 50 });
+  const { mutate: toggleWish } = useToggleWishMutation();
 
-  // isFavorite가 true인 상품만 필터링 (메모이제이션)
-  const favoriteProducts = useMemo(() => MOCK_PRODUCTS.filter((p) => p.isFavorite), []);
+  const handleWishRemove = (productId: number) => {
+    toggleWish({ productId, isWished: true });
+  };
 
-  const renderItem = ({ item }: { item: ProductData }) => (
+  const renderItem = ({ item }: { item: WishSummary }) => (
     <WishlistProduct
-      id={item.id}
+      productId={item.product_id}
       title={item.title}
-      currentPrice={item.currentPrice}
-      participants={item.participants}
-      image={item.image}
-      badge={item.badge}
-      deadline={item.deadline}
-      likes={item.likes}
-      comments={item.comments}
-      onPress={() => router.push(`/product/${item.id}`)}
-      onFavoritePress={() => console.log('찜 해제:', item.title)}
+      currentPrice={item.current_price}
+      category={item.category}
+      endTime={item.end_time}
+      image={item.media_url}
+      onPress={() => router.push(`/product/${item.product_id}`)}
+      onWishRemove={() => handleWishRemove(item.product_id)}
     />
   );
 
@@ -42,14 +42,28 @@ export default function Wishlist() {
       </View>
 
       {/* 관심 상품 목록 */}
-      <FlatList
-        data={favoriteProducts}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-        className="flex-1 bg-gray-50 px-4"
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingVertical: 12 }}
-      />
+      {isLoading ? (
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator size="large" color={COLORS.active} />
+        </View>
+      ) : isError ? (
+        <View className="flex-1 items-center justify-center">
+          <Text className="text-sm text-gray-500">관심목록을 불러올 수 없습니다.</Text>
+        </View>
+      ) : !data?.content?.length ? (
+        <View className="flex-1 items-center justify-center">
+          <Text className="text-sm text-gray-500">찜한 상품이 없습니다.</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={data.content}
+          renderItem={renderItem}
+          keyExtractor={(item) => String(item.wish_id)}
+          className="flex-1 bg-gray-50 px-4"
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingVertical: 12 }}
+        />
+      )}
 
       {/* 하단 탭바 */}
       <TabBar />

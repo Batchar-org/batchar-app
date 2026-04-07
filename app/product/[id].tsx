@@ -15,6 +15,7 @@ import { useProductDetailQuery } from '../../hooks/product/useProductDetailQuery
 import { COLORS, LAYOUT } from '../../constants/theme';
 import { formatPrice } from '../../utils/format';
 import useAuthStore from '../../store/useAuthStore';
+import { useToggleWishMutation } from '../../hooks/wish/useToggleWishMutation';
 
 function formatRemainingTime(endTimeStr: string): string {
   const end = new Date(endTimeStr);
@@ -68,6 +69,7 @@ export default function ProductDetail() {
   const productId = Number(id) || 0;
   const userId = useAuthStore((state) => state.userId);
   const { data: product, isLoading, isError } = useProductDetailQuery(productId);
+  const { mutate: toggleWish } = useToggleWishMutation();
 
   if (isLoading) {
     return (
@@ -165,7 +167,9 @@ export default function ProductDetail() {
         {/* 상품 제목 */}
         <View className="flex-row items-start justify-between bg-white px-4 pb-4 pt-2">
           <Text className="flex-1 text-xl font-bold text-gray-900">{product.title}</Text>
-          <TouchableOpacity className="ml-2 pt-1">
+          <TouchableOpacity
+            className="ml-2 pt-1"
+            onPress={() => toggleWish({ productId, isWished: !!product.is_wished })}>
             <MaterialCommunityIcons
               name={product.is_wished ? 'heart' : 'heart-outline'}
               size={24}
@@ -313,7 +317,9 @@ export default function ProductDetail() {
 
       {/* 하단 버튼 */}
       <View className="flex-row items-center border-t border-gray-100 bg-white px-4 py-3">
-        <TouchableOpacity className="mr-4 p-1">
+        <TouchableOpacity
+          className="mr-4 p-1"
+          onPress={() => toggleWish({ productId, isWished: !!product.is_wished })}>
           <MaterialCommunityIcons
             name={product.is_wished ? 'heart' : 'heart-outline'}
             size={28}
