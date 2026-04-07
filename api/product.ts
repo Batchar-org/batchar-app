@@ -1,7 +1,14 @@
 import * as FileSystem from 'expo-file-system';
 import { ImagePickerAsset } from 'expo-image-picker';
 
-import { ProductCreateRequest, ProductCreateResponse } from './types';
+import {
+  ProductCreateRequest,
+  ProductCreateResponse,
+  ProductDetailResponse,
+  ProductListParams,
+  ProductListResponse,
+} from './types';
+import { apiFetch } from './client';
 
 declare const process: {
   env: Record<string, string | undefined>;
@@ -85,4 +92,27 @@ export async function createProductApi(
   }
 
   return data as ProductCreateResponse;
+}
+
+export async function getProductsApi(
+  params: ProductListParams = {},
+  accessToken?: string | null
+): Promise<ProductListResponse> {
+  const query = new URLSearchParams();
+  if (params.view) query.set('view', params.view);
+  if (params.category) query.set('category', params.category);
+  if (params.page !== undefined) query.set('page', String(params.page));
+  if (params.size !== undefined) query.set('size', String(params.size));
+
+  const queryString = query.toString();
+  const path = `/api/products${queryString ? `?${queryString}` : ''}`;
+
+  return apiFetch<ProductListResponse>(path, { accessToken });
+}
+
+export async function getProductDetailApi(
+  productId: number,
+  accessToken?: string | null
+): Promise<ProductDetailResponse> {
+  return apiFetch<ProductDetailResponse>(`/api/products/${productId}`, { accessToken });
 }

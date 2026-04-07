@@ -1,11 +1,43 @@
-import { View, Text, ScrollView, Image, TouchableOpacity, useWindowDimensions } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  Image,
+  TouchableOpacity,
+  useWindowDimensions,
+  ActivityIndicator,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState, useRef } from 'react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { getProductById } from '../../mocks/product';
+import { useProductDetailQuery } from '../../hooks/product/useProductDetailQuery';
 import { COLORS, LAYOUT } from '../../constants/theme';
 import { formatPrice } from '../../utils/format';
+
+function formatRemainingTime(endTimeStr: string): string {
+  const end = new Date(endTimeStr);
+  const now = new Date();
+  const diff = end.getTime() - now.getTime();
+  if (diff <= 0) return '마감됨';
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  if (days > 0) return `${days}일 ${hours}시간`;
+  if (hours > 0) return `${hours}시간 ${minutes}분`;
+  return `${minutes}분`;
+}
+
+function formatEndDate(endTimeStr: string): string {
+  const date = new Date(endTimeStr);
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  const hours = date.getHours();
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const period = hours >= 12 ? '오후' : '오전';
+  const displayHours = hours > 12 ? hours - 12 : hours || 12;
+  return `${month}/${day} ${displayHours}:${minutes} ${period}`;
+}
 
 // 가격 추이 mock 데이터
 const PRICE_HISTORY = [
@@ -32,9 +64,18 @@ export default function ProductDetail() {
   const [isHighestOfferer, setIsHighestOfferer] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
 
-  const product = getProductById(id || '');
+  const productId = Number(id) || 0;
+  const { data: product, isLoading, isError } = useProductDetailQuery(productId);
 
-  if (!product) {
+  if (isLoading) {
+    return (
+      <SafeAreaView className="flex-1 items-center justify-center bg-white">
+        <ActivityIndicator size="large" color={COLORS.active} />
+      </SafeAreaView>
+    );
+  }
+
+  if (isError || !product) {
     return (
       <SafeAreaView className="flex-1 items-center justify-center bg-white">
         <Text>상품을 찾을 수 없습니다.</Text>
@@ -42,7 +83,7 @@ export default function ProductDetail() {
     );
   }
 
-  const images = product.images || [product.image];
+  const images = product.media_urls.map((m) => m.url);
 
   const handleScroll = (event: any) => {
     const offsetX = event.nativeEvent.contentOffset.x;
@@ -112,13 +153,8 @@ export default function ProductDetail() {
             </View>
             <View>
               <Text className="text-base font-medium text-gray-900">
-                {product.sellerName || '판매자'}
+                {product.seller_name || '판매자'}
               </Text>
-              {product.isTrustedSeller && (
-                <Text className="text-sm font-medium" style={{ color: COLORS.active }}>
-                  VIP
-                </Text>
-              )}
             </View>
           </View>
         </View>
@@ -128,9 +164,9 @@ export default function ProductDetail() {
           <Text className="flex-1 text-xl font-bold text-gray-900">{product.title}</Text>
           <TouchableOpacity className="ml-2 pt-1">
             <MaterialCommunityIcons
-              name={product.isFavorite ? 'heart' : 'heart-outline'}
+              name={product.is_wished ? 'heart' : 'heart-outline'}
               size={24}
-              color={product.isFavorite ? COLORS.active : '#D1D5DB'}
+              color={product.is_wished ? COLORS.active : '#D1D5DB'}
             />
           </TouchableOpacity>
         </View>
@@ -140,7 +176,7 @@ export default function ProductDetail() {
           <View className="mr-2 flex-1 items-center rounded-xl bg-gray-100 py-3">
             <Text className="text-xs text-gray-500">시작가</Text>
             <Text className="mt-1 text-lg font-bold text-gray-900">
-              {formatPrice(product.originalPrice)}원
+              {formatPrice(product.start_price)}원
             </Text>
           </View>
           <View
@@ -148,7 +184,7 @@ export default function ProductDetail() {
             style={{ backgroundColor: COLORS.active }}>
             <Text className="text-xs text-white/80">현재가</Text>
             <Text className="mt-1 text-lg font-bold text-white">
-              {formatPrice(product.currentPrice)}원
+              {formatPrice(product.current_price)}원
             </Text>
           </View>
         </View>
@@ -179,11 +215,11 @@ export default function ProductDetail() {
             <MaterialCommunityIcons name="clock-outline" size={16} color="#6B7280" />
             <Text className="ml-1 text-sm text-gray-500">남은 시간:</Text>
             <Text className="ml-1 text-sm font-bold text-gray-900">
-              {product.remainingTime || '2일 8시간'}
+              {product.end_time ? formatRemainingTime(product.end_time) : '-'}
             </Text>
           </View>
           <Text className="text-sm text-gray-500">
-            마감일: {product.endDate || '11/14 02:30 오후'}
+            마감일: {product.end_time ? formatEndDate(product.end_time) : '-'}
           </Text>
         </View>
 
@@ -201,15 +237,15 @@ export default function ProductDetail() {
         {/* 상품 정보 테이블 */}
         <View className="bg-white px-4 pb-4">
           <View className="flex-row border-b border-gray-100 py-3">
-            <Text className="w-20 text-sm text-gray-500">참여자</Text>
+            <Text className="w-20 text-sm text-gray-500">입찰자</Text>
             <Text className="flex-1 text-right text-sm font-medium text-gray-900">
-              {product.participants}명
+              {product.bid_count}명
             </Text>
           </View>
           <View className="flex-row py-3">
-            <Text className="w-20 text-sm text-gray-500">조회수</Text>
+            <Text className="w-20 text-sm text-gray-500">찜</Text>
             <Text className="flex-1 text-right text-sm font-medium text-gray-900">
-              {product.views || 234}회
+              {product.wish_count}개
             </Text>
           </View>
         </View>
@@ -276,9 +312,9 @@ export default function ProductDetail() {
       <View className="flex-row items-center border-t border-gray-100 bg-white px-4 py-3">
         <TouchableOpacity className="mr-4 p-1">
           <MaterialCommunityIcons
-            name={product.isFavorite ? 'heart' : 'heart-outline'}
+            name={product.is_wished ? 'heart' : 'heart-outline'}
             size={28}
-            color={product.isFavorite ? COLORS.active : '#D1D5DB'}
+            color={product.is_wished ? COLORS.active : '#D1D5DB'}
           />
         </TouchableOpacity>
 
