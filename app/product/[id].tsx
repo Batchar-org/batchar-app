@@ -170,6 +170,7 @@ export default function ProductDetail() {
             ref={scrollViewRef}
             horizontal
             pagingEnabled
+            nestedScrollEnabled
             showsHorizontalScrollIndicator={false}
             onScroll={handleScroll}
             scrollEventThrottle={16}>
@@ -183,7 +184,10 @@ export default function ProductDetail() {
             ))}
           </ScrollView>
           {/* 페이지 인디케이터 */}
-          <View className="absolute bottom-4 right-4 rounded-full bg-black/60 px-3 py-1">
+          <View
+            pointerEvents="none"
+            className="absolute bottom-4 right-4 rounded-full px-3 py-1"
+            style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}>
             <Text className="text-sm font-medium text-white">
               {currentImageIndex + 1} / {images.length}
             </Text>
@@ -422,7 +426,7 @@ export default function ProductDetail() {
 
       {/* 입찰 모달 */}
       <Modal visible={bidModalVisible} transparent animationType="slide">
-        <View className="flex-1 justify-end bg-black/50">
+        <View className="flex-1 justify-end" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
           <View className="rounded-t-3xl bg-white px-5 pb-8 pt-6">
             <View className="mb-4 flex-row items-center justify-between">
               <Text className="text-lg font-bold text-gray-900">입찰하기</Text>

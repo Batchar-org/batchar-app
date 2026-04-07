@@ -36,7 +36,9 @@ export default function Wishlist() {
       {/* 헤더 */}
       <View className="flex-row items-center justify-center bg-white px-5 py-4">
         <Text className="text-lg font-bold text-gray-900">관심목록</Text>
-        <TouchableOpacity className="absolute right-5">
+        <TouchableOpacity
+          className="absolute right-5"
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
           <MaterialCommunityIcons name="dots-horizontal" size={24} color={COLORS.text} />
         </TouchableOpacity>
       </View>

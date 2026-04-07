@@ -57,13 +57,17 @@ export default function Product({
         <View className="relative mr-3 h-24 w-24 overflow-hidden rounded-xl bg-gray-100">
           {badge && (
             <View
+              pointerEvents="none"
               className={`absolute left-2 top-2 z-10 rounded px-1.5 py-1`}
               style={{ backgroundColor: badge === 'HOT' ? '#F97316' : COLORS.primary }}>
               <Text className="text-xs font-bold text-white">{badge}</Text>
             </View>
           )}
           {deadline && (
-            <View className="absolute bottom-2 left-2 z-10 flex-row items-center rounded bg-black/70 px-1.5 py-0.5">
+            <View
+              pointerEvents="none"
+              className="absolute bottom-2 left-2 z-10 flex-row items-center rounded px-1.5 py-0.5"
+              style={{ backgroundColor: 'rgba(0,0,0,0.7)' }}>
               <MaterialCommunityIcons name="clock-outline" size={10} color="white" />
               <Text className="ml-1 text-xs font-semibold text-white">{deadline}</Text>
             </View>

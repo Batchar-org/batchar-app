@@ -317,7 +317,9 @@ export default function ProductEdit() {
                   <Image source={{ uri: media.url }} className="h-20 w-20 rounded-lg" />
                   <TouchableOpacity
                     onPress={() => handleRemoveExistingMedia(media.id)}
-                    className="absolute -right-2 -top-2 h-5 w-5 items-center justify-center rounded-full bg-black/70">
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    className="absolute -right-2 -top-2 h-5 w-5 items-center justify-center rounded-full"
+                    style={{ backgroundColor: 'rgba(0,0,0,0.7)' }}>
                     <MaterialCommunityIcons name="close" size={14} color="#FFFFFF" />
                   </TouchableOpacity>
                 </View>
@@ -328,7 +330,9 @@ export default function ProductEdit() {
                   <Image source={{ uri: img.uri }} className="h-20 w-20 rounded-lg" />
                   <TouchableOpacity
                     onPress={() => handleRemoveNewImage(index)}
-                    className="absolute -right-2 -top-2 h-5 w-5 items-center justify-center rounded-full bg-black/70">
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    className="absolute -right-2 -top-2 h-5 w-5 items-center justify-center rounded-full"
+                    style={{ backgroundColor: 'rgba(0,0,0,0.7)' }}>
                     <MaterialCommunityIcons name="close" size={14} color="#FFFFFF" />
                   </TouchableOpacity>
                 </View>
@@ -459,7 +463,8 @@ export default function ProductEdit() {
         <TouchableOpacity
           activeOpacity={1}
           onPress={() => setShowCategoryModal(false)}
-          className="flex-1 justify-end bg-black/40">
+          className="flex-1 justify-end"
+          style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}>
           <View className="rounded-t-2xl bg-white pb-8 pt-4">
             <Text className="mb-4 px-5 text-lg font-bold">카테고리 선택</Text>
             <FlatList
@@ -493,7 +498,8 @@ export default function ProductEdit() {
           <TouchableOpacity
             activeOpacity={1}
             onPress={() => setShowDatePicker(false)}
-            className="flex-1 justify-end bg-black/40">
+            className="flex-1 justify-end"
+            style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}>
             <View className="rounded-t-2xl bg-white pb-8 pt-4">
               <View className="mb-2 flex-row items-center justify-between px-5">
                 <TouchableOpacity onPress={() => setShowDatePicker(false)}>
