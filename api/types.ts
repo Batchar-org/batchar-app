@@ -199,3 +199,33 @@ export type BidListResponse = ApiResponse<{
   content: BidSummary[];
   has_next: boolean;
 }>;
+
+// ── Chat ──
+
+export type ChatListItem = {
+  chat_id: number;
+  product_id: number;
+  partner_name: string;
+  product_image_url: string;
+  last_message: string;
+  unread_count: number;
+  updated_at: string;
+};
+
+export type ChatListResponse = ApiResponse<ChatListItem[]>;
+
+export type ChatMessageRequest = {
+  message: string;
+};
+
+export type ChatMessage = {
+  message_id: number;
+  sender_id: number;
+  content: string;
+  is_read: boolean;
+  created_at: string;
+};
+
+export type ChatMessagesResponse = ApiResponse<ChatMessage[]>;
+
+export type ChatMessageSendResponse = ApiResponse<ChatMessage>;

@@ -36,7 +36,9 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): 
 
   if (!response.ok) {
     const message = data?.message ?? `요청에 실패했습니다. status=${response.status}`;
-    throw new Error(message);
+    const error = new Error(message);
+    (error as any).status = response.status;
+    throw error;
   }
 
   return data as T;

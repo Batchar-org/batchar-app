@@ -77,16 +77,30 @@ export default function ProductDetail() {
 
   if (isLoading) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-white">
-        <ActivityIndicator size="large" color={COLORS.active} />
+      <SafeAreaView className="flex-1 bg-white" edges={['top']}>
+        <View className="flex-row items-center px-4 py-3">
+          <TouchableOpacity onPress={() => router.back()}>
+            <MaterialCommunityIcons name="chevron-left" size={28} color={COLORS.active} />
+          </TouchableOpacity>
+        </View>
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator size="large" color={COLORS.active} />
+        </View>
       </SafeAreaView>
     );
   }
 
   if (isError || !product) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-white">
-        <Text>상품을 찾을 수 없습니다.</Text>
+      <SafeAreaView className="flex-1 bg-white" edges={['top']}>
+        <View className="flex-row items-center px-4 py-3">
+          <TouchableOpacity onPress={() => router.back()}>
+            <MaterialCommunityIcons name="chevron-left" size={28} color={COLORS.active} />
+          </TouchableOpacity>
+        </View>
+        <View className="flex-1 items-center justify-center">
+          <Text className="text-sm text-gray-500">상품을 찾을 수 없습니다.</Text>
+        </View>
       </SafeAreaView>
     );
   }
@@ -334,23 +348,39 @@ export default function ProductDetail() {
             </Text>
           ) : (
             <View>
-              {bidRecords.map((bid, index) => (
-                <View
-                  key={bid.bid_id}
-                  className={`flex-row items-center justify-between py-4 ${
-                    index !== bidRecords.length - 1 ? 'border-b border-gray-100' : ''
-                  }`}>
-                  <View>
-                    <Text className="text-base font-medium text-gray-900">{bid.bidder_name}</Text>
+              {bidRecords.map((bid, index) => {
+                const isHighest = index === 0;
+                return (
+                  <View
+                    key={bid.bid_id}
+                    className={`py-4 ${
+                      index !== bidRecords.length - 1 ? 'border-b border-gray-100' : ''
+                    }`}>
+                    <View className="flex-row items-center justify-between">
+                      <View className="flex-row items-center">
+                        {isHighest && (
+                          <View
+                            className="mr-2 rounded-md px-1.5 py-0.5"
+                            style={{ backgroundColor: COLORS.primaryLight }}>
+                            <Text className="text-xs font-bold" style={{ color: COLORS.active }}>
+                              최고가
+                            </Text>
+                          </View>
+                        )}
+                        <Text className="text-base font-medium text-gray-900">
+                          {bid.bidder_name}
+                        </Text>
+                      </View>
+                      <Text className="text-base font-bold" style={{ color: COLORS.active }}>
+                        {formatPrice(bid.price)}원
+                      </Text>
+                    </View>
                     <Text className="mt-1 text-xs text-gray-400">
                       {formatBidTime(bid.created_at)}
                     </Text>
                   </View>
-                  <Text className="text-base font-bold" style={{ color: COLORS.active }}>
-                    {formatPrice(bid.price)}원
-                  </Text>
-                </View>
-              ))}
+                );
+              })}
             </View>
           )}
         </View>

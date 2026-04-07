@@ -17,7 +17,17 @@ import { COLORS } from '../constants/theme';
 // 인증 없이 접근 가능한 퍼블릭 라우트 목록
 const PUBLIC_ROUTES = ['login', 'register'];
 // 앱 전역에서 같은 QueryClient를 재사용합니다.
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: (failureCount, error) => {
+        const status = (error as any)?.status;
+        if (status && status >= 400 && status < 500) return false;
+        return failureCount < 2;
+      },
+    },
+  },
+});
 
 function RouteGuard() {
   const router = useRouter();

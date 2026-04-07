@@ -1,0 +1,29 @@
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+
+import { sendMessageApi } from '../../api/chat';
+import { ChatMessageSendResponse } from '../../api/types';
+import { useAccessToken } from '../../store/useAuthStore';
+
+type SendMessageParams = {
+  chatId: number;
+  message: string;
+};
+
+export function useSendMessageMutation() {
+  const accessToken = useAccessToken();
+  const queryClient = useQueryClient();
+
+  return useMutation<ChatMessageSendResponse, Error, SendMessageParams>({
+    mutationFn: async ({ chatId, message }) => {
+      if (!accessToken) {
+        throw new Error('로그인이 필요합니다.');
+      }
+      return sendMessageApi(chatId, { message }, accessToken);
+    },
+
+    onSuccess: (_data, { chatId }) => {
+      queryClient.invalidateQueries({ queryKey: ['chatMessages', chatId] });
+      queryClient.invalidateQueries({ queryKey: ['chatList'] });
+    },
+  });
+}
