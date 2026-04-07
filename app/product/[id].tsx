@@ -14,6 +14,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useProductDetailQuery } from '../../hooks/product/useProductDetailQuery';
 import { COLORS, LAYOUT } from '../../constants/theme';
 import { formatPrice } from '../../utils/format';
+import useAuthStore from '../../store/useAuthStore';
 
 function formatRemainingTime(endTimeStr: string): string {
   const end = new Date(endTimeStr);
@@ -65,6 +66,7 @@ export default function ProductDetail() {
   const scrollViewRef = useRef<ScrollView>(null);
 
   const productId = Number(id) || 0;
+  const userId = useAuthStore((state) => state.userId);
   const { data: product, isLoading, isError } = useProductDetailQuery(productId);
 
   if (isLoading) {
@@ -83,6 +85,7 @@ export default function ProductDetail() {
     );
   }
 
+  const isOwner = userId !== null && product.seller_id === userId;
   const images = product.media_urls.map((m) => m.url);
 
   const handleScroll = (event: any) => {
@@ -318,7 +321,14 @@ export default function ProductDetail() {
           />
         </TouchableOpacity>
 
-        {hasPriceOffer ? (
+        {isOwner ? (
+          <TouchableOpacity
+            className="flex-1 items-center rounded-full py-4"
+            style={{ backgroundColor: COLORS.active }}
+            onPress={() => router.push(`/product/edit/${productId}`)}>
+            <Text className="text-base font-semibold text-white">수정하기</Text>
+          </TouchableOpacity>
+        ) : hasPriceOffer ? (
           <>
             <TouchableOpacity
               className="flex-1 items-center rounded-full border border-gray-300 py-4"

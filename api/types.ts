@@ -127,3 +127,15 @@ export type ProductDetail = {
 };
 
 export type ProductDetailResponse = ApiResponse<ProductDetail>;
+
+export type ProductUpdateRequest = {
+  title?: string;
+  description?: string;
+  category?: string;
+  endTime?: string;
+  deleteMediaIds?: number[];
+};
+
+export type ProductUpdateResponse = ProductDetailResponse;
+
+export type ProductDeleteResponse = ApiResponse<{ product_id: number }>;

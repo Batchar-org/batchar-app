@@ -12,15 +12,17 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
-import { useRouter } from 'expo-router';
-import TabBar from '../components/layout/TabBar';
-import { COLORS, INPUT_STYLE, LAYOUT } from '../constants/theme';
-import { useCreateProductMutation } from '../hooks/product/useCreateProductMutation';
-import { useIsLoggedIn } from '../store/useAuthStore';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import TabBar from '../../../components/layout/TabBar';
+import { COLORS, INPUT_STYLE, LAYOUT } from '../../../constants/theme';
+import { useUpdateProductMutation } from '../../../hooks/product/useUpdateProductMutation';
+import { useDeleteProductMutation } from '../../../hooks/product/useDeleteProductMutation';
+import { useProductDetailQuery } from '../../../hooks/product/useProductDetailQuery';
+import { ProductMediaInfo } from '../../../api/types';
 
 const MAX_DESCRIPTION_LENGTH = 2000;
 const MAX_IMAGE_COUNT = 10;
@@ -38,16 +40,23 @@ const CATEGORIES = [
   '기타',
 ];
 
-export default function Register() {
+type ExistingMedia = ProductMediaInfo & { markedForDeletion?: boolean };
+
+export default function ProductEdit() {
   const router = useRouter();
-  const isLoggedIn = useIsLoggedIn();
-  const { mutate: createProduct, isPending } = useCreateProductMutation();
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const productId = Number(id) || 0;
+
+  const { data: product, isLoading } = useProductDetailQuery(productId);
+  const { mutate: updateProduct, isPending: isUpdating } = useUpdateProductMutation();
+  const { mutate: deleteProduct, isPending: isDeleting } = useDeleteProductMutation();
 
   const [productName, setProductName] = useState('');
   const [category, setCategory] = useState('');
   const [description, setDescription] = useState('');
   const [startingPrice, setStartingPrice] = useState('');
-  const [images, setImages] = useState<ImagePicker.ImagePickerAsset[]>([]);
+  const [newImages, setNewImages] = useState<ImagePicker.ImagePickerAsset[]>([]);
+  const [existingMedia, setExistingMedia] = useState<ExistingMedia[]>([]);
 
   // 경매 종료 시간
   const [endTime, setEndTime] = useState<Date | null>(null);
@@ -57,6 +66,23 @@ export default function Register() {
 
   // 카테고리 모달
   const [showCategoryModal, setShowCategoryModal] = useState(false);
+
+  // 기존 데이터 프리필
+  useEffect(() => {
+    if (product) {
+      setProductName(product.title);
+      setCategory(product.category);
+      setDescription(product.description);
+      setStartingPrice(String(product.start_price));
+      setExistingMedia(product.media_urls.map((m) => ({ ...m, markedForDeletion: false })));
+      if (product.end_time) {
+        setEndTime(new Date(product.end_time));
+      }
+    }
+  }, [product]);
+
+  const activeExistingMedia = existingMedia.filter((m) => !m.markedForDeletion);
+  const totalImageCount = activeExistingMedia.length + newImages.length;
 
   const handlePickImages = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -68,18 +94,35 @@ export default function Register() {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images', 'videos'],
       allowsMultipleSelection: true,
-      selectionLimit: MAX_IMAGE_COUNT - images.length,
+      selectionLimit: MAX_IMAGE_COUNT - totalImageCount,
       quality: 0.8,
     });
 
     if (!result.canceled && result.assets.length > 0) {
-      const total = [...images, ...result.assets].slice(0, MAX_IMAGE_COUNT);
-      setImages(total);
+      const total = [...newImages, ...result.assets].slice(
+        0,
+        MAX_IMAGE_COUNT - activeExistingMedia.length
+      );
+      setNewImages(total);
     }
   };
 
-  const handleRemoveImage = (index: number) => {
-    setImages((prev) => prev.filter((_, i) => i !== index));
+  const handleRemoveExistingMedia = (mediaId: number) => {
+    if (activeExistingMedia.length + newImages.length <= 1) {
+      Alert.alert('알림', '최소 1개 이상의 이미지가 필요합니다.');
+      return;
+    }
+    setExistingMedia((prev) =>
+      prev.map((m) => (m.id === mediaId ? { ...m, markedForDeletion: true } : m))
+    );
+  };
+
+  const handleRemoveNewImage = (index: number) => {
+    if (activeExistingMedia.length + newImages.length <= 1) {
+      Alert.alert('알림', '최소 1개 이상의 이미지가 필요합니다.');
+      return;
+    }
+    setNewImages((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleDateChange = (_: DateTimePickerEvent, selectedDate?: Date) => {
@@ -117,11 +160,7 @@ export default function Register() {
 
   const handleOpenDatePicker = () => {
     setTempDate(endTime ?? new Date());
-    if (Platform.OS === 'ios') {
-      setShowDatePicker(true);
-    } else {
-      setShowDatePicker(true);
-    }
+    setShowDatePicker(true);
   };
 
   const formatDate = (date: Date) => {
@@ -143,21 +182,17 @@ export default function Register() {
     }
   };
 
+  const isPending = isUpdating || isDeleting;
+
   const isFormValid =
     productName.trim() &&
     category &&
     description.trim() &&
-    startingPrice.trim() &&
     endTime &&
-    images.length > 0 &&
+    totalImageCount > 0 &&
     !isPending;
 
   const handleSubmit = () => {
-    if (!isLoggedIn) {
-      Alert.alert('로그인 필요', '상품을 등록하려면 로그인이 필요합니다.');
-      return;
-    }
-
     if (!productName.trim()) {
       Alert.alert('입력 오류', '상품명을 입력해주세요.');
       return;
@@ -170,10 +205,6 @@ export default function Register() {
       Alert.alert('입력 오류', '상품 설명을 입력해주세요.');
       return;
     }
-    if (!startingPrice.trim() || Number(startingPrice) < 0) {
-      Alert.alert('입력 오류', '올바른 시작가를 입력해주세요.');
-      return;
-    }
     if (!endTime) {
       Alert.alert('입력 오류', '경매 종료 시간을 선택해주세요.');
       return;
@@ -182,34 +213,67 @@ export default function Register() {
       Alert.alert('입력 오류', '경매 종료 시간은 현재보다 미래여야 합니다.');
       return;
     }
-    if (images.length === 0) {
+    if (totalImageCount === 0) {
       Alert.alert('입력 오류', '사진을 최소 1장 이상 등록해주세요.');
       return;
     }
 
-    createProduct(
+    const deleteMediaIds = existingMedia.filter((m) => m.markedForDeletion).map((m) => m.id);
+
+    updateProduct(
       {
+        productId,
         request: {
           title: productName.trim(),
           description: description.trim(),
           category,
-          startPrice: Number(startingPrice),
           endTime: endTime.toISOString(),
+          ...(deleteMediaIds.length > 0 && { deleteMediaIds }),
         },
-        files: images,
+        files: newImages,
       },
       {
         onSuccess: () => {
-          Alert.alert('등록 완료', '상품이 등록되었습니다.', [
+          Alert.alert('수정 완료', '상품이 수정되었습니다.', [
             { text: '확인', onPress: () => router.back() },
           ]);
         },
         onError: (error) => {
-          Alert.alert('등록 실패', error.message);
+          Alert.alert('수정 실패', error.message);
         },
       }
     );
   };
+
+  const handleDelete = () => {
+    Alert.alert('상품 삭제', '정말로 이 상품을 삭제하시겠습니까?', [
+      { text: '취소', style: 'cancel' },
+      {
+        text: '삭제',
+        style: 'destructive',
+        onPress: () => {
+          deleteProduct(productId, {
+            onSuccess: () => {
+              Alert.alert('삭제 완료', '상품이 삭제되었습니다.', [
+                { text: '확인', onPress: () => router.replace('/') },
+              ]);
+            },
+            onError: (error) => {
+              Alert.alert('삭제 실패', error.message);
+            },
+          });
+        },
+      },
+    ]);
+  };
+
+  if (isLoading) {
+    return (
+      <SafeAreaView className="flex-1 items-center justify-center bg-white">
+        <ActivityIndicator size="large" color={COLORS.active} />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-white" edges={['top']}>
@@ -218,7 +282,7 @@ export default function Register() {
         <TouchableOpacity onPress={() => router.back()}>
           <MaterialCommunityIcons name="arrow-left" size={24} color={COLORS.text} />
         </TouchableOpacity>
-        <Text className="text-lg font-bold">경매품 등록</Text>
+        <Text className="text-lg font-bold">경매품 수정</Text>
         <View className="w-8" />
       </View>
 
@@ -244,15 +308,26 @@ export default function Register() {
                 style={{ borderColor: COLORS.active }}>
                 <MaterialCommunityIcons name="camera-outline" size={28} color={COLORS.active} />
                 <Text className="mt-1 text-xs" style={{ color: COLORS.active }}>
-                  {images.length}/{MAX_IMAGE_COUNT}
+                  {totalImageCount}/{MAX_IMAGE_COUNT}
                 </Text>
               </TouchableOpacity>
 
-              {images.map((img, index) => (
+              {activeExistingMedia.map((media) => (
+                <View key={`existing-${media.id}`} className="relative">
+                  <Image source={{ uri: media.url }} className="h-20 w-20 rounded-lg" />
+                  <TouchableOpacity
+                    onPress={() => handleRemoveExistingMedia(media.id)}
+                    className="absolute -right-2 -top-2 h-5 w-5 items-center justify-center rounded-full bg-black/70">
+                    <MaterialCommunityIcons name="close" size={14} color="#FFFFFF" />
+                  </TouchableOpacity>
+                </View>
+              ))}
+
+              {newImages.map((img, index) => (
                 <View key={img.uri} className="relative">
                   <Image source={{ uri: img.uri }} className="h-20 w-20 rounded-lg" />
                   <TouchableOpacity
-                    onPress={() => handleRemoveImage(index)}
+                    onPress={() => handleRemoveNewImage(index)}
                     className="absolute -right-2 -top-2 h-5 w-5 items-center justify-center rounded-full bg-black/70">
                     <MaterialCommunityIcons name="close" size={14} color="#FFFFFF" />
                   </TouchableOpacity>
@@ -308,17 +383,14 @@ export default function Register() {
           </View>
         </View>
 
-        {/* 시작가 섹션 */}
+        {/* 시작가 섹션 (수정 불가) */}
         <View className="py-4">
           <Text className="mb-4 text-base font-bold">시작가</Text>
           <View className="border-b border-gray-200 py-3">
             <TextInput
-              className="text-base"
-              placeholder="가격"
-              placeholderTextColor="#9CA3AF"
+              className="text-base text-gray-400"
               value={startingPrice}
-              onChangeText={setStartingPrice}
-              keyboardType="numeric"
+              editable={false}
               style={INPUT_STYLE}
             />
           </View>
@@ -343,8 +415,25 @@ export default function Register() {
           </TouchableOpacity>
         </View>
 
-        {/* 등록 완료 버튼 */}
-        <View className="py-4">
+        {/* 삭제 / 수정 완료 버튼 */}
+        <View className="flex-row gap-3 py-4">
+          <TouchableOpacity
+            onPress={handleDelete}
+            disabled={isPending}
+            style={{
+              minHeight: LAYOUT.inputMinHeight,
+              borderWidth: 1,
+              borderColor: COLORS.inactive,
+            }}
+            className="flex-1 items-center justify-center rounded-full bg-white py-4">
+            {isDeleting ? (
+              <ActivityIndicator color={COLORS.text} />
+            ) : (
+              <Text className="text-base font-bold" style={{ color: COLORS.text }}>
+                삭제하기
+              </Text>
+            )}
+          </TouchableOpacity>
           <TouchableOpacity
             onPress={handleSubmit}
             disabled={!isFormValid}
@@ -352,11 +441,11 @@ export default function Register() {
               minHeight: LAYOUT.inputMinHeight,
               backgroundColor: isFormValid ? COLORS.active : COLORS.inactive,
             }}
-            className="items-center justify-center rounded-full py-4">
-            {isPending ? (
+            className="flex-1 items-center justify-center rounded-full py-4">
+            {isUpdating ? (
               <ActivityIndicator color="#FFFFFF" />
             ) : (
-              <Text className="text-base font-bold text-white">등록 완료</Text>
+              <Text className="text-base font-bold text-white">수정 완료</Text>
             )}
           </TouchableOpacity>
         </View>
