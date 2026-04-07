@@ -6,12 +6,17 @@ import {
   TouchableOpacity,
   useWindowDimensions,
   ActivityIndicator,
+  TextInput,
+  Alert,
+  Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState, useRef } from 'react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useProductDetailQuery } from '../../hooks/product/useProductDetailQuery';
+import { useBidHistoryQuery } from '../../hooks/bid/useBidHistoryQuery';
+import { usePlaceBidMutation } from '../../hooks/bid/usePlaceBidMutation';
 import { COLORS, LAYOUT } from '../../constants/theme';
 import { formatPrice } from '../../utils/format';
 import useAuthStore from '../../store/useAuthStore';
@@ -41,35 +46,34 @@ function formatEndDate(endTimeStr: string): string {
   return `${month}/${day} ${displayHours}:${minutes} ${period}`;
 }
 
-// 가격 추이 mock 데이터
-const PRICE_HISTORY = [
-  { day: 'DAY1', height: 50 },
-  { day: 'DAY2', height: 60 },
-  { day: 'DAY3', height: 70 },
-  { day: 'DAY4', height: 85 },
-  { day: 'DAY5', height: 100 },
-];
+const MAX_BAR_HEIGHT = 120;
 
-// 입찰 기록 mock 데이터
-const PRICE_OFFER_HISTORY = [
-  { id: '1', name: '박**', amount: 80000, time: '24/11/11 14:27' },
-  { id: '2', name: '이**', amount: 78000, time: '24/11/11 16:35' },
-  { id: '3', name: '김**', amount: 76000, time: '24/11/11 14:27' },
-];
+function formatBidTime(createdAt: string): string {
+  const date = new Date(createdAt);
+  const y = String(date.getFullYear()).slice(2);
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  const h = String(date.getHours()).padStart(2, '0');
+  const min = String(date.getMinutes()).padStart(2, '0');
+  return `${y}/${m}/${d} ${h}:${min}`;
+}
 
 export default function ProductDetail() {
   const { width: screenWidth } = useWindowDimensions();
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [hasPriceOffer, setHasPriceOffer] = useState(false);
-  const [isHighestOfferer, setIsHighestOfferer] = useState(false);
+  const [bidModalVisible, setBidModalVisible] = useState(false);
+  const [bidPrice, setBidPrice] = useState('');
   const scrollViewRef = useRef<ScrollView>(null);
 
   const productId = Number(id) || 0;
   const userId = useAuthStore((state) => state.userId);
   const { data: product, isLoading, isError } = useProductDetailQuery(productId);
+  const { data: bidHistory } = useBidHistoryQuery(productId, { size: 3 });
+  const { data: bidTrend } = useBidHistoryQuery(productId, { size: 10 });
   const { mutate: toggleWish } = useToggleWishMutation();
+  const { mutate: placeBid, isPending: isBidding } = usePlaceBidMutation();
 
   if (isLoading) {
     return (
@@ -96,15 +100,37 @@ export default function ProductDetail() {
     setCurrentImageIndex(index);
   };
 
-  const handlePriceOffer = () => {
-    setHasPriceOffer(true);
-    setIsHighestOfferer(true);
+  const handleOpenBidModal = () => {
+    setBidPrice('');
+    setBidModalVisible(true);
   };
 
-  const handleCancelPriceOffer = () => {
-    setHasPriceOffer(false);
-    setIsHighestOfferer(false);
+  const handlePlaceBid = () => {
+    const price = Number(bidPrice);
+    if (!price || price <= product.current_price) {
+      Alert.alert('입찰 실패', '현재가보다 높은 금액을 입력해주세요.');
+      return;
+    }
+    placeBid(
+      { productId, price },
+      {
+        onSuccess: () => {
+          setBidModalVisible(false);
+          Alert.alert('입찰 완료', '입찰이 성공적으로 등록되었습니다.');
+        },
+        onError: (error) => {
+          Alert.alert('입찰 실패', error.message);
+        },
+      }
+    );
   };
+
+  const bidRecords = bidHistory?.content ?? [];
+
+  // 가격 추이: 입찰 기록을 시간순(오래된 순)으로 정렬하여 바 차트 생성
+  const trendBids = [...(bidTrend?.content ?? [])].reverse();
+  const maxPrice = trendBids.length > 0 ? Math.max(...trendBids.map((b) => b.price)) : 0;
+  const minPrice = trendBids.length > 0 ? Math.min(...trendBids.map((b) => b.price)) : 0;
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50" edges={['top', 'bottom']}>
@@ -197,19 +223,19 @@ export default function ProductDetail() {
         </View>
 
         {/* 입찰 상태 알림 */}
-        {hasPriceOffer && (
+        {bidRecords.length > 0 && !isOwner && (
           <View
             className="mx-4 mb-2 flex-row items-center rounded-xl px-4 py-3"
-            style={{ backgroundColor: isHighestOfferer ? '#E8F5E9' : '#FFF8E1' }}>
+            style={{ backgroundColor: product.is_top_bidder ? '#E8F5E9' : '#FFF8E1' }}>
             <MaterialCommunityIcons
-              name={isHighestOfferer ? 'check-circle' : 'alert-circle-outline'}
+              name={product.is_top_bidder ? 'check-circle' : 'alert-circle-outline'}
               size={20}
-              color={isHighestOfferer ? COLORS.active : '#FFA000'}
+              color={product.is_top_bidder ? COLORS.active : '#FFA000'}
             />
             <Text
               className="ml-2 flex-1 text-sm font-medium"
-              style={{ color: isHighestOfferer ? COLORS.active : '#F57C00' }}>
-              {isHighestOfferer
+              style={{ color: product.is_top_bidder ? COLORS.active : '#F57C00' }}>
+              {product.is_top_bidder
                 ? '안심하세요, 1등을 유지하고 있어요'
                 : '다른 사람이 더 높은 금액을 제시했어요'}
             </Text>
@@ -263,21 +289,35 @@ export default function ProductDetail() {
         {/* 가격 추이 */}
         <View className="bg-white px-4 py-4">
           <Text className="mb-4 text-base font-bold text-gray-900">📈 가격 추이</Text>
-          <View className="flex-row items-end justify-between px-2">
-            {PRICE_HISTORY.map((item, index) => (
-              <View key={index} className="items-center">
-                <View
-                  className="w-12 rounded-t-md"
-                  style={{
-                    height: item.height,
-                    backgroundColor: COLORS.active,
-                    opacity: 0.5 + index * 0.12,
-                  }}
-                />
-                <Text className="mt-2 text-xs text-gray-500">{item.day}</Text>
-              </View>
-            ))}
-          </View>
+          {trendBids.length === 0 ? (
+            <Text className="py-4 text-center text-sm text-gray-400">
+              아직 입찰 기록이 없습니다.
+            </Text>
+          ) : (
+            <View className="flex-row items-end justify-around px-2">
+              {trendBids.map((bid, index) => {
+                const ratio =
+                  maxPrice === minPrice ? 1 : (bid.price - minPrice) / (maxPrice - minPrice);
+                const barHeight = Math.max(30, ratio * MAX_BAR_HEIGHT);
+                const date = new Date(bid.created_at);
+                const label = `${date.getMonth() + 1}/${date.getDate()}`;
+                return (
+                  <View key={bid.bid_id} className="items-center" style={{ flex: 1 }}>
+                    <Text className="mb-1 text-xs text-gray-500">{formatPrice(bid.price)}</Text>
+                    <View
+                      className="w-10 rounded-t-md"
+                      style={{
+                        height: barHeight,
+                        backgroundColor: COLORS.active,
+                        opacity: 0.5 + (index / Math.max(trendBids.length - 1, 1)) * 0.5,
+                      }}
+                    />
+                    <Text className="mt-2 text-xs text-gray-500">{label}</Text>
+                  </View>
+                );
+              })}
+            </View>
+          )}
         </View>
 
         {/* 구분선 */}
@@ -287,28 +327,32 @@ export default function ProductDetail() {
         <View className="bg-white px-4 py-4">
           <View className="mb-2 flex-row items-center justify-between">
             <Text className="text-base font-bold text-gray-900">입찰 기록</Text>
-            <TouchableOpacity className="flex-row items-center">
-              <Text className="text-sm text-gray-500">전체보기</Text>
-              <MaterialCommunityIcons name="chevron-right" size={18} color="#9CA3AF" />
-            </TouchableOpacity>
           </View>
-          <View>
-            {PRICE_OFFER_HISTORY.map((offer, index) => (
-              <View
-                key={offer.id}
-                className={`flex-row items-center justify-between py-4 ${
-                  index !== PRICE_OFFER_HISTORY.length - 1 ? 'border-b border-gray-100' : ''
-                }`}>
-                <View>
-                  <Text className="text-base font-medium text-gray-900">{offer.name}</Text>
-                  <Text className="mt-1 text-xs text-gray-400">{offer.time}</Text>
+          {bidRecords.length === 0 ? (
+            <Text className="py-4 text-center text-sm text-gray-400">
+              아직 입찰 기록이 없습니다.
+            </Text>
+          ) : (
+            <View>
+              {bidRecords.map((bid, index) => (
+                <View
+                  key={bid.bid_id}
+                  className={`flex-row items-center justify-between py-4 ${
+                    index !== bidRecords.length - 1 ? 'border-b border-gray-100' : ''
+                  }`}>
+                  <View>
+                    <Text className="text-base font-medium text-gray-900">{bid.bidder_name}</Text>
+                    <Text className="mt-1 text-xs text-gray-400">
+                      {formatBidTime(bid.created_at)}
+                    </Text>
+                  </View>
+                  <Text className="text-base font-bold" style={{ color: COLORS.active }}>
+                    {formatPrice(bid.price)}원
+                  </Text>
                 </View>
-                <Text className="text-base font-bold" style={{ color: COLORS.active }}>
-                  {formatPrice(offer.amount)}원
-                </Text>
-              </View>
-            ))}
-          </View>
+              ))}
+            </View>
+          )}
         </View>
 
         {/* 하단 여백 */}
@@ -334,28 +378,67 @@ export default function ProductDetail() {
             onPress={() => router.push(`/product/edit/${productId}`)}>
             <Text className="text-base font-semibold text-white">수정하기</Text>
           </TouchableOpacity>
-        ) : hasPriceOffer ? (
-          <>
-            <TouchableOpacity
-              className="flex-1 items-center rounded-full border border-gray-300 py-4"
-              onPress={handleCancelPriceOffer}>
-              <Text className="text-base font-semibold text-gray-600">입찰 취소</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              className="ml-3 flex-1 items-center rounded-full py-4"
-              style={{ backgroundColor: COLORS.active }}>
-              <Text className="text-base font-semibold text-white">추가 입찰하기</Text>
-            </TouchableOpacity>
-          </>
         ) : (
           <TouchableOpacity
             className="flex-1 items-center rounded-full py-4"
             style={{ backgroundColor: COLORS.active }}
-            onPress={handlePriceOffer}>
-            <Text className="text-base font-semibold text-white">입찰하기</Text>
+            onPress={handleOpenBidModal}>
+            <Text className="text-base font-semibold text-white">
+              {product.is_top_bidder ? '추가 입찰하기' : '입찰하기'}
+            </Text>
           </TouchableOpacity>
         )}
       </View>
+
+      {/* 입찰 모달 */}
+      <Modal visible={bidModalVisible} transparent animationType="slide">
+        <View className="flex-1 justify-end bg-black/50">
+          <View className="rounded-t-3xl bg-white px-5 pb-8 pt-6">
+            <View className="mb-4 flex-row items-center justify-between">
+              <Text className="text-lg font-bold text-gray-900">입찰하기</Text>
+              <TouchableOpacity onPress={() => setBidModalVisible(false)}>
+                <MaterialCommunityIcons name="close" size={24} color="#6B7280" />
+              </TouchableOpacity>
+            </View>
+
+            <View className="mb-2 flex-row items-center justify-between">
+              <Text className="text-sm text-gray-500">현재가</Text>
+              <Text className="text-base font-bold" style={{ color: COLORS.active }}>
+                {formatPrice(product.current_price)}원
+              </Text>
+            </View>
+
+            <View className="mb-4">
+              <Text className="mb-2 text-sm text-gray-500">입찰 금액</Text>
+              <TextInput
+                className="rounded-xl border border-gray-200 px-4 py-3 text-base"
+                placeholder="현재가보다 높은 금액을 입력하세요"
+                keyboardType="number-pad"
+                value={bidPrice}
+                onChangeText={setBidPrice}
+              />
+              {bidPrice !== '' && Number(bidPrice) > 0 && (
+                <Text className="mt-1 text-right text-sm text-gray-400">
+                  {formatPrice(Number(bidPrice))}원
+                </Text>
+              )}
+            </View>
+
+            <TouchableOpacity
+              className="items-center rounded-full py-4"
+              style={{
+                backgroundColor: COLORS.active,
+                opacity: isBidding ? 0.6 : 1,
+              }}
+              onPress={handlePlaceBid}
+              disabled={isBidding}>
+              <Text className="text-base font-semibold text-white">
+                {isBidding ? '입찰 중...' : '입찰하기'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }

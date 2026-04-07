@@ -167,3 +167,35 @@ export type ProductUpdateRequest = {
 export type ProductUpdateResponse = ProductDetailResponse;
 
 export type ProductDeleteResponse = ApiResponse<{ product_id: number }>;
+
+// ── Bid ──
+
+export type BidCreateRequest = {
+  price: number;
+};
+
+export type BidCreateResponse = ApiResponse<{
+  bid_id: number;
+  product_id: number;
+  bidder_id: number;
+  price: number;
+  created_at: string;
+}>;
+
+export type BidSummary = {
+  bid_id: number;
+  bidder_name: string;
+  price: number;
+  status: 'ACTIVE' | 'WON';
+  created_at: string;
+};
+
+export type BidListParams = {
+  page?: number;
+  size?: number;
+};
+
+export type BidListResponse = ApiResponse<{
+  content: BidSummary[];
+  has_next: boolean;
+}>;
