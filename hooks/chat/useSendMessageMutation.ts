@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { sendMessageApi } from '../../api/chat';
-import { ChatMessageSendResponse } from '../../api/types';
-import { useAccessToken } from '../../store/useAuthStore';
+import { sendMessageApi } from '@/api/chat';
+import { ChatMessageSendResponse } from '@/api/types';
+import { useAccessToken } from '@/store/useAuthStore';
 
 type SendMessageParams = {
   chatId: number;

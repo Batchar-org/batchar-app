@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { getProductsApi } from '../../api/product';
-import { ProductListParams } from '../../api/types';
-import useAuthStore, { useIsLoggedIn } from '../../store/useAuthStore';
+import { getProductsApi } from '@/api/product';
+import { ProductListParams } from '@/api/types';
+import useAuthStore, { useIsLoggedIn } from '@/store/useAuthStore';
 
 export function useProductsQuery(params: ProductListParams = {}) {
   const isLoggedIn = useIsLoggedIn();

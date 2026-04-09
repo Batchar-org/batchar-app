@@ -1,9 +1,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { deleteProductApi } from '@/api/product';
+import { closeProductApi } from '@/api/product';
 import { useAccessToken } from '@/store/useAuthStore';
 
-export function useDeleteProductMutation() {
+export function useCloseProductMutation() {
   const accessToken = useAccessToken();
   const queryClient = useQueryClient();
 
@@ -12,10 +12,12 @@ export function useDeleteProductMutation() {
       if (!accessToken) {
         throw new Error('로그인이 필요합니다.');
       }
-      return deleteProductApi(productId, accessToken);
+      return closeProductApi(productId, accessToken);
     },
-    onSuccess: () => {
+    onSuccess: (_data, productId) => {
+      queryClient.invalidateQueries({ queryKey: ['product', productId] });
       queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['bidHistory', productId] });
     },
   });
 }

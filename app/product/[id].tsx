@@ -14,13 +14,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState, useRef } from 'react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useProductDetailQuery } from '../../hooks/product/useProductDetailQuery';
-import { useBidHistoryQuery } from '../../hooks/bid/useBidHistoryQuery';
-import { usePlaceBidMutation } from '../../hooks/bid/usePlaceBidMutation';
-import { COLORS, LAYOUT } from '../../constants/theme';
-import { formatPrice } from '../../utils/format';
-import useAuthStore from '../../store/useAuthStore';
-import { useToggleWishMutation } from '../../hooks/wish/useToggleWishMutation';
+import { useProductDetailQuery } from '@/hooks/product/useProductDetailQuery';
+import { useBidHistoryQuery } from '@/hooks/bid/useBidHistoryQuery';
+import { usePlaceBidMutation } from '@/hooks/bid/usePlaceBidMutation';
+import { COLORS, LAYOUT } from '@/constants/theme';
+import { formatPrice } from '@/utils/format';
+import useAuthStore from '@/store/useAuthStore';
+import { useToggleWishMutation } from '@/hooks/wish/useToggleWishMutation';
+import { useCloseProductMutation } from '@/hooks/product/useCloseProductMutation';
 
 function formatRemainingTime(endTimeStr: string): string {
   const end = new Date(endTimeStr);
@@ -74,6 +75,7 @@ export default function ProductDetail() {
   const { data: bidTrend } = useBidHistoryQuery(productId, { size: 10 });
   const { mutate: toggleWish } = useToggleWishMutation();
   const { mutate: placeBid, isPending: isBidding } = usePlaceBidMutation();
+  const { mutate: closeProduct, isPending: isClosing } = useCloseProductMutation();
 
   if (isLoading) {
     return (
@@ -125,21 +127,53 @@ export default function ProductDetail() {
       Alert.alert('입찰 실패', '현재가보다 높은 금액을 입력해주세요.');
       return;
     }
-    placeBid(
-      { productId, price },
+    Alert.alert('입찰 확인', '입찰 후에는 취소가 불가능합니다. 입찰하시겠습니까?', [
+      { text: '취소', style: 'cancel' },
       {
-        onSuccess: () => {
-          setBidModalVisible(false);
-          Alert.alert('입찰 완료', '입찰이 성공적으로 등록되었습니다.');
+        text: '입찰하기',
+        onPress: () => {
+          placeBid(
+            { productId, price },
+            {
+              onSuccess: () => {
+                setBidModalVisible(false);
+                Alert.alert('입찰 완료', '입찰이 성공적으로 등록되었습니다.');
+              },
+              onError: (error) => {
+                Alert.alert('입찰 실패', error.message);
+              },
+            }
+          );
         },
-        onError: (error) => {
-          Alert.alert('입찰 실패', error.message);
-        },
-      }
-    );
+      },
+    ]);
   };
 
+  const isAuctionActive = product.status === 'ON_SALE';
   const bidRecords = bidHistory?.content ?? [];
+
+  const handleAwardAuction = () => {
+    Alert.alert(
+      '낙찰 확인',
+      `최고가 입찰자(${bidRecords[0]?.bidder_name})에게 낙찰됩니다. 진행하시겠습니까?`,
+      [
+        { text: '취소', style: 'cancel' },
+        {
+          text: '낙찰하기',
+          onPress: () => {
+            closeProduct(productId, {
+              onSuccess: () => {
+                Alert.alert('낙찰 완료', '낙찰이 완료되었습니다.');
+              },
+              onError: (error) => {
+                Alert.alert('낙찰 실패', error.message);
+              },
+            });
+          },
+        },
+      ]
+    );
+  };
 
   // 가격 추이: 입찰 기록을 시간순(오래된 순)으로 정렬하여 바 차트 생성
   const trendBids = [...(bidTrend?.content ?? [])].reverse();
@@ -306,7 +340,7 @@ export default function ProductDetail() {
 
         {/* 가격 추이 */}
         <View className="bg-white px-4 py-4">
-          <Text className="mb-4 text-base font-bold text-gray-900">📈 가격 추이</Text>
+          <Text className="mb-4 text-base font-bold text-gray-900">가격 추이</Text>
           {trendBids.length === 0 ? (
             <Text className="py-4 text-center text-sm text-gray-400">
               아직 입찰 기록이 없습니다.
@@ -406,12 +440,28 @@ export default function ProductDetail() {
         </TouchableOpacity>
 
         {isOwner ? (
-          <TouchableOpacity
-            className="flex-1 items-center rounded-full py-4"
-            style={{ backgroundColor: COLORS.active }}
-            onPress={() => router.push(`/product/edit/${productId}`)}>
-            <Text className="text-base font-semibold text-white">수정하기</Text>
-          </TouchableOpacity>
+          <View className="flex-1 flex-row">
+            {isAuctionActive && bidRecords.length > 0 && (
+              <TouchableOpacity
+                className="mr-2 flex-1 items-center rounded-full py-4"
+                style={{
+                  backgroundColor: '#EF4444',
+                  opacity: isClosing ? 0.6 : 1,
+                }}
+                onPress={handleAwardAuction}
+                disabled={isClosing}>
+                <Text className="text-base font-semibold text-white">
+                  {isClosing ? '처리 중...' : '낙찰하기'}
+                </Text>
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity
+              className="flex-1 items-center rounded-full py-4"
+              style={{ backgroundColor: COLORS.active }}
+              onPress={() => router.push(`/product/edit/${productId}`)}>
+              <Text className="text-base font-semibold text-white">수정하기</Text>
+            </TouchableOpacity>
+          </View>
         ) : (
           <TouchableOpacity
             className="flex-1 items-center rounded-full py-4"

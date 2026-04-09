@@ -2,12 +2,12 @@ import { View, Text, FlatList, TouchableOpacity, ActivityIndicator } from 'react
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import TabBar from '../components/layout/TabBar';
-import WishlistProduct from '../components/product/WishlistProduct';
-import { useWishlistQuery } from '../hooks/wish/useWishlistQuery';
-import { useToggleWishMutation } from '../hooks/wish/useToggleWishMutation';
-import { COLORS } from '../constants/theme';
-import type { WishSummary } from '../api/types';
+import TabBar from '@/components/layout/TabBar';
+import WishlistProduct from '@/components/product/WishlistProduct';
+import { useWishlistQuery } from '@/hooks/wish/useWishlistQuery';
+import { useToggleWishMutation } from '@/hooks/wish/useToggleWishMutation';
+import { COLORS } from '@/constants/theme';
+import type { WishSummary } from '@/api/types';
 
 export default function Wishlist() {
   const router = useRouter();

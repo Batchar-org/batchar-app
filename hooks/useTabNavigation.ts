@@ -3,7 +3,7 @@
 import { useCallback, useEffect } from 'react';
 import { useRouter, usePathname } from 'expo-router';
 import { useActiveTab, useTabActions } from '@/store/useTabStore';
-import type { TabId } from '../types/tab';
+import type { TabId } from '@/types/tab';
 
 // 경로 → 탭 ID 매핑
 const ROUTE_TO_TAB: Record<string, TabId> = {

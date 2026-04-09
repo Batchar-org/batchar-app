@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Modal, Pressable, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { COLORS, INPUT_STYLE, LAYOUT } from '../../constants/theme';
+import { COLORS, INPUT_STYLE, LAYOUT } from '@/constants/theme';
 
 // 백엔드 명세 기준 6자리 코드를 입력받습니다.
 const CODE_LENGTH = 6;

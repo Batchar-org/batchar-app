@@ -2,6 +2,7 @@ import * as FileSystem from 'expo-file-system/legacy';
 import { ImagePickerAsset } from 'expo-image-picker';
 
 import {
+  ProductCloseResponse,
   ProductCreateRequest,
   ProductCreateResponse,
   ProductDeleteResponse,
@@ -190,6 +191,16 @@ export async function updateProductApi(
   }
 
   return data as ProductUpdateResponse;
+}
+
+export async function closeProductApi(
+  productId: number,
+  accessToken: string
+): Promise<ProductCloseResponse> {
+  return apiFetch<ProductCloseResponse>(`/api/products/${productId}/close`, {
+    method: 'POST',
+    accessToken,
+  });
 }
 
 export async function deleteProductApi(

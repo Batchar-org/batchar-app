@@ -1,6 +1,6 @@
 import { View, TextInput, TouchableOpacity } from 'react-native';
 import { Feather } from '@expo/vector-icons';
-import { COLORS } from '../../constants/theme';
+import { COLORS } from '@/constants/theme';
 
 export default function SearchBar() {
   return (

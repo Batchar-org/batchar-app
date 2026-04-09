@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { getBidHistoryApi } from '../../api/bid';
-import { BidListParams } from '../../api/types';
-import useAuthStore, { useIsLoggedIn } from '../../store/useAuthStore';
+import { getBidHistoryApi } from '@/api/bid';
+import { BidListParams } from '@/api/types';
+import useAuthStore, { useIsLoggedIn } from '@/store/useAuthStore';
 
 export function useBidHistoryQuery(productId: number, params: BidListParams = {}) {
   const isLoggedIn = useIsLoggedIn();

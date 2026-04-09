@@ -1,9 +1,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ImagePickerAsset } from 'expo-image-picker';
 
-import { updateProductApi } from '../../api/product';
-import { ProductUpdateRequest } from '../../api/types';
-import { useAccessToken } from '../../store/useAuthStore';
+import { updateProductApi } from '@/api/product';
+import { ProductUpdateRequest } from '@/api/types';
+import { useAccessToken } from '@/store/useAuthStore';
 
 type UpdateProductParams = {
   productId: number;

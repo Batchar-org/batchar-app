@@ -1,7 +1,7 @@
 import { View, Text, Image, TouchableOpacity, Platform } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { COLORS, SHADOWS } from '../../constants/theme';
-import { formatPrice } from '../../utils/format';
+import { COLORS, SHADOWS } from '@/constants/theme';
+import { formatPrice } from '@/utils/format';
 
 interface ProductProps {
   id: string;
@@ -137,12 +137,10 @@ export default function Product({
       </View>
 
       {/* 참여자 수 */}
-      {participants > 0 && (
-        <View className="mt-2 flex-row items-center pl-1">
-          <MaterialCommunityIcons name="account-outline" size={14} color={COLORS.textMuted} />
-          <Text className="ml-1 text-xs text-gray-500">{participants}명 참여중</Text>
-        </View>
-      )}
+      <View className="mt-2 flex-row items-center pl-1">
+        <MaterialCommunityIcons name="account-outline" size={14} color={COLORS.textMuted} />
+        <Text className="ml-1 text-xs text-gray-500">{participants}명 참여중</Text>
+      </View>
     </TouchableOpacity>
   );
 }

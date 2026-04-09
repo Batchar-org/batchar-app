@@ -168,6 +168,8 @@ export type ProductUpdateResponse = ProductDetailResponse;
 
 export type ProductDeleteResponse = ApiResponse<{ product_id: number }>;
 
+export type ProductCloseResponse = ApiResponse<void>;
+
 // ── Bid ──
 
 export type BidCreateRequest = {

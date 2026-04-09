@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { getWishlistApi } from '../../api/wish';
-import { WishListParams } from '../../api/types';
-import { useAccessToken, useIsLoggedIn } from '../../store/useAuthStore';
+import { getWishlistApi } from '@/api/wish';
+import { WishListParams } from '@/api/types';
+import { useAccessToken, useIsLoggedIn } from '@/store/useAuthStore';
 
 export function useWishlistQuery(params: WishListParams = {}) {
   const accessToken = useAccessToken();

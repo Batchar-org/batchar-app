@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { getChatMessagesApi } from '../../api/chat';
-import useAuthStore, { useIsLoggedIn } from '../../store/useAuthStore';
+import { getChatMessagesApi } from '@/api/chat';
+import useAuthStore, { useIsLoggedIn } from '@/store/useAuthStore';
 
 export function useChatMessagesQuery(chatId: number) {
   const isLoggedIn = useIsLoggedIn();
