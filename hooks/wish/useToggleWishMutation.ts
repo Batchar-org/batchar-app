@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { addWishApi, removeWishApi } from '../../api/wish';
-import { ProductDetailResponse } from '../../api/types';
-import { useAccessToken } from '../../store/useAuthStore';
+import { addWishApi, removeWishApi } from '@/api/wish';
+import { ProductDetailResponse } from '@/api/types';
+import { useAccessToken } from '@/store/useAuthStore';
 
 type ToggleWishParams = {
   productId: number;

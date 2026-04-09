@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
-import { loginApi } from '../../api/auth';
-import { setRefreshToken, setStoredUserId } from '../../lib/secureStore';
-import { useAuthActions } from '../../store/useAuthStore';
+import { loginApi } from '@/api/auth';
+import { setRefreshToken, setStoredUserId } from '@/lib/secureStore';
+import { useAuthActions } from '@/store/useAuthStore';
 
 function readStringCandidate(source: Record<string, unknown>, keys: string[]) {
   for (const key of keys) {

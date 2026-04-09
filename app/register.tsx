@@ -11,12 +11,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { COLORS, INPUT_STYLE } from '../constants/theme';
-import EmailVerifyModal from '../components/modals/EmailVerifyModal';
-import { useCheckNicknameDuplicateMutation } from '../hooks/auth/useCheckNicknameDuplicateMutation';
-import { useSendEmailCodeMutation } from '../hooks/auth/useSendEmailCodeMutation';
-import { useSignupMutation } from '../hooks/auth/useSignupMutation';
-import { useVerifyEmailCodeMutation } from '../hooks/auth/useVerifyEmailCodeMutation';
+import { COLORS, INPUT_STYLE } from '@/constants/theme';
+import EmailVerifyModal from '@/components/modals/EmailVerifyModal';
+import { useCheckNicknameDuplicateMutation } from '@/hooks/auth/useCheckNicknameDuplicateMutation';
+import { useSendEmailCodeMutation } from '@/hooks/auth/useSendEmailCodeMutation';
+import { useSignupMutation } from '@/hooks/auth/useSignupMutation';
+import { useVerifyEmailCodeMutation } from '@/hooks/auth/useVerifyEmailCodeMutation';
 
 const EMAIL_VERIFY_EXPIRE_SECONDS = 10 * 60;
 

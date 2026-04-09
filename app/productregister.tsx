@@ -17,10 +17,10 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { useRouter } from 'expo-router';
-import TabBar from '../components/layout/TabBar';
-import { COLORS, INPUT_STYLE, LAYOUT } from '../constants/theme';
-import { useCreateProductMutation } from '../hooks/product/useCreateProductMutation';
-import { useIsLoggedIn } from '../store/useAuthStore';
+import TabBar from '@/components/layout/TabBar';
+import { COLORS, INPUT_STYLE, LAYOUT } from '@/constants/theme';
+import { useCreateProductMutation } from '@/hooks/product/useCreateProductMutation';
+import { useIsLoggedIn } from '@/store/useAuthStore';
 
 const MAX_DESCRIPTION_LENGTH = 2000;
 const MAX_IMAGE_COUNT = 10;

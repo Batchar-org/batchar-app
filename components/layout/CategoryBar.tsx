@@ -1,6 +1,6 @@
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
-import { COLORS } from '../../constants/theme';
-import { ProductViewType } from '../../api/types';
+import { COLORS } from '@/constants/theme';
+import { ProductViewType } from '@/api/types';
 
 interface CategoryBarProps {
   activeCategory: ProductViewType;

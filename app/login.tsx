@@ -11,8 +11,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { COLORS, INPUT_STYLE, LAYOUT } from '../constants/theme';
-import { useLoginMutation } from '../hooks/auth/useLoginMutation';
+import { COLORS, INPUT_STYLE, LAYOUT } from '@/constants/theme';
+import { useLoginMutation } from '@/hooks/auth/useLoginMutation';
 
 export default function LoginPage() {
   const router = useRouter();

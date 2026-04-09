@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { devtools, combine } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
-import type { TabId } from '../types/tab';
+import type { TabId } from '@/types/tab';
 
 const initialState = {
   activeTab: 'home' as TabId,

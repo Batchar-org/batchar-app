@@ -12,11 +12,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState, useRef, useEffect } from 'react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useChatMessagesQuery } from '../../hooks/chat/useChatMessagesQuery';
-import { useSendMessageMutation } from '../../hooks/chat/useSendMessageMutation';
-import { useChatListQuery } from '../../hooks/chat/useChatListQuery';
-import { COLORS, ICON_SIZES } from '../../constants/theme';
-import useAuthStore from '../../store/useAuthStore';
+import { useChatMessagesQuery } from '@/hooks/chat/useChatMessagesQuery';
+import { useSendMessageMutation } from '@/hooks/chat/useSendMessageMutation';
+import { useChatListQuery } from '@/hooks/chat/useChatListQuery';
+import { COLORS, ICON_SIZES } from '@/constants/theme';
+import useAuthStore from '@/store/useAuthStore';
 
 function formatMessageTime(createdAt: string): string {
   const date = new Date(createdAt);

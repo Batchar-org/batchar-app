@@ -1,10 +1,10 @@
 import { View, Text, ScrollView, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import TabBar from '../../components/layout/TabBar';
+import TabBar from '@/components/layout/TabBar';
 import { useRouter } from 'expo-router';
-import { useChatListQuery } from '../../hooks/chat/useChatListQuery';
-import { COLORS } from '../../constants/theme';
+import { useChatListQuery } from '@/hooks/chat/useChatListQuery';
+import { COLORS } from '@/constants/theme';
 
 function formatChatDate(updatedAt: string): string {
   const date = new Date(updatedAt);

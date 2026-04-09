@@ -1,14 +1,14 @@
 import { create } from 'zustand';
 import { combine, devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
-import { logoutApi, refreshApi } from '../api/auth';
+import { logoutApi, refreshApi } from '@/api/auth';
 import {
   getRefreshToken,
   getStoredUserId,
   removeRefreshToken,
   removeStoredUserId,
   setRefreshToken,
-} from '../lib/secureStore';
+} from '@/lib/secureStore';
 
 type AuthStatus = 'idle' | 'authenticated' | 'unauthenticated';
 

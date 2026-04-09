@@ -1,7 +1,7 @@
 import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { COLORS, SHADOWS } from '../../constants/theme';
-import { formatPrice } from '../../utils/format';
+import { COLORS, SHADOWS } from '@/constants/theme';
+import { formatPrice } from '@/utils/format';
 
 interface WishlistProductProps {
   productId: number;

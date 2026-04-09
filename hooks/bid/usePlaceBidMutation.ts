@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { placeBidApi } from '../../api/bid';
-import { BidCreateResponse, ProductDetailResponse } from '../../api/types';
-import { useAccessToken } from '../../store/useAuthStore';
+import { placeBidApi } from '@/api/bid';
+import { BidCreateResponse, ProductDetailResponse } from '@/api/types';
+import { useAccessToken } from '@/store/useAuthStore';
 
 type PlaceBidParams = {
   productId: number;

@@ -1,9 +1,9 @@
 import { useMutation } from '@tanstack/react-query';
 import { ImagePickerAsset } from 'expo-image-picker';
 
-import { createProductApi } from '../../api/product';
-import { ProductCreateRequest } from '../../api/types';
-import { useAccessToken } from '../../store/useAuthStore';
+import { createProductApi } from '@/api/product';
+import { ProductCreateRequest } from '@/api/types';
+import { useAccessToken } from '@/store/useAuthStore';
 
 type CreateProductParams = {
   request: ProductCreateRequest;

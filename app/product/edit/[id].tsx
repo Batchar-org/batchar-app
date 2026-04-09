@@ -17,12 +17,12 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import TabBar from '../../../components/layout/TabBar';
-import { COLORS, INPUT_STYLE, LAYOUT } from '../../../constants/theme';
-import { useUpdateProductMutation } from '../../../hooks/product/useUpdateProductMutation';
-import { useDeleteProductMutation } from '../../../hooks/product/useDeleteProductMutation';
-import { useProductDetailQuery } from '../../../hooks/product/useProductDetailQuery';
-import { ProductMediaInfo } from '../../../api/types';
+import TabBar from '@/components/layout/TabBar';
+import { COLORS, INPUT_STYLE, LAYOUT } from '@/constants/theme';
+import { useUpdateProductMutation } from '@/hooks/product/useUpdateProductMutation';
+import { useDeleteProductMutation } from '@/hooks/product/useDeleteProductMutation';
+import { useProductDetailQuery } from '@/hooks/product/useProductDetailQuery';
+import { ProductMediaInfo } from '@/api/types';
 
 const MAX_DESCRIPTION_LENGTH = 2000;
 const MAX_IMAGE_COUNT = 10;
@@ -245,26 +245,45 @@ export default function ProductEdit() {
     );
   };
 
-  const handleDelete = () => {
-    Alert.alert('상품 삭제', '정말로 이 상품을 삭제하시겠습니까?', [
-      { text: '취소', style: 'cancel' },
-      {
-        text: '삭제',
-        style: 'destructive',
-        onPress: () => {
-          deleteProduct(productId, {
-            onSuccess: () => {
-              Alert.alert('삭제 완료', '상품이 삭제되었습니다.', [
-                { text: '확인', onPress: () => router.replace('/') },
-              ]);
-            },
-            onError: (error) => {
-              Alert.alert('삭제 실패', error.message);
-            },
-          });
-        },
+  const performDelete = () => {
+    deleteProduct(productId, {
+      onSuccess: () => {
+        Alert.alert('삭제 완료', '상품이 삭제되었습니다.', [
+          { text: '확인', onPress: () => router.replace('/') },
+        ]);
       },
-    ]);
+      onError: (error) => {
+        Alert.alert('삭제 실패', error.message);
+      },
+    });
+  };
+
+  const handleDelete = () => {
+    const hasBids = product && product.bid_count > 0;
+
+    if (hasBids) {
+      Alert.alert(
+        '상품 삭제',
+        `현재 ${product.bid_count}명의 입찰자가 있습니다. 정말로 삭제하시겠습니까?`,
+        [
+          { text: '취소', style: 'cancel' },
+          {
+            text: '삭제',
+            style: 'destructive',
+            onPress: performDelete,
+          },
+        ]
+      );
+    } else {
+      Alert.alert('상품 삭제', '정말로 이 상품을 삭제하시겠습니까?', [
+        { text: '취소', style: 'cancel' },
+        {
+          text: '삭제',
+          style: 'destructive',
+          onPress: performDelete,
+        },
+      ]);
+    }
   };
 
   if (isLoading) {

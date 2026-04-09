@@ -2,11 +2,11 @@ import { View, Text, ActivityIndicator } from 'react-native';
 import { useMemo } from 'react';
 import { useRouter } from 'expo-router';
 import Product from './Product';
-import { useProductsQuery } from '../../hooks/product/useProductsQuery';
-import { useWishlistQuery } from '../../hooks/wish/useWishlistQuery';
-import { useToggleWishMutation } from '../../hooks/wish/useToggleWishMutation';
-import { COLORS } from '../../constants/theme';
-import { ProductViewType } from '../../api/types';
+import { useProductsQuery } from '@/hooks/product/useProductsQuery';
+import { useWishlistQuery } from '@/hooks/wish/useWishlistQuery';
+import { useToggleWishMutation } from '@/hooks/wish/useToggleWishMutation';
+import { COLORS } from '@/constants/theme';
+import { ProductViewType } from '@/api/types';
 
 interface ProductListProps {
   viewType?: ProductViewType;
