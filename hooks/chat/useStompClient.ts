@@ -32,7 +32,10 @@ export function useStompClient({ chatId, onMessageReceived }: UseStompClientOpti
     const wsUrl = getWebSocketUrl();
 
     const client = new Client({
-      webSocketFactory: () => new WebSocket(wsUrl) as any,
+      webSocketFactory: () =>
+        new WebSocket(wsUrl, [], {
+          headers: { 'User-Agent': 'BatcharApp/1.0' },
+        }) as any,
       connectHeaders: {
         Authorization: `Bearer ${token}`,
       },
