@@ -267,7 +267,10 @@ export default function ChatDetail() {
               returnKeyType="send"
             />
           </View>
-          <TouchableOpacity className="ml-2 p-1" onPress={handleSend}>
+          <TouchableOpacity
+            className="ml-2 p-1"
+            onPress={handleSend}
+            disabled={isSending || !messageText.trim()}>
             <MaterialCommunityIcons
               name="arrow-up-circle"
               size={ICON_SIZES.lg}
