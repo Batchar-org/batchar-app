@@ -2,6 +2,7 @@ import { Platform, View, Text, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTabNavigation } from '@/hooks/useTabNavigation';
+import { useUnreadCount } from '@/hooks/chat/useUnreadCount';
 import type { TabId } from '@/types/tab';
 import { COLORS, ICON_SIZES, LAYOUT } from '@/constants/theme';
 
@@ -22,6 +23,7 @@ const TABS: Tab[] = [
 export default function TabBar() {
   const { activeTab, handleTabPress } = useTabNavigation();
   const insets = useSafeAreaInsets();
+  const unreadCount = useUnreadCount();
 
   return (
     <View
@@ -41,11 +43,22 @@ export default function TabBar() {
           activeOpacity={0.8}
           style={{ minHeight: LAYOUT.touchTargetMinHeight }}
           className="flex-1 items-center justify-center py-1">
-          <MaterialCommunityIcons
-            name={tab.icon}
-            size={ICON_SIZES.lg}
-            color={activeTab === tab.id ? COLORS.active : COLORS.inactive}
-          />
+          <View className="relative">
+            <MaterialCommunityIcons
+              name={tab.icon}
+              size={ICON_SIZES.lg}
+              color={activeTab === tab.id ? COLORS.active : COLORS.inactive}
+            />
+            {tab.id === 'message' && unreadCount > 0 && (
+              <View
+                className="absolute -right-2.5 -top-1.5 items-center justify-center rounded-full bg-red-500"
+                style={{ minWidth: 16, height: 16, paddingHorizontal: 3 }}>
+                <Text className="text-[10px] font-bold text-white">
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </Text>
+              </View>
+            )}
+          </View>
           <Text
             className="mt-1 text-xs"
             style={{
