@@ -38,10 +38,12 @@ export function useStompClient({ chatId, onMessageReceived }: UseStompClientOpti
     const wsUrl = getWebSocketUrl();
 
     const client = new Client({
-      webSocketFactory: () =>
-        new WebSocket(wsUrl, [], {
+      webSocketFactory: () => {
+        // @ts-ignore — React Native WebSocket은 3번째 인자(headers)를 지원하지만 TS 타입에 미정의
+        return new WebSocket(wsUrl, [], {
           headers: { 'User-Agent': 'BatcharApp/1.0' },
-        }) as any,
+        });
+      },
       connectHeaders: {
         Authorization: `Bearer ${accessToken}`,
       },
