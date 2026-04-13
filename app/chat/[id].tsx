@@ -10,11 +10,12 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useChatMessagesQuery } from '@/hooks/chat/useChatMessagesQuery';
 import { useSendMessageMutation } from '@/hooks/chat/useSendMessageMutation';
 import { useChatListQuery } from '@/hooks/chat/useChatListQuery';
+import { useStompClient } from '@/hooks/chat/useStompClient';
 import { COLORS, ICON_SIZES } from '@/constants/theme';
 import useAuthStore from '@/store/useAuthStore';
 
@@ -32,6 +33,20 @@ function formatDateSeparator(createdAt: string): string {
   return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
 }
 
+function DefaultAvatar({ size = 36, color = COLORS.textMuted }: { size?: number; color?: string }) {
+  return (
+    <View
+      className="items-center justify-center rounded-full"
+      style={{
+        width: size,
+        height: size,
+        backgroundColor: COLORS.border,
+      }}>
+      <MaterialCommunityIcons name="account" size={size * 0.6} color={color} />
+    </View>
+  );
+}
+
 export default function ChatDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
@@ -42,9 +57,18 @@ export default function ChatDetail() {
   const userId = useAuthStore((state) => state.userId);
   const { data: chatList } = useChatListQuery();
   const { data: messages, isLoading } = useChatMessagesQuery(chatId);
-  const { mutate: sendMessage, isPending: isSending } = useSendMessageMutation();
 
+  const { mutate: sendMessageHttp, isPending: isSending } = useSendMessageMutation();
   const chatInfo = chatList?.find((c) => c.chat_id === chatId);
+
+  const onMessageReceived = useCallback(() => {
+    setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 100);
+  }, []);
+
+  const { sendMessage: stompSend } = useStompClient({
+    chatId,
+    onMessageReceived,
+  });
 
   useEffect(() => {
     if (messages && messages.length > 0) {
@@ -55,15 +79,23 @@ export default function ChatDetail() {
   const handleSend = () => {
     const trimmed = messageText.trim();
     if (!trimmed || isSending) return;
-    sendMessage(
-      { chatId, message: trimmed },
-      {
-        onSuccess: () => {
-          setMessageText('');
-          setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 200);
-        },
-      }
-    );
+
+    // WebSocket 전송 시도, 실패 시 HTTP API 폴백
+    const sent = stompSend(trimmed);
+    if (sent) {
+      setMessageText('');
+      setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 200);
+    } else {
+      sendMessageHttp(
+        { chatId, message: trimmed },
+        {
+          onSuccess: () => {
+            setMessageText('');
+            setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 200);
+          },
+        }
+      );
+    }
   };
 
   if (isLoading) {
@@ -85,7 +117,6 @@ export default function ChatDetail() {
     );
   }
 
-  // 날짜별 그룹핑을 위해 이전 메시지와 날짜 비교
   const getDateKey = (createdAt: string) => new Date(createdAt).toDateString();
 
   return (
@@ -142,6 +173,18 @@ export default function ChatDetail() {
                 index === 0 ||
                 getDateKey(msg.created_at) !== getDateKey(messages[index - 1].created_at);
 
+              // 상대방 메시지: 연속 메시지면 아바타 숨김
+              const showPartnerAvatar =
+                !isMe && (index === 0 || messages[index - 1].sender_id === userId || showDate);
+
+              // 같은 발신자 + 같은 시간이면 마지막 메시지에만 시간 표시
+              const nextMsg = messages[index + 1];
+              const showTime =
+                !nextMsg ||
+                nextMsg.sender_id !== msg.sender_id ||
+                formatMessageTime(nextMsg.created_at) !== formatMessageTime(msg.created_at) ||
+                getDateKey(nextMsg.created_at) !== getDateKey(msg.created_at);
+
               return (
                 <View key={msg.message_id}>
                   {/* 날짜 구분선 */}
@@ -156,26 +199,46 @@ export default function ChatDetail() {
                   )}
 
                   {/* 메시지 버블 */}
-                  <View className={`mb-2 flex-row ${isMe ? 'justify-end' : 'justify-start'}`}>
-                    <View className={`flex-row items-end ${isMe ? 'flex-row-reverse' : ''}`}>
+                  <View
+                    className={`${showTime ? 'mb-3' : 'mb-1'} flex-row ${isMe ? 'justify-end' : 'justify-start'}`}>
+                    {/* 상대방 아바타 */}
+                    {!isMe && (
+                      <View className="mr-2 self-start" style={{ width: 40 }}>
+                        {showPartnerAvatar ? <DefaultAvatar size={40} /> : null}
+                      </View>
+                    )}
+
+                    <View className={`max-w-[70%] ${isMe ? 'items-end' : 'items-start'}`}>
+                      {/* 말풍선 */}
                       <View
-                        className={`max-w-[75%] rounded-2xl px-4 py-2.5 ${
-                          isMe ? 'rounded-br-sm' : 'rounded-bl-sm'
-                        }`}
+                        className="rounded-2xl px-4 py-2.5"
                         style={{
                           backgroundColor: isMe ? COLORS.primary : COLORS.backgroundSecondary,
+                          borderBottomRightRadius: isMe ? 4 : 16,
+                          borderBottomLeftRadius: isMe ? 16 : 4,
                         }}>
                         <Text
-                          className="text-sm leading-5"
+                          className="text-[15px] leading-6"
                           style={{ color: isMe ? '#FFFFFF' : COLORS.text }}>
                           {msg.content}
                         </Text>
                       </View>
-                      <Text
-                        className={`text-xs ${isMe ? 'mr-1.5' : 'ml-1.5'}`}
-                        style={{ color: COLORS.textMuted }}>
-                        {formatMessageTime(msg.created_at)}
-                      </Text>
+                      {/* 읽음 표시 + 시간 */}
+                      {showTime && (
+                        <View
+                          className={`mt-1 flex-row items-center ${isMe ? 'flex-row-reverse' : ''}`}>
+                          <Text className="text-xs" style={{ color: COLORS.textMuted }}>
+                            {formatMessageTime(msg.created_at)}
+                          </Text>
+                          {isMe && !msg.is_read && (
+                            <Text
+                              className="mr-1 text-xs font-semibold"
+                              style={{ color: COLORS.primary }}>
+                              1
+                            </Text>
+                          )}
+                        </View>
+                      )}
                     </View>
                   </View>
                 </View>
@@ -204,7 +267,7 @@ export default function ChatDetail() {
               returnKeyType="send"
             />
           </View>
-          <TouchableOpacity className="ml-2 p-1" onPress={handleSend} disabled={isSending}>
+          <TouchableOpacity className="ml-2 p-1" onPress={handleSend}>
             <MaterialCommunityIcons
               name="arrow-up-circle"
               size={ICON_SIZES.lg}
