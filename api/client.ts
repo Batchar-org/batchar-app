@@ -18,7 +18,9 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): 
   // 중복 슬래시로 잘못된 URL이 만들어지지 않도록 정규화합니다.
   const normalizedBaseUrl = BASE_URL.replace(/\/+$/, '');
 
-  headers.set('Content-Type', 'application/json');
+  if (options.body) {
+    headers.set('Content-Type', 'application/json');
+  }
   headers.set('Accept', 'application/json');
 
   if (options.accessToken) {
