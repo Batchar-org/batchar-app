@@ -4,7 +4,7 @@ import 'text-encoding';
 import { useQueryClient } from '@tanstack/react-query';
 
 import { ChatMessage } from '@/api/types';
-import useAuthStore from '@/store/useAuthStore';
+import { useAccessToken } from '@/store/useAuthStore';
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL?.trim() ?? '';
 
@@ -21,13 +21,19 @@ type UseStompClientOptions = {
 
 export function useStompClient({ chatId, onMessageReceived }: UseStompClientOptions) {
   const clientRef = useRef<Client | null>(null);
+  const onMessageReceivedRef = useRef(onMessageReceived);
   const [connected, setConnected] = useState(false);
   const queryClient = useQueryClient();
+  const accessToken = useAccessToken();
+
+  // 콜백 ref 최신화 (STOMP 재연결 방지)
+  useEffect(() => {
+    onMessageReceivedRef.current = onMessageReceived;
+  }, [onMessageReceived]);
 
   // WebSocket STOMP 연결 시도
   useEffect(() => {
-    const token = useAuthStore.getState().accessToken;
-    if (!token || chatId <= 0) return;
+    if (!accessToken || chatId <= 0) return;
 
     const wsUrl = getWebSocketUrl();
 
@@ -37,9 +43,9 @@ export function useStompClient({ chatId, onMessageReceived }: UseStompClientOpti
           headers: { 'User-Agent': 'BatcharApp/1.0' },
         }) as any,
       connectHeaders: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${accessToken}`,
       },
-      reconnectDelay: 10000,
+      reconnectDelay: 5000,
       heartbeatIncoming: 10000,
       heartbeatOutgoing: 10000,
       forceBinaryWSFrames: false,
@@ -70,7 +76,7 @@ export function useStompClient({ chatId, onMessageReceived }: UseStompClientOpti
           });
 
           queryClient.invalidateQueries({ queryKey: ['chatList'] });
-          onMessageReceived?.(newMessage);
+          onMessageReceivedRef.current?.(newMessage);
         } catch (e) {
           console.warn('[STOMP] 메시지 파싱 실패:', e);
         }
@@ -90,7 +96,7 @@ export function useStompClient({ chatId, onMessageReceived }: UseStompClientOpti
       clientRef.current = null;
       setConnected(false);
     };
-  }, [chatId, queryClient, onMessageReceived]);
+  }, [chatId, queryClient, accessToken]);
 
   // 폴링 폴백: WebSocket 미연결 시 2초 간격으로 메시지 갱신
   useEffect(() => {
@@ -114,7 +120,6 @@ export function useStompClient({ chatId, onMessageReceived }: UseStompClientOpti
         });
         return true;
       }
-      // WebSocket 미연결 → false 반환하여 HTTP fallback 사용
       return false;
     },
     [chatId]
