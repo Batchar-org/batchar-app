@@ -1,20 +1,32 @@
 import { useState } from 'react';
-import { View, Text, TextInput, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { COLORS } from '@/constants/theme';
+import { useUpdateUserProfileMutation } from '@/hooks/user/useUpdateUserProfileMutation';
 
 export default function ChangeAddress() {
   const router = useRouter();
   const [address, setAddress] = useState('');
+  const updateProfileMutation = useUpdateUserProfileMutation();
 
   const canSubmit = address.trim().length > 0;
 
   const handleSubmit = () => {
     if (!canSubmit) return;
-    // TODO: 주소 변경 API 연동
-    router.back();
+    updateProfileMutation.mutate(
+      { address: address.trim() },
+      {
+        onSuccess: () => {
+          Alert.alert('완료', '주소가 변경되었습니다.');
+          router.back();
+        },
+        onError: (error) => {
+          Alert.alert('실패', error.message);
+        },
+      }
+    );
   };
 
   return (
@@ -53,9 +65,11 @@ export default function ChangeAddress() {
         <TouchableOpacity
           className="items-center rounded-xl py-4"
           style={{ backgroundColor: COLORS.primary, opacity: canSubmit ? 1 : 0.5 }}
-          disabled={!canSubmit}
+          disabled={!canSubmit || updateProfileMutation.isPending}
           onPress={handleSubmit}>
-          <Text className="text-base font-bold text-white">주소 변경하기</Text>
+          <Text className="text-base font-bold text-white">
+            {updateProfileMutation.isPending ? '변경 중...' : '주소 변경하기'}
+          </Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

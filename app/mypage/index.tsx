@@ -1,27 +1,27 @@
-import { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Alert, Modal } from 'react-native';
+import { useState, useMemo } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, Alert, Modal, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import TabBar from '@/components/layout/TabBar';
 import { COLORS, SHADOWS } from '@/constants/theme';
 import { useAuthActions } from '@/store/useAuthStore';
+import { useProductsQuery } from '@/hooks/product/useProductsQuery';
+import { useUserProfileQuery } from '@/hooks/user/useUserProfileQuery';
+import { useDeleteUserMutation } from '@/hooks/user/useDeleteUserMutation';
+import type { ProductSummary } from '@/api/types';
 
-// 구매 내역 mock 데이터
-const PURCHASE_HISTORY = {
-  전체: 0,
-  '입찰 중': 2,
-  '진행 중': 1,
-  종료: 1,
-};
-
-// 판매 내역 mock 데이터
-const SALE_HISTORY = {
-  전체: 0,
-  '입찰 중': '-',
-  '진행 중': '-',
-  종료: '-',
-};
+function countByStatus(products: ProductSummary[]) {
+  let bidding = 0;
+  let inProgress = 0;
+  let completed = 0;
+  for (const p of products) {
+    if (p.status === 'ON_SALE') bidding++;
+    else if (p.status === 'ENDED' || p.status === 'FAILED' || p.status === 'CANCELED') completed++;
+    else inProgress++;
+  }
+  return { total: products.length, bidding, inProgress, completed };
+}
 
 const WITHDRAWAL_REASONS = [
   '사이트 방문을 잘 하지 않아요',
@@ -32,10 +32,19 @@ const WITHDRAWAL_REASONS = [
 
 export default function MyPage() {
   const { logout } = useAuthActions();
+  const { data: profile } = useUserProfileQuery();
   const router = useRouter();
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [selectedReason, setSelectedReason] = useState<string | null>(null);
+
+  const deleteUserMutation = useDeleteUserMutation();
+
+  const { data: bidsData } = useProductsQuery({ view: 'MY_BIDS' });
+  const { data: productsData } = useProductsQuery({ view: 'MY_PRODUCTS' });
+
+  const purchaseCounts = useMemo(() => countByStatus(bidsData?.content ?? []), [bidsData]);
+  const saleCounts = useMemo(() => countByStatus(productsData?.content ?? []), [productsData]);
 
   const handleLogout = () => {
     Alert.alert('로그아웃', '정말 로그아웃 하시겠습니까?', [
@@ -55,9 +64,16 @@ export default function MyPage() {
   };
 
   const handleConfirmWithdraw = () => {
-    setShowConfirmModal(false);
-    // TODO: 회원탈퇴 API 연동
-    logout();
+    deleteUserMutation.mutate(undefined, {
+      onSuccess: () => {
+        setShowConfirmModal(false);
+        logout();
+      },
+      onError: (error) => {
+        setShowConfirmModal(false);
+        Alert.alert('탈퇴 실패', error.message);
+      },
+    });
   };
 
   return (
@@ -77,11 +93,19 @@ export default function MyPage() {
         {/* 프로필 섹션 */}
         <View className="items-center pb-6 pt-4">
           <View
-            className="mb-3 h-24 w-24 items-center justify-center rounded-full"
+            className="mb-3 h-24 w-24 items-center justify-center overflow-hidden rounded-full"
             style={{ backgroundColor: COLORS.primary }}>
-            <MaterialCommunityIcons name="account" size={48} color="white" />
+            {profile?.profile_image_url ? (
+              <Image
+                source={{ uri: profile.profile_image_url }}
+                className="h-full w-full"
+                resizeMode="cover"
+              />
+            ) : (
+              <MaterialCommunityIcons name="account" size={48} color="white" />
+            )}
           </View>
-          <Text className="mb-2 text-xl font-bold text-gray-900">학생 1</Text>
+          <Text className="mb-2 text-xl font-bold text-gray-900">{profile?.name ?? '사용자'}</Text>
           <TouchableOpacity
             className="rounded-full border px-4 py-1.5"
             style={{ borderColor: COLORS.primary }}
@@ -98,7 +122,12 @@ export default function MyPage() {
           <TouchableOpacity
             className="mb-5 flex-row rounded-xl border border-gray-200 bg-white py-3"
             onPress={() => router.push('/mypage/purchase-history')}>
-            {Object.entries(PURCHASE_HISTORY).map(([label, count]) => (
+            {[
+              { label: '전체', count: purchaseCounts.total },
+              { label: '입찰 중', count: purchaseCounts.bidding },
+              { label: '진행 중', count: purchaseCounts.inProgress },
+              { label: '종료', count: purchaseCounts.completed },
+            ].map(({ label, count }) => (
               <View key={label} className="flex-1 items-center">
                 <Text className="mb-1 text-sm text-gray-500">{label}</Text>
                 <Text
@@ -114,7 +143,12 @@ export default function MyPage() {
           <TouchableOpacity
             className="flex-row rounded-xl border border-gray-200 bg-white py-3"
             onPress={() => router.push('/mypage/sale-history')}>
-            {Object.entries(SALE_HISTORY).map(([label, count]) => (
+            {[
+              { label: '전체', count: saleCounts.total },
+              { label: '입찰 중', count: saleCounts.bidding },
+              { label: '진행 중', count: saleCounts.inProgress },
+              { label: '종료', count: saleCounts.completed },
+            ].map(({ label, count }) => (
               <View key={label} className="flex-1 items-center">
                 <Text className="mb-1 text-sm text-gray-500">{label}</Text>
                 <Text

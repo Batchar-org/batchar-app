@@ -59,6 +59,27 @@ export type VerifyEmailCodeResponse = ApiResponse<{
 
 export type LogoutResponse = ApiResponse<string>;
 
+// ── User ──
+
+export type UserProfile = {
+  user_id: number;
+  email: string;
+  name: string;
+  address: string;
+  profile_image_url: string | null;
+};
+
+export type UserProfileResponse = ApiResponse<UserProfile>;
+
+export type UpdateUserProfileRequest = {
+  name?: string;
+  address?: string;
+};
+
+export type UpdateUserProfileResponse = ApiResponse<UserProfile>;
+
+export type DeleteUserResponse = ApiResponse<null>;
+
 // ── Product ──
 
 export type ProductCreateRequest = {

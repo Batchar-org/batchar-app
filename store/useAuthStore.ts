@@ -5,15 +5,19 @@ import { logoutApi, refreshApi } from '@/api/auth';
 import {
   getRefreshToken,
   getStoredUserId,
+  getStoredUserName,
   removeRefreshToken,
   removeStoredUserId,
+  removeStoredUserName,
   setRefreshToken,
+  setStoredUserName,
 } from '@/lib/secureStore';
 
 type AuthStatus = 'idle' | 'authenticated' | 'unauthenticated';
 
 type AuthStoreState = {
   userId: number | null;
+  userName: string | null;
   accessToken: string | null;
   status: AuthStatus;
   isInitialized: boolean;
@@ -21,6 +25,7 @@ type AuthStoreState = {
 
 const initialState: AuthStoreState = {
   userId: null,
+  userName: null,
   accessToken: null,
   status: 'idle' as AuthStatus,
   // 초기 세션 복원이 끝나기 전에는 라우팅을 보류합니다.
@@ -32,16 +37,26 @@ const useAuthStore = create(
     immer(
       combine(initialState, (set) => ({
         actions: {
-          setSession: ({ userId, accessToken }: { userId: number; accessToken: string }) =>
+          setSession: ({
+            userId,
+            accessToken,
+            userName,
+          }: {
+            userId: number;
+            accessToken: string;
+            userName?: string | null;
+          }) =>
             set((state) => {
               state.userId = userId;
               state.accessToken = accessToken;
               state.status = 'authenticated';
+              if (userName) state.userName = userName;
             }),
 
           clearSession: () =>
             set((state) => {
               state.userId = null;
+              state.userName = null;
               state.accessToken = null;
               state.status = 'unauthenticated';
             }),
@@ -51,10 +66,12 @@ const useAuthStore = create(
               // 앱 재실행 시에는 저장된 RT와 userId로 세션을 복구합니다.
               const refreshToken = await getRefreshToken();
               const storedUserId = await getStoredUserId();
+              const storedUserName = await getStoredUserName();
 
               if (!refreshToken || storedUserId === null) {
                 set((state) => {
                   state.userId = null;
+                  state.userName = null;
                   state.accessToken = null;
                   state.status = 'unauthenticated';
                   state.isInitialized = true;
@@ -70,6 +87,7 @@ const useAuthStore = create(
 
               set((state) => {
                 state.userId = storedUserId;
+                state.userName = storedUserName;
                 state.accessToken = accessToken;
                 state.status = 'authenticated';
                 state.isInitialized = true;
@@ -78,9 +96,11 @@ const useAuthStore = create(
               // 세션 복구에 실패하면 저장된 RT를 제거하고 비로그인 상태로 전환합니다.
               await removeRefreshToken();
               await removeStoredUserId();
+              await removeStoredUserName();
 
               set((state) => {
                 state.userId = null;
+                state.userName = null;
                 state.accessToken = null;
                 state.status = 'unauthenticated';
                 state.isInitialized = true;
@@ -100,9 +120,11 @@ const useAuthStore = create(
             } finally {
               await removeRefreshToken();
               await removeStoredUserId();
+              await removeStoredUserName();
 
               set((state) => {
                 state.userId = null;
+                state.userName = null;
                 state.accessToken = null;
                 state.status = 'unauthenticated';
               });
@@ -119,6 +141,7 @@ export default useAuthStore;
 
 export const useAuthStatus = () => useAuthStore((state) => state.status);
 export const useAccessToken = () => useAuthStore((state) => state.accessToken);
+export const useUserName = () => useAuthStore((state) => state.userName);
 export const useIsInitialized = () => useAuthStore((state) => state.isInitialized);
 export const useIsLoggedIn = () => useAuthStore((state) => state.status === 'authenticated');
 export const useAuthActions = () => useAuthStore((state) => state.actions);
