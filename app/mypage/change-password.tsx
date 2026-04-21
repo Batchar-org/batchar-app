@@ -1,12 +1,16 @@
 import { useState } from 'react';
-import { View, Text, TextInput, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { COLORS } from '@/constants/theme';
+import { useVerifyPasswordMutation } from '@/hooks/user/useVerifyPasswordMutation';
+import { useChangePasswordMutation } from '@/hooks/user/useChangePasswordMutation';
 
 export default function ChangePassword() {
   const router = useRouter();
+  const verifyPasswordMutation = useVerifyPasswordMutation();
+  const changePasswordMutation = useChangePasswordMutation();
 
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -21,7 +25,10 @@ export default function ChangePassword() {
     newPassword.length === 0 || (newPassword.length >= 8 && newPassword.length <= 30);
   const isConfirmMatch = confirmPassword.length === 0 || newPassword === confirmPassword;
 
+  const isLoading = verifyPasswordMutation.isPending || changePasswordMutation.isPending;
+
   const canSubmit =
+    !isLoading &&
     currentPassword.length > 0 &&
     newPassword.length >= 8 &&
     newPassword.length <= 30 &&
@@ -29,8 +36,30 @@ export default function ChangePassword() {
 
   const handleSubmit = () => {
     if (!canSubmit) return;
-    // TODO: 비밀번호 변경 API 연동
-    router.back();
+
+    verifyPasswordMutation.mutate(
+      { password: currentPassword },
+      {
+        onSuccess: () => {
+          changePasswordMutation.mutate(
+            { current_password: currentPassword, new_password: newPassword },
+            {
+              onSuccess: () => {
+                Alert.alert('완료', '비밀번호가 변경되었습니다.', [
+                  { text: '확인', onPress: () => router.back() },
+                ]);
+              },
+              onError: (error) => {
+                Alert.alert('오류', error.message);
+              },
+            }
+          );
+        },
+        onError: (error) => {
+          Alert.alert('오류', error.message);
+        },
+      }
+    );
   };
 
   return (
@@ -139,7 +168,9 @@ export default function ChangePassword() {
           style={{ backgroundColor: COLORS.primary, opacity: canSubmit ? 1 : 0.5 }}
           disabled={!canSubmit}
           onPress={handleSubmit}>
-          <Text className="text-base font-bold text-white">비밀번호 변경하기</Text>
+          <Text className="text-base font-bold text-white">
+            {isLoading ? '처리 중...' : '비밀번호 변경하기'}
+          </Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

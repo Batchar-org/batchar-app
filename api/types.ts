@@ -80,6 +80,22 @@ export type UpdateUserProfileResponse = ApiResponse<UserProfile>;
 
 export type DeleteUserResponse = ApiResponse<null>;
 
+export type UpdateProfileImageResponse = ApiResponse<UserProfile>;
+export type DeleteProfileImageResponse = ApiResponse<null>;
+
+export type PasswordVerifyRequest = {
+  password: string;
+};
+
+export type PasswordVerifyResponse = ApiResponse<null>;
+
+export type ChangePasswordRequest = {
+  current_password: string;
+  new_password: string;
+};
+
+export type ChangePasswordResponse = ApiResponse<null>;
+
 // ── Product ──
 
 export type ProductCreateRequest = {
