@@ -1,10 +1,21 @@
-import { View, Text, ScrollView, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  Image,
+  ActivityIndicator,
+  Alert,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import * as ImagePicker from 'expo-image-picker';
 import { COLORS } from '@/constants/theme';
 import TabBar from '@/components/layout/TabBar';
 import { useUserProfileQuery } from '@/hooks/user/useUserProfileQuery';
+import { useUpdateProfileImageMutation } from '@/hooks/user/useUpdateProfileImageMutation';
+import { useDeleteProfileImageMutation } from '@/hooks/user/useDeleteProfileImageMutation';
 
 type ProfileField = {
   label: string;
@@ -15,6 +26,46 @@ type ProfileField = {
 export default function EditProfile() {
   const router = useRouter();
   const { data: profile, isLoading } = useUserProfileQuery();
+  const updateImageMutation = useUpdateProfileImageMutation();
+  const deleteImageMutation = useDeleteProfileImageMutation();
+
+  const handleProfileImagePress = () => {
+    const options = profile?.profile_image_url
+      ? [
+          { text: '앨범에서 선택', onPress: pickImage },
+          { text: '기본 이미지로 변경', onPress: handleDeleteImage },
+          { text: '취소', style: 'cancel' as const },
+        ]
+      : [
+          { text: '앨범에서 선택', onPress: pickImage },
+          { text: '취소', style: 'cancel' as const },
+        ];
+
+    Alert.alert('프로필 사진', '변경 방법을 선택해주세요.', options);
+  };
+
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+
+    if (result.canceled || !result.assets[0]) return;
+
+    updateImageMutation.mutate(result.assets[0].uri, {
+      onError: (error) => Alert.alert('오류', error.message),
+    });
+  };
+
+  const handleDeleteImage = () => {
+    deleteImageMutation.mutate(undefined, {
+      onError: (error) => Alert.alert('오류', error.message),
+    });
+  };
+
+  const isImageLoading = updateImageMutation.isPending || deleteImageMutation.isPending;
 
   const fields: ProfileField[] = [
     { label: '이메일', value: profile?.email ?? '' },
@@ -44,11 +95,16 @@ export default function EditProfile() {
         <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
           {/* 프로필 이미지 */}
           <View className="items-center pb-6 pt-4">
-            <View style={{ width: 96, height: 96 }}>
+            <TouchableOpacity
+              style={{ width: 96, height: 96 }}
+              onPress={handleProfileImagePress}
+              disabled={isImageLoading}>
               <View
                 className="h-24 w-24 items-center justify-center overflow-hidden rounded-full"
                 style={{ backgroundColor: COLORS.primary }}>
-                {profile?.profile_image_url ? (
+                {isImageLoading ? (
+                  <ActivityIndicator size="small" color="white" />
+                ) : profile?.profile_image_url ? (
                   <Image
                     source={{ uri: profile.profile_image_url }}
                     className="h-full w-full"
@@ -62,13 +118,13 @@ export default function EditProfile() {
                     style={{ marginTop: -8 }}
                   />
                 )}
-                <TouchableOpacity
+                <View
                   className="absolute bottom-0 left-0 right-0 items-center py-1.5"
                   style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
                   <Text className="text-xs font-semibold text-white">편집</Text>
-                </TouchableOpacity>
+                </View>
               </View>
-            </View>
+            </TouchableOpacity>
           </View>
 
           {/* 프로필 정보 */}
