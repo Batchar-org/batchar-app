@@ -17,7 +17,13 @@ function countByStatus(products: ProductSummary[]) {
   let completed = 0;
   for (const p of products) {
     if (p.status === 'ON_SALE') bidding++;
-    else if (p.status === 'ENDED' || p.status === 'FAILED' || p.status === 'CANCELED') completed++;
+    else if (
+      p.status === 'ENDED' ||
+      p.status === 'FAILED' ||
+      p.status === 'CANCELED' ||
+      p.status === 'TRADED'
+    )
+      completed++;
     else inProgress++;
   }
   return { total: products.length, bidding, inProgress, completed };

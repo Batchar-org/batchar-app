@@ -2,11 +2,21 @@ import '../global.css';
 import { Stack, useRouter, useSegments, useRootNavigationState } from 'expo-router';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useEffect } from 'react';
-import { ActivityIndicator, View } from 'react-native';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ActivityIndicator, AppState, Platform, View } from 'react-native';
+import { focusManager, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { StatusBar } from 'expo-status-bar';
 import { useAuthActions, useIsInitialized, useIsLoggedIn } from '@/store/useAuthStore';
 import { COLORS } from '@/constants/theme';
+
+// React Native에서 앱이 포그라운드로 돌아올 때 refetchOnWindowFocus 동작을 위한 설정
+focusManager.setEventListener((handleFocus) => {
+  const subscription = AppState.addEventListener('change', (state) => {
+    if (Platform.OS !== 'web') {
+      handleFocus(state === 'active');
+    }
+  });
+  return () => subscription.remove();
+});
 
 // ──────────────────────────────────────────────────────────────────
 // 라우트 가드 컴포넌트

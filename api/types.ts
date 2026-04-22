@@ -239,6 +239,27 @@ export type BidListResponse = ApiResponse<{
   has_next: boolean;
 }>;
 
+// ── SSE ──
+
+export type BidBroadcast = {
+  productId: number;
+  currentPrice: number;
+  bidderName: string;
+  createdAt: string;
+};
+
+// ── Storage ──
+
+export type PresignedUrlRequest = {
+  fileName: string;
+  contentType: string;
+};
+
+export type PresignedUrlResponse = ApiResponse<{
+  presignedUrl: string;
+  objectUrl: string;
+}>;
+
 // ── Chat ──
 
 export type ChatListItem = {
@@ -268,3 +289,19 @@ export type ChatMessage = {
 export type ChatMessagesResponse = ApiResponse<ChatMessage[]>;
 
 export type ChatMessageSendResponse = ApiResponse<ChatMessage>;
+
+export type ChatLeaveResponse = ApiResponse<null>;
+
+export type ChatCompleteDealResponse = ApiResponse<null>;
+
+export type ChatMediaMessage = {
+  message_id: number;
+  sender_id: number;
+  content: string;
+  media_url: string;
+  media_type: 'IMAGE' | 'VIDEO';
+  is_read: boolean;
+  created_at: string;
+};
+
+export type ChatMediaSendResponse = ApiResponse<ChatMediaMessage>;

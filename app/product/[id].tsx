@@ -22,6 +22,7 @@ import { formatPrice } from '@/utils/format';
 import useAuthStore from '@/store/useAuthStore';
 import { useToggleWishMutation } from '@/hooks/wish/useToggleWishMutation';
 import { useCloseProductMutation } from '@/hooks/product/useCloseProductMutation';
+import { useProductSSE } from '@/hooks/product/useProductSSE';
 
 function formatRemainingTime(endTimeStr: string): string {
   const end = new Date(endTimeStr);
@@ -76,6 +77,12 @@ export default function ProductDetail() {
   const { mutate: toggleWish } = useToggleWishMutation();
   const { mutate: placeBid, isPending: isBidding } = usePlaceBidMutation();
   const { mutate: closeProduct, isPending: isClosing } = useCloseProductMutation();
+
+  // SSE 실시간 입찰 업데이트 (경매 진행 중일 때만)
+  useProductSSE({
+    productId,
+    enabled: product?.status === 'ON_SALE',
+  });
 
   if (isLoading) {
     return (

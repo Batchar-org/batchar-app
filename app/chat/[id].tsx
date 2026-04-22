@@ -7,15 +7,24 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  Alert,
+  Modal,
+  Image,
+  Animated,
+  StyleSheet,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import { useChatMessagesQuery } from '@/hooks/chat/useChatMessagesQuery';
 import { useSendMessageMutation } from '@/hooks/chat/useSendMessageMutation';
 import { useChatListQuery } from '@/hooks/chat/useChatListQuery';
 import { useStompClient } from '@/hooks/chat/useStompClient';
+import { useLeaveChatMutation } from '@/hooks/chat/useLeaveChatMutation';
+import { useCompleteDealMutation } from '@/hooks/chat/useCompleteDealMutation';
+import { useSendChatMediaMutation } from '@/hooks/chat/useSendChatMediaMutation';
 import { COLORS, ICON_SIZES } from '@/constants/theme';
 import useAuthStore from '@/store/useAuthStore';
 
@@ -52,13 +61,37 @@ export default function ChatDetail() {
   const router = useRouter();
   const [messageText, setMessageText] = useState('');
   const scrollViewRef = useRef<ScrollView>(null);
+  const [showMenu, setShowMenu] = useState(false);
+  const sheetAnim = useRef(new Animated.Value(0)).current;
+  const SHEET_HEIGHT = 200;
+
+  const openMenu = () => {
+    setShowMenu(true);
+    Animated.timing(sheetAnim, {
+      toValue: 1,
+      duration: 250,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const closeMenu = () => {
+    Animated.timing(sheetAnim, {
+      toValue: 0,
+      duration: 200,
+      useNativeDriver: true,
+    }).start(() => setShowMenu(false));
+  };
 
   const chatId = Number(id) || 0;
   const userId = useAuthStore((state) => state.userId);
   const { data: chatList } = useChatListQuery();
   const { data: messages, isLoading } = useChatMessagesQuery(chatId);
 
+  const [dealCompleted, setDealCompleted] = useState(false);
   const { mutate: sendMessageHttp, isPending: isSending } = useSendMessageMutation();
+  const { mutate: leaveChat, isPending: isLeaving } = useLeaveChatMutation();
+  const { mutate: completeDeal, isPending: isCompleting } = useCompleteDealMutation();
+  const { mutate: sendMedia, isPending: isSendingMedia } = useSendChatMediaMutation();
   const chatInfo = chatList?.find((c) => c.chat_id === chatId);
 
   const onMessageReceived = useCallback(() => {
@@ -98,6 +131,84 @@ export default function ChatDetail() {
     }
   };
 
+  const handleLeaveChat = () => {
+    if (!dealCompleted) {
+      closeMenu();
+      Alert.alert('알림', '거래가 완료된 후에 채팅방을 나갈 수 있습니다.');
+      return;
+    }
+    closeMenu();
+    Alert.alert('채팅방 나가기', '정말 이 채팅방을 나가시겠습니까?', [
+      { text: '취소', style: 'cancel' },
+      {
+        text: '나가기',
+        style: 'destructive',
+        onPress: () => {
+          leaveChat(chatId, {
+            onSuccess: () => {
+              router.replace('/chat');
+            },
+            onError: (error) => {
+              Alert.alert('오류', error.message);
+            },
+          });
+        },
+      },
+    ]);
+  };
+
+  const handleCompleteDeal = () => {
+    closeMenu();
+    Alert.alert('거래 완료', '거래를 완료하시겠습니까?', [
+      { text: '취소', style: 'cancel' },
+      {
+        text: '완료',
+        onPress: () => {
+          completeDeal(chatId, {
+            onSuccess: () => {
+              setDealCompleted(true);
+              Alert.alert(
+                '거래 완료 확인',
+                '거래 완료를 확인했습니다.\n상대방도 거래 완료를 확인해야 최종 완료됩니다.'
+              );
+            },
+            onError: (error) => {
+              Alert.alert('오류', error.message);
+            },
+          });
+        },
+      },
+    ]);
+  };
+
+  const handlePickMedia = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('권한 필요', '사진 라이브러리 접근 권한이 필요합니다.');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images', 'videos'],
+      allowsMultipleSelection: false,
+      quality: 0.8,
+    });
+
+    if (!result.canceled && result.assets.length > 0) {
+      sendMedia(
+        { chatId, file: result.assets[0] },
+        {
+          onSuccess: () => {
+            setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 200);
+          },
+          onError: (error) => {
+            Alert.alert('전송 실패', error.message);
+          },
+        }
+      );
+    }
+  };
+
   if (isLoading) {
     return (
       <SafeAreaView className="flex-1 bg-white" edges={['top']}>
@@ -119,21 +230,112 @@ export default function ChatDetail() {
 
   const getDateKey = (createdAt: string) => new Date(createdAt).toDateString();
 
+  const isMediaMessage = (content: string) => {
+    return /\.(jpg|jpeg|png|gif|webp|mp4|mov|avi|webm)$/i.test(content);
+  };
+
+  const isVideoUrl = (url: string) => {
+    return /\.(mp4|mov|avi|webm)$/i.test(url);
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-white" edges={['top', 'bottom']}>
       {/* 헤더 */}
       <View
-        className="flex-row items-center px-4 py-3"
+        className="flex-row items-center justify-between px-4 py-3"
         style={{ borderBottomWidth: 1, borderBottomColor: COLORS.border }}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <MaterialCommunityIcons name="chevron-left" size={ICON_SIZES.lg} color={COLORS.primary} />
-        </TouchableOpacity>
-        <View className="ml-2">
-          <Text className="text-lg font-bold" style={{ color: COLORS.text }}>
-            {chatInfo?.partner_name ?? '채팅'}
-          </Text>
+        <View className="flex-row items-center">
+          <TouchableOpacity onPress={() => router.back()}>
+            <MaterialCommunityIcons
+              name="chevron-left"
+              size={ICON_SIZES.lg}
+              color={COLORS.primary}
+            />
+          </TouchableOpacity>
+          <View className="ml-2">
+            <Text className="text-lg font-bold" style={{ color: COLORS.text }}>
+              {chatInfo?.partner_name ?? '채팅'}
+            </Text>
+          </View>
         </View>
+        <TouchableOpacity onPress={openMenu}>
+          <MaterialCommunityIcons name="dots-vertical" size={ICON_SIZES.md} color={COLORS.text} />
+        </TouchableOpacity>
       </View>
+
+      {/* 하단 바텀시트 메뉴 */}
+      <Modal visible={showMenu} transparent animationType="none" onRequestClose={closeMenu}>
+        <View className="flex-1">
+          {/* 딤 배경 (페이드) */}
+          <Animated.View
+            style={{
+              ...StyleSheet.absoluteFillObject,
+              backgroundColor: 'rgba(0,0,0,0.4)',
+              opacity: sheetAnim,
+            }}
+          />
+          <TouchableOpacity className="flex-1" activeOpacity={1} onPress={closeMenu} />
+          {/* 시트 (슬라이드) */}
+          <Animated.View
+            style={{
+              transform: [
+                {
+                  translateY: sheetAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [SHEET_HEIGHT, 0],
+                  }),
+                },
+              ],
+            }}>
+            <View className="rounded-t-2xl bg-white pb-8 pt-2">
+              {/* 핸들 바 */}
+              <View className="mb-2 items-center py-2">
+                <View
+                  style={{
+                    width: 36,
+                    height: 4,
+                    borderRadius: 2,
+                    backgroundColor: COLORS.border,
+                  }}
+                />
+              </View>
+              <TouchableOpacity
+                className="flex-row items-center px-5 py-4"
+                disabled={isCompleting}
+                onPress={handleCompleteDeal}>
+                <MaterialCommunityIcons
+                  name="check-circle-outline"
+                  size={22}
+                  color={COLORS.primary}
+                />
+                <Text className="ml-4 text-base font-medium" style={{ color: COLORS.text }}>
+                  거래 완료
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                className="flex-row items-center px-5 py-4"
+                disabled={isLeaving}
+                onPress={handleLeaveChat}>
+                <MaterialCommunityIcons
+                  name="exit-to-app"
+                  size={22}
+                  color={dealCompleted ? COLORS.error : COLORS.textMuted}
+                />
+                <Text
+                  className="ml-4 text-base font-medium"
+                  style={{ color: dealCompleted ? COLORS.error : COLORS.textMuted }}>
+                  채팅방 나가기
+                </Text>
+                {!dealCompleted && (
+                  <Text className="ml-auto text-xs" style={{ color: COLORS.textMuted }}>
+                    거래 완료 후 가능
+                  </Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </Animated.View>
+        </View>
+      </Modal>
 
       {/* 상품 정보 바 */}
       {chatInfo && (
@@ -148,6 +350,18 @@ export default function ChatDetail() {
           </View>
           <MaterialCommunityIcons name="chevron-right" size={20} color={COLORS.textMuted} />
         </TouchableOpacity>
+      )}
+
+      {/* 거래 완료 배너 */}
+      {dealCompleted && (
+        <View
+          className="flex-row items-center justify-center px-4 py-3"
+          style={{ backgroundColor: COLORS.primaryLight }}>
+          <MaterialCommunityIcons name="check-circle" size={18} color={COLORS.primary} />
+          <Text className="ml-2 text-sm font-semibold" style={{ color: COLORS.primary }}>
+            거래가 완료되었습니다
+          </Text>
+        </View>
       )}
 
       <KeyboardAvoidingView
@@ -185,6 +399,9 @@ export default function ChatDetail() {
                 formatMessageTime(nextMsg.created_at) !== formatMessageTime(msg.created_at) ||
                 getDateKey(nextMsg.created_at) !== getDateKey(msg.created_at);
 
+              const hasMedia = isMediaMessage(msg.content);
+              const isVideo = hasMedia && isVideoUrl(msg.content);
+
               return (
                 <View key={msg.message_id}>
                   {/* 날짜 구분선 */}
@@ -210,19 +427,53 @@ export default function ChatDetail() {
 
                     <View className={`max-w-[70%] ${isMe ? 'items-end' : 'items-start'}`}>
                       {/* 말풍선 */}
-                      <View
-                        className="rounded-2xl px-4 py-2.5"
-                        style={{
-                          backgroundColor: isMe ? COLORS.primary : COLORS.backgroundSecondary,
-                          borderBottomRightRadius: isMe ? 4 : 16,
-                          borderBottomLeftRadius: isMe ? 16 : 4,
-                        }}>
-                        <Text
-                          className="text-[15px] leading-6"
-                          style={{ color: isMe ? '#FFFFFF' : COLORS.text }}>
-                          {msg.content}
-                        </Text>
-                      </View>
+                      {hasMedia ? (
+                        <View
+                          className="overflow-hidden rounded-2xl"
+                          style={{
+                            borderBottomRightRadius: isMe ? 4 : 16,
+                            borderBottomLeftRadius: isMe ? 16 : 4,
+                          }}>
+                          {isVideo ? (
+                            <View
+                              className="items-center justify-center"
+                              style={{
+                                width: 200,
+                                height: 150,
+                                backgroundColor: COLORS.backgroundSecondary,
+                              }}>
+                              <MaterialCommunityIcons
+                                name="play-circle-outline"
+                                size={48}
+                                color={COLORS.textMuted}
+                              />
+                              <Text className="mt-1 text-xs" style={{ color: COLORS.textMuted }}>
+                                동영상
+                              </Text>
+                            </View>
+                          ) : (
+                            <Image
+                              source={{ uri: msg.content }}
+                              style={{ width: 200, height: 200 }}
+                              resizeMode="cover"
+                            />
+                          )}
+                        </View>
+                      ) : (
+                        <View
+                          className="rounded-2xl px-4 py-2.5"
+                          style={{
+                            backgroundColor: isMe ? COLORS.primary : COLORS.backgroundSecondary,
+                            borderBottomRightRadius: isMe ? 4 : 16,
+                            borderBottomLeftRadius: isMe ? 16 : 4,
+                          }}>
+                          <Text
+                            className="text-[15px] leading-6"
+                            style={{ color: isMe ? '#FFFFFF' : COLORS.text }}>
+                            {msg.content}
+                          </Text>
+                        </View>
+                      )}
                       {/* 읽음 표시 + 시간 */}
                       {showTime && (
                         <View
@@ -252,6 +503,17 @@ export default function ChatDetail() {
         <View
           className="flex-row items-center px-3 pb-2 pt-2"
           style={{ borderTopWidth: 1, borderTopColor: COLORS.border }}>
+          {/* 미디어 첨부 버튼 */}
+          <TouchableOpacity
+            className="mr-2 p-1"
+            onPress={handlePickMedia}
+            disabled={isSendingMedia}>
+            <MaterialCommunityIcons
+              name="plus-circle-outline"
+              size={ICON_SIZES.lg}
+              color={isSendingMedia ? COLORS.textMuted : COLORS.primary}
+            />
+          </TouchableOpacity>
           <View
             className="flex-1 flex-row items-center rounded-full px-4 py-2"
             style={{ backgroundColor: COLORS.backgroundSecondary }}>
