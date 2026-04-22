@@ -15,5 +15,7 @@ export function useProductsQuery(params: ProductListParams = {}) {
     },
     select: (response) => response.data,
     enabled: isLoggedIn,
+    refetchOnWindowFocus: true,
+    staleTime: 0,
   });
 }
