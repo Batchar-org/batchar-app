@@ -25,6 +25,7 @@ import { useStompClient } from '@/hooks/chat/useStompClient';
 import { useLeaveChatMutation } from '@/hooks/chat/useLeaveChatMutation';
 import { useCompleteDealMutation } from '@/hooks/chat/useCompleteDealMutation';
 import { useSendChatMediaMutation } from '@/hooks/chat/useSendChatMediaMutation';
+import { useDealStatus } from '@/hooks/chat/useDealStatus';
 import { COLORS, ICON_SIZES } from '@/constants/theme';
 import useAuthStore from '@/store/useAuthStore';
 
@@ -87,12 +88,12 @@ export default function ChatDetail() {
   const { data: chatList } = useChatListQuery();
   const { data: messages, isLoading } = useChatMessagesQuery(chatId);
 
-  const [dealCompleted, setDealCompleted] = useState(false);
   const { mutate: sendMessageHttp, isPending: isSending } = useSendMessageMutation();
   const { mutate: leaveChat, isPending: isLeaving } = useLeaveChatMutation();
   const { mutate: completeDeal, isPending: isCompleting } = useCompleteDealMutation();
   const { mutate: sendMedia, isPending: isSendingMedia } = useSendChatMediaMutation();
   const chatInfo = chatList?.find((c) => c.chat_id === chatId);
+  const { dealCompleted, markMyConfirmed } = useDealStatus(chatId);
 
   const onMessageReceived = useCallback(() => {
     setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 100);
@@ -166,7 +167,7 @@ export default function ChatDetail() {
         onPress: () => {
           completeDeal(chatId, {
             onSuccess: () => {
-              setDealCompleted(true);
+              markMyConfirmed();
               Alert.alert(
                 '거래 완료 확인',
                 '거래 완료를 확인했습니다.\n상대방도 거래 완료를 확인해야 최종 완료됩니다.'

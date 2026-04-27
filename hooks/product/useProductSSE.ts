@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import EventSource from 'react-native-sse';
 
 import { BidBroadcast, ProductDetailResponse } from '@/api/types';
 
@@ -25,7 +26,8 @@ export function useProductSSE({ productId, enabled = true }: UseProductSSEOption
     const eventSource = new EventSource(url);
     eventSourceRef.current = eventSource;
 
-    eventSource.onmessage = (event) => {
+    eventSource.addEventListener('message', (event) => {
+      if (!event.data) return;
       try {
         const broadcast: BidBroadcast = JSON.parse(event.data);
 
@@ -47,11 +49,11 @@ export function useProductSSE({ productId, enabled = true }: UseProductSSEOption
       } catch (e) {
         console.warn('[SSE] 메시지 파싱 실패:', e);
       }
-    };
+    });
 
-    eventSource.onerror = () => {
-      // 연결 끊김 시 EventSource가 자동 재연결 시도
-    };
+    eventSource.addEventListener('error', () => {
+      // 연결 끊김 시 react-native-sse가 자동 재연결 시도
+    });
 
     return () => {
       eventSource.close();
