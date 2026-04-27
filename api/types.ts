@@ -270,6 +270,8 @@ export type ChatListItem = {
   last_message: string;
   unread_count: number;
   updated_at: string;
+  my_confirmed: boolean;
+  partner_confirmed: boolean;
 };
 
 export type ChatListResponse = ApiResponse<ChatListItem[]>;
