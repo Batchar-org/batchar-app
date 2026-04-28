@@ -1,5 +1,7 @@
 import { apiFetch } from './client';
 import type {
+  CheckEmailDuplicateRequest,
+  CheckEmailDuplicateResponse,
   CheckNicknameDuplicateResponse,
   LoginRequest,
   LoginResponse,
@@ -35,6 +37,17 @@ export function checkNicknameDuplicateApi({ name }: CheckNicknameDuplicateReques
 
   return apiFetch<CheckNicknameDuplicateResponse>(
     `/api/users/name/duplicate?${searchParams.toString()}`,
+    {
+      method: 'GET',
+    }
+  );
+}
+
+export function checkEmailDuplicateApi({ email }: CheckEmailDuplicateRequest) {
+  const searchParams = new URLSearchParams({ email });
+
+  return apiFetch<CheckEmailDuplicateResponse>(
+    `/api/users/email/duplicate?${searchParams.toString()}`,
     {
       method: 'GET',
     }
