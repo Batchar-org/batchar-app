@@ -13,6 +13,7 @@ import { useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { COLORS, INPUT_STYLE } from '@/constants/theme';
 import EmailVerifyModal from '@/components/modals/EmailVerifyModal';
+import { useCheckEmailDuplicateMutation } from '@/hooks/auth/useCheckEmailDuplicateMutation';
 import { useCheckNicknameDuplicateMutation } from '@/hooks/auth/useCheckNicknameDuplicateMutation';
 import { useSendEmailCodeMutation } from '@/hooks/auth/useSendEmailCodeMutation';
 import { useSignupMutation } from '@/hooks/auth/useSignupMutation';
@@ -35,6 +36,7 @@ export default function RegisterPage() {
   const [expireAt, setExpireAt] = useState<number | null>(null);
   const [now, setNow] = useState(Date.now());
 
+  const checkEmailDuplicateMutation = useCheckEmailDuplicateMutation();
   const checkNicknameDuplicateMutation = useCheckNicknameDuplicateMutation();
   const sendEmailCodeMutation = useSendEmailCodeMutation();
   const verifyEmailCodeMutation = useVerifyEmailCodeMutation();
@@ -75,16 +77,24 @@ export default function RegisterPage() {
       return;
     }
 
-    sendEmailCodeMutation.mutate(
+    // 이메일 중복 체크 후 인증 코드 발송
+    checkEmailDuplicateMutation.mutate(
       { email: normalizedEmail },
       {
         onSuccess: () => {
-          // 재전송 시에는 이전 인증 결과와 만료 시간을 모두 초기화합니다.
-          setIsEmailVerified(false);
-          setVerifiedEmail('');
-          setExpireAt(Date.now() + EMAIL_VERIFY_EXPIRE_SECONDS * 1000);
-          setNow(Date.now());
-          setIsVerifyModalVisible(true);
+          sendEmailCodeMutation.mutate(
+            { email: normalizedEmail },
+            {
+              onSuccess: () => {
+                // 재전송 시에는 이전 인증 결과와 만료 시간을 모두 초기화합니다.
+                setIsEmailVerified(false);
+                setVerifiedEmail('');
+                setExpireAt(Date.now() + EMAIL_VERIFY_EXPIRE_SECONDS * 1000);
+                setNow(Date.now());
+                setIsVerifyModalVisible(true);
+              },
+            }
+          );
         },
       }
     );
@@ -247,6 +257,7 @@ export default function RegisterPage() {
                     setIsEmailVerified(false);
                     setVerifiedEmail('');
                     setExpireAt(null);
+                    checkEmailDuplicateMutation.reset();
                   }}
                   keyboardType="email-address"
                   autoCapitalize="none"
@@ -256,13 +267,22 @@ export default function RegisterPage() {
                 {/* 이메일 인증하기 버튼 — 입력 필드 우측 */}
                 <TouchableOpacity
                   onPress={handleOpenVerifyModal}
-                  disabled={sendEmailCodeMutation.isPending}
+                  disabled={
+                    checkEmailDuplicateMutation.isPending || sendEmailCodeMutation.isPending
+                  }
                   className="ml-2 rounded-full px-3 py-1"
                   style={{
-                    backgroundColor: sendEmailCodeMutation.isPending ? '#A3A3A3' : COLORS.primary,
+                    backgroundColor:
+                      checkEmailDuplicateMutation.isPending || sendEmailCodeMutation.isPending
+                        ? '#A3A3A3'
+                        : COLORS.primary,
                   }}>
                   <Text className="text-xs font-semibold text-white">
-                    {sendEmailCodeMutation.isPending ? '전송 중' : '이메일 인증'}
+                    {checkEmailDuplicateMutation.isPending
+                      ? '확인 중'
+                      : sendEmailCodeMutation.isPending
+                        ? '전송 중'
+                        : '이메일 인증'}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -271,6 +291,14 @@ export default function RegisterPage() {
             {isEmailVerified && verifiedEmail === email.trim() && (
               // 검증한 이메일과 현재 입력값이 같을 때만 인증 완료로 표시합니다.
               <Text className="mb-6 text-sm text-green-600">이메일 인증이 완료되었습니다.</Text>
+            )}
+
+            {checkEmailDuplicateMutation.isError && (
+              <Text className="mb-6 text-sm text-red-500">
+                {checkEmailDuplicateMutation.error instanceof Error
+                  ? checkEmailDuplicateMutation.error.message
+                  : '이메일 중복 확인에 실패했습니다.'}
+              </Text>
             )}
 
             {sendEmailCodeMutation.isError && (

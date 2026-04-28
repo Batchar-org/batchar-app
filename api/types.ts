@@ -52,6 +52,10 @@ export type RefreshResponse = ApiResponse<{
 
 export type SendEmailCodeResponse = ApiResponse<string>;
 export type CheckNicknameDuplicateResponse = ApiResponse<null>;
+export type CheckEmailDuplicateRequest = {
+  email: string;
+};
+export type CheckEmailDuplicateResponse = ApiResponse<null>;
 
 export type VerifyEmailCodeResponse = ApiResponse<{
   email: string;
