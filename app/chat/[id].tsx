@@ -12,6 +12,7 @@ import {
   Image,
   Animated,
   StyleSheet,
+  Pressable,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -275,7 +276,7 @@ export default function ChatDetail() {
               opacity: sheetAnim,
             }}
           />
-          <TouchableOpacity className="flex-1" activeOpacity={1} onPress={closeMenu} />
+          <Pressable className="flex-1" onPress={closeMenu} />
           {/* 시트 (슬라이드) */}
           <Animated.View
             style={{

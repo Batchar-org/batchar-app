@@ -9,6 +9,10 @@ import {
   TextInput,
   Alert,
   Modal,
+  Pressable,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -483,52 +487,68 @@ export default function ProductDetail() {
 
       {/* 입찰 모달 */}
       <Modal visible={bidModalVisible} transparent animationType="slide">
-        <View className="flex-1 justify-end" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          <View className="rounded-t-3xl bg-white px-5 pb-8 pt-6">
-            <View className="mb-4 flex-row items-center justify-between">
-              <Text className="text-lg font-bold text-gray-900">입찰하기</Text>
-              <TouchableOpacity onPress={() => setBidModalVisible(false)}>
-                <MaterialCommunityIcons name="close" size={24} color="#6B7280" />
-              </TouchableOpacity>
-            </View>
+        <KeyboardAvoidingView
+          className="flex-1"
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+          <Pressable
+            className="flex-1 justify-end"
+            style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+            onPress={() => {
+              Keyboard.dismiss();
+              setBidModalVisible(false);
+            }}>
+            <Pressable
+              onPress={(e) => {
+                e.stopPropagation();
+                Keyboard.dismiss();
+              }}>
+              <View className="rounded-t-3xl bg-white px-5 pb-8 pt-6">
+                <View className="mb-4 flex-row items-center justify-between">
+                  <Text className="text-lg font-bold text-gray-900">입찰하기</Text>
+                  <TouchableOpacity onPress={() => setBidModalVisible(false)}>
+                    <MaterialCommunityIcons name="close" size={24} color="#6B7280" />
+                  </TouchableOpacity>
+                </View>
 
-            <View className="mb-2 flex-row items-center justify-between">
-              <Text className="text-sm text-gray-500">현재가</Text>
-              <Text className="text-base font-bold" style={{ color: COLORS.active }}>
-                {formatPrice(product.current_price)}원
-              </Text>
-            </View>
+                <View className="mb-2 flex-row items-center justify-between">
+                  <Text className="text-sm text-gray-500">현재가</Text>
+                  <Text className="text-base font-bold" style={{ color: COLORS.active }}>
+                    {formatPrice(product.current_price)}원
+                  </Text>
+                </View>
 
-            <View className="mb-4">
-              <Text className="mb-2 text-sm text-gray-500">입찰 금액</Text>
-              <TextInput
-                className="rounded-xl border border-gray-200 px-4 py-3 text-base"
-                placeholder="현재가보다 높은 금액을 입력하세요"
-                keyboardType="number-pad"
-                value={bidPrice}
-                onChangeText={setBidPrice}
-              />
-              {bidPrice !== '' && Number(bidPrice) > 0 && (
-                <Text className="mt-1 text-right text-sm text-gray-400">
-                  {formatPrice(Number(bidPrice))}원
-                </Text>
-              )}
-            </View>
+                <View className="mb-4">
+                  <Text className="mb-2 text-sm text-gray-500">입찰 금액</Text>
+                  <TextInput
+                    className="rounded-xl border border-gray-200 px-4 py-3 text-base"
+                    placeholder="현재가보다 높은 금액을 입력하세요"
+                    keyboardType="number-pad"
+                    value={bidPrice}
+                    onChangeText={setBidPrice}
+                  />
+                  {bidPrice !== '' && Number(bidPrice) > 0 && (
+                    <Text className="mt-1 text-right text-sm text-gray-400">
+                      {formatPrice(Number(bidPrice))}원
+                    </Text>
+                  )}
+                </View>
 
-            <TouchableOpacity
-              className="items-center rounded-full py-4"
-              style={{
-                backgroundColor: COLORS.active,
-                opacity: isBidding ? 0.6 : 1,
-              }}
-              onPress={handlePlaceBid}
-              disabled={isBidding}>
-              <Text className="text-base font-semibold text-white">
-                {isBidding ? '입찰 중...' : '입찰하기'}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+                <TouchableOpacity
+                  className="items-center rounded-full py-4"
+                  style={{
+                    backgroundColor: COLORS.active,
+                    opacity: isBidding ? 0.6 : 1,
+                  }}
+                  onPress={handlePlaceBid}
+                  disabled={isBidding}>
+                  <Text className="text-base font-semibold text-white">
+                    {isBidding ? '입찰 중...' : '입찰하기'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </Pressable>
+          </Pressable>
+        </KeyboardAvoidingView>
       </Modal>
     </SafeAreaView>
   );
