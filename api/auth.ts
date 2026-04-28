@@ -7,6 +7,8 @@ import type {
   LoginResponse,
   LogoutRequest,
   LogoutResponse,
+  PasswordResetRequest,
+  PasswordResetResponse,
   RefreshRequest,
   RefreshResponse,
   SendEmailCodeRequest,
@@ -70,6 +72,13 @@ export function verifyEmailCodeApi(body: VerifyEmailCodeRequest) {
 
 export function refreshApi(body: RefreshRequest) {
   return apiFetch<RefreshResponse>('/api/auth/refresh', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+}
+
+export function resetPasswordApi(body: PasswordResetRequest) {
+  return apiFetch<PasswordResetResponse>('/api/auth/password/reset', {
     method: 'POST',
     body: JSON.stringify(body),
   });

@@ -63,6 +63,12 @@ export type VerifyEmailCodeResponse = ApiResponse<{
 
 export type LogoutResponse = ApiResponse<string>;
 
+export type PasswordResetRequest = {
+  email: string;
+};
+
+export type PasswordResetResponse = ApiResponse<null>;
+
 // ── User ──
 
 export type UserProfile = {
