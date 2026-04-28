@@ -130,7 +130,7 @@ export default function EmailVerifyModal({
           </Text>
 
           {/* 안내 문구 */}
-          <Text style={{ fontSize: 13, color: '#6B7280', lineHeight: 20, marginBottom: 24 }}>
+          <Text style={{ fontSize: 14, color: '#6B7280', lineHeight: 20, marginBottom: 24 }}>
             {'회원가입을 위해 이메일로 전송된 6자리 인증\n코드를 입력해 주세요.'}
           </Text>
 
@@ -185,17 +185,17 @@ export default function EmailVerifyModal({
             }}>
             <Text
               style={{
-                fontSize: 12,
+                fontSize: 14,
                 fontWeight: '600',
                 color: remainingSeconds > 0 ? '#111827' : '#DC2626',
               }}>
               {remainingSeconds > 0 ? formatRemainingTime(remainingSeconds) : '인증 만료'}
             </Text>
-            <Text style={{ marginLeft: 8, fontSize: 12, color: '#9CA3AF' }}>
+            <Text style={{ marginLeft: 8, fontSize: 14, color: '#9CA3AF' }}>
               인증 번호를 받지 못하셨나요?
             </Text>
             <TouchableOpacity onPress={handleResend} style={{ marginLeft: 8 }}>
-              <Text style={{ fontSize: 12, fontWeight: '600', color: COLORS.primary }}>
+              <Text style={{ fontSize: 14, fontWeight: '600', color: COLORS.primary }}>
                 인증 번호 재전송
               </Text>
             </TouchableOpacity>
@@ -212,7 +212,7 @@ export default function EmailVerifyModal({
               alignItems: 'center',
               marginBottom: 12,
             }}>
-            <Text style={{ color: 'white', fontSize: 16, fontWeight: '600' }}>
+            <Text style={{ color: 'white', fontSize: 14, fontWeight: '600' }}>
               {isSubmitting ? '인증 중...' : '이메일 인증 완료'}
             </Text>
           </TouchableOpacity>

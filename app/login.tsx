@@ -12,6 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { COLORS, INPUT_STYLE, LAYOUT } from '@/constants/theme';
+import PasswordResetModal from '@/components/modals/PasswordResetModal';
 import { useLoginMutation } from '@/hooks/auth/useLoginMutation';
 
 export default function LoginPage() {
@@ -20,6 +21,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [isResetModalVisible, setIsResetModalVisible] = useState(false);
 
   const handleLogin = () => {
     if (!email.trim() || !password.trim()) {
@@ -77,7 +79,7 @@ export default function LoginPage() {
             </View>
 
             {/* 비밀번호 입력 */}
-            <View className="mb-8">
+            <View className="mb-4">
               <Text className="mb-2 text-sm font-medium text-gray-700">비밀번호</Text>
               <View className="flex-row items-center border-b border-gray-300">
                 <TextInput
@@ -99,6 +101,13 @@ export default function LoginPage() {
                 </TouchableOpacity>
               </View>
             </View>
+
+            {/* 비밀번호 찾기 */}
+            <TouchableOpacity
+              onPress={() => setIsResetModalVisible(true)}
+              className="mb-8 self-end">
+              <Text className="text-sm text-gray-400">비밀번호를 잃어버리셨나요?</Text>
+            </TouchableOpacity>
 
             {loginMutation.isError && (
               <Text className="mb-4 text-sm text-red-500">
@@ -126,6 +135,10 @@ export default function LoginPage() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+      <PasswordResetModal
+        visible={isResetModalVisible}
+        onClose={() => setIsResetModalVisible(false)}
+      />
     </SafeAreaView>
   );
 }
