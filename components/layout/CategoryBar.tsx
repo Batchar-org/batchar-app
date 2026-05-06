@@ -33,7 +33,7 @@ export default function CategoryBar({ activeCategory, onCategoryPress }: Categor
               marginRight: index === CATEGORIES.length - 1 ? 0 : 6,
               backgroundColor: isActive(id) ? COLORS.primary : 'white',
               borderWidth: isActive(id) ? 0 : 1,
-              borderColor: '#D1D5DB',
+              borderColor: COLORS.inactive,
             }}>
             <Text
               className="text-sm font-semibold"

@@ -23,6 +23,7 @@ export const COLORS = {
 
   // 기타 UI 색상
   border: '#E5E7EB',
+  disabled: '#A3A3A3',
   error: '#EF4444',
   warning: '#F59E0B',
   success: '#22C55E',

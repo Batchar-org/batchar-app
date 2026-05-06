@@ -50,7 +50,7 @@ export default function ChangeAddress() {
             <TextInput
               className="flex-1 text-sm text-gray-900"
               placeholder="새 주소를 입력해주세요"
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={COLORS.textMuted}
               value={address}
               onChangeText={setAddress}
               autoCapitalize="none"

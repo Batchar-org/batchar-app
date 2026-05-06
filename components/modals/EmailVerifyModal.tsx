@@ -130,7 +130,8 @@ export default function EmailVerifyModal({
           </Text>
 
           {/* 안내 문구 */}
-          <Text style={{ fontSize: 14, color: '#6B7280', lineHeight: 20, marginBottom: 24 }}>
+          <Text
+            style={{ fontSize: 14, color: COLORS.textSecondary, lineHeight: 20, marginBottom: 24 }}>
             {'회원가입을 위해 이메일로 전송된 6자리 인증\n코드를 입력해 주세요.'}
           </Text>
 
@@ -146,7 +147,7 @@ export default function EmailVerifyModal({
                     marginRight: index === CODE_LENGTH - 1 ? 0 : 8,
                     borderWidth: 2,
                     borderRadius: 12,
-                    borderColor: code[index] ? COLORS.primary : '#E5E7EB',
+                    borderColor: code[index] ? COLORS.primary : COLORS.border,
                     backgroundColor: code[index] ? '#F0FDF4' : '#F9FAFB',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -191,7 +192,7 @@ export default function EmailVerifyModal({
               }}>
               {remainingSeconds > 0 ? formatRemainingTime(remainingSeconds) : '인증 만료'}
             </Text>
-            <Text style={{ marginLeft: 8, fontSize: 14, color: '#9CA3AF' }}>
+            <Text style={{ marginLeft: 8, fontSize: 14, color: COLORS.textMuted }}>
               인증 번호를 받지 못하셨나요?
             </Text>
             <TouchableOpacity onPress={handleResend} style={{ marginLeft: 8 }}>
@@ -206,7 +207,8 @@ export default function EmailVerifyModal({
             onPress={handleVerifyComplete}
             disabled={isSubmitting || remainingSeconds <= 0}
             style={{
-              backgroundColor: isSubmitting || remainingSeconds <= 0 ? '#A3A3A3' : COLORS.primary,
+              backgroundColor:
+                isSubmitting || remainingSeconds <= 0 ? COLORS.disabled : COLORS.primary,
               borderRadius: 999,
               paddingVertical: 16,
               alignItems: 'center',
@@ -221,7 +223,7 @@ export default function EmailVerifyModal({
           <TouchableOpacity
             onPress={handleClose}
             style={{ alignItems: 'center', paddingVertical: 8 }}>
-            <Text style={{ fontSize: 14, color: '#9CA3AF' }}>취소</Text>
+            <Text style={{ fontSize: 14, color: COLORS.textMuted }}>취소</Text>
           </TouchableOpacity>
         </Pressable>
       </Pressable>

@@ -8,10 +8,10 @@ export default function SearchBar() {
       <View
         className="h-12 flex-row items-center rounded-3xl border-2 bg-white px-4"
         style={{ borderColor: `${COLORS.primary}66` }}>
-        <Feather name="search" size={20} color="#9CA3AF" />
+        <Feather name="search" size={20} color={COLORS.textMuted} />
         <TextInput
           placeholder="검색하기"
-          placeholderTextColor="#9CA3AF"
+          placeholderTextColor={COLORS.textMuted}
           className="ml-3 flex-1 text-base"
         />
         <TouchableOpacity>

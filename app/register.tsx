@@ -203,7 +203,7 @@ export default function RegisterPage() {
                 <TextInput
                   className="flex-1 text-base text-gray-900"
                   placeholder="닉네임을 입력해주세요"
-                  placeholderTextColor="#9CA3AF"
+                  placeholderTextColor={COLORS.textMuted}
                   value={name}
                   onChangeText={(value) => {
                     setName(value);
@@ -220,7 +220,7 @@ export default function RegisterPage() {
                   className="ml-2 rounded-full px-3 py-1"
                   style={{
                     backgroundColor: checkNicknameDuplicateMutation.isPending
-                      ? '#A3A3A3'
+                      ? COLORS.disabled
                       : COLORS.primary,
                   }}>
                   <Text className="text-xs font-semibold text-white">
@@ -249,7 +249,7 @@ export default function RegisterPage() {
                 <TextInput
                   className="flex-1 text-base text-gray-900"
                   placeholder="예) 12345678@hanbat.edu.kr"
-                  placeholderTextColor="#9CA3AF"
+                  placeholderTextColor={COLORS.textMuted}
                   value={email}
                   onChangeText={(value) => {
                     // 이메일이 바뀌면 이전 인증 결과는 더 이상 유효하지 않습니다.
@@ -274,7 +274,7 @@ export default function RegisterPage() {
                   style={{
                     backgroundColor:
                       checkEmailDuplicateMutation.isPending || sendEmailCodeMutation.isPending
-                        ? '#A3A3A3'
+                        ? COLORS.disabled
                         : COLORS.primary,
                   }}>
                   <Text className="text-xs font-semibold text-white">
@@ -324,7 +324,7 @@ export default function RegisterPage() {
                 <TextInput
                   className="flex-1 text-base text-gray-900"
                   placeholder="비밀번호를 입력해주세요"
-                  placeholderTextColor="#9CA3AF"
+                  placeholderTextColor={COLORS.textMuted}
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry={!isPasswordVisible}
@@ -335,7 +335,11 @@ export default function RegisterPage() {
                 <TouchableOpacity
                   onPress={() => setIsPasswordVisible(!isPasswordVisible)}
                   className="items-center justify-center p-1">
-                  <Feather name={isPasswordVisible ? 'eye' : 'eye-off'} size={20} color="#9CA3AF" />
+                  <Feather
+                    name={isPasswordVisible ? 'eye' : 'eye-off'}
+                    size={20}
+                    color={COLORS.textMuted}
+                  />
                 </TouchableOpacity>
               </View>
             </View>
@@ -347,7 +351,7 @@ export default function RegisterPage() {
                 <TextInput
                   className="text-base text-gray-900"
                   placeholder="주소를 입력해주세요"
-                  placeholderTextColor="#9CA3AF"
+                  placeholderTextColor={COLORS.textMuted}
                   value={address}
                   onChangeText={setAddress}
                   autoCapitalize="none"
@@ -370,7 +374,7 @@ export default function RegisterPage() {
               onPress={handleRegister}
               disabled={isRegisterDisabled}
               className="items-center rounded-full py-4"
-              style={{ backgroundColor: isRegisterDisabled ? '#A3A3A3' : COLORS.primary }}>
+              style={{ backgroundColor: isRegisterDisabled ? COLORS.disabled : COLORS.primary }}>
               <Text className="text-base font-semibold text-white">
                 {signupMutation.isPending ? '회원가입 중...' : '회원가입'}
               </Text>

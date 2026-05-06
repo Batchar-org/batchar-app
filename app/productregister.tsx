@@ -268,7 +268,7 @@ export default function Register() {
             <TextInput
               className="text-base"
               placeholder="상품명"
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={COLORS.textMuted}
               value={productName}
               onChangeText={setProductName}
               style={INPUT_STYLE}
@@ -282,7 +282,7 @@ export default function Register() {
             <Text className={category ? 'text-base text-black' : 'text-base text-gray-400'}>
               {category || '카테고리'}
             </Text>
-            <MaterialCommunityIcons name="chevron-right" size={24} color="#9CA3AF" />
+            <MaterialCommunityIcons name="chevron-right" size={24} color={COLORS.textMuted} />
           </TouchableOpacity>
         </View>
 
@@ -293,7 +293,7 @@ export default function Register() {
             <TextInput
               className="h-32 text-base"
               placeholder={`• 브랜드, 모델명, 구매 시기, 하자 유무 등 상품 설명을 최대한 자세히 적어주세요.\n\n• 전화번호, SNS 계정 등 개인정보 입력은 제한될 수 있어요.`}
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={COLORS.textMuted}
               value={description}
               onChangeText={handleDescriptionChange}
               multiline
@@ -317,7 +317,7 @@ export default function Register() {
             <TextInput
               className="text-base"
               placeholder="가격"
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={COLORS.textMuted}
               value={startingPrice}
               onChangeText={setStartingPrice}
               keyboardType="numeric"

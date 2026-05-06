@@ -51,7 +51,7 @@ export default function Chat() {
               onPress={() => router.push(`/chat/${chat.chat_id}`)}>
               {/* 프로필 아바타 */}
               <View className="h-12 w-12 items-center justify-center rounded-full bg-gray-200">
-                <MaterialCommunityIcons name="account" size={28} color="#9CA3AF" />
+                <MaterialCommunityIcons name="account" size={28} color={COLORS.textMuted} />
               </View>
 
               {/* 채팅 정보 */}

@@ -220,7 +220,7 @@ export default function MyPage() {
                   <View
                     className="mr-3 h-5 w-5 items-center justify-center rounded-full border-2"
                     style={{
-                      borderColor: selectedReason === reason ? COLORS.error : '#D1D5DB',
+                      borderColor: selectedReason === reason ? COLORS.error : COLORS.inactive,
                       backgroundColor: selectedReason === reason ? COLORS.error : 'transparent',
                     }}>
                     {selectedReason === reason && (

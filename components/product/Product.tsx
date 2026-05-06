@@ -118,7 +118,7 @@ export default function Product({
           <MaterialCommunityIcons
             name={isFavorite ? 'heart' : 'heart-outline'}
             size={24}
-            color={isFavorite ? COLORS.primary : '#D1D5DB'}
+            color={isFavorite ? COLORS.primary : COLORS.inactive}
           />
         </TouchableOpacity>
       </View>

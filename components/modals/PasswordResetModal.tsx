@@ -68,7 +68,13 @@ export default function PasswordResetModal({ visible, onClose }: PasswordResetMo
 
           {isSuccess ? (
             <>
-              <Text style={{ fontSize: 14, color: '#6B7280', lineHeight: 20, marginBottom: 24 }}>
+              <Text
+                style={{
+                  fontSize: 14,
+                  color: COLORS.textSecondary,
+                  lineHeight: 20,
+                  marginBottom: 24,
+                }}>
                 {
                   '입력하신 이메일로 임시 비밀번호가 발송되었습니다. \n로그인 후 비밀번호를 변경해 주세요.'
                 }
@@ -87,19 +93,25 @@ export default function PasswordResetModal({ visible, onClose }: PasswordResetMo
             </>
           ) : (
             <>
-              <Text style={{ fontSize: 14, color: '#6B7280', lineHeight: 20, marginBottom: 24 }}>
+              <Text
+                style={{
+                  fontSize: 14,
+                  color: COLORS.textSecondary,
+                  lineHeight: 20,
+                  marginBottom: 24,
+                }}>
                 {'가입 시 사용한 이메일을 입력하시면\n임시 비밀번호를 발송해 드립니다.'}
               </Text>
 
               <View
                 style={{
                   borderBottomWidth: 1,
-                  borderBottomColor: '#D1D5DB',
+                  borderBottomColor: COLORS.inactive,
                   marginBottom: 12,
                 }}>
                 <TextInput
                   placeholder="예) 12345678@hanbat.edu.kr"
-                  placeholderTextColor="#9CA3AF"
+                  placeholderTextColor={COLORS.textMuted}
                   value={email}
                   onChangeText={(value) => {
                     setEmail(value);
@@ -118,7 +130,7 @@ export default function PasswordResetModal({ visible, onClose }: PasswordResetMo
               </View>
 
               {resetPasswordMutation.isError && (
-                <Text style={{ fontSize: 14, color: '#EF4444', marginBottom: 12 }}>
+                <Text style={{ fontSize: 14, color: COLORS.error, marginBottom: 12 }}>
                   {resetPasswordMutation.error instanceof Error
                     ? resetPasswordMutation.error.message
                     : '임시 비밀번호 발송에 실패했습니다.'}
@@ -130,7 +142,9 @@ export default function PasswordResetModal({ visible, onClose }: PasswordResetMo
                 disabled={!email.trim() || resetPasswordMutation.isPending}
                 style={{
                   backgroundColor:
-                    !email.trim() || resetPasswordMutation.isPending ? '#A3A3A3' : COLORS.primary,
+                    !email.trim() || resetPasswordMutation.isPending
+                      ? COLORS.disabled
+                      : COLORS.primary,
                   borderRadius: 999,
                   paddingVertical: 16,
                   alignItems: 'center',
@@ -144,7 +158,7 @@ export default function PasswordResetModal({ visible, onClose }: PasswordResetMo
               <TouchableOpacity
                 onPress={handleClose}
                 style={{ alignItems: 'center', paddingVertical: 8 }}>
-                <Text style={{ fontSize: 14, color: '#9CA3AF' }}>취소</Text>
+                <Text style={{ fontSize: 14, color: COLORS.textMuted }}>취소</Text>
               </TouchableOpacity>
             </>
           )}

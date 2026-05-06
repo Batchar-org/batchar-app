@@ -230,7 +230,7 @@ export default function ProductDetail() {
         <View className="bg-white px-4 pb-2 pt-4">
           <View className="flex-row items-center">
             <View className="mr-3 h-10 w-10 items-center justify-center rounded-full bg-gray-100">
-              <MaterialCommunityIcons name="account" size={24} color="#9CA3AF" />
+              <MaterialCommunityIcons name="account" size={24} color={COLORS.textMuted} />
             </View>
             <View>
               <Text className="text-base font-medium text-gray-900">
@@ -249,7 +249,7 @@ export default function ProductDetail() {
             <MaterialCommunityIcons
               name={product.is_wished ? 'heart' : 'heart-outline'}
               size={24}
-              color={product.is_wished ? COLORS.active : '#D1D5DB'}
+              color={product.is_wished ? COLORS.active : COLORS.inactive}
             />
           </TouchableOpacity>
         </View>
@@ -295,7 +295,7 @@ export default function ProductDetail() {
         {/* 남은 시간 */}
         <View className="flex-row items-center justify-between bg-white px-4 pb-4">
           <View className="flex-row items-center">
-            <MaterialCommunityIcons name="clock-outline" size={16} color="#6B7280" />
+            <MaterialCommunityIcons name="clock-outline" size={16} color={COLORS.textSecondary} />
             <Text className="ml-1 text-sm text-gray-500">남은 시간:</Text>
             <Text className="ml-1 text-sm font-bold text-gray-900">
               {product.end_time ? formatRemainingTime(product.end_time) : '-'}
@@ -433,7 +433,7 @@ export default function ProductDetail() {
           <MaterialCommunityIcons
             name={product.is_wished ? 'heart' : 'heart-outline'}
             size={28}
-            color={product.is_wished ? COLORS.active : '#D1D5DB'}
+            color={product.is_wished ? COLORS.active : COLORS.inactive}
           />
         </TouchableOpacity>
 
@@ -443,7 +443,7 @@ export default function ProductDetail() {
               <TouchableOpacity
                 className="mr-2 flex-1 items-center rounded-full py-4"
                 style={{
-                  backgroundColor: '#EF4444',
+                  backgroundColor: COLORS.error,
                   opacity: isClosing ? 0.6 : 1,
                 }}
                 onPress={handleAwardAuction}
@@ -493,7 +493,7 @@ export default function ProductDetail() {
                 <View className="mb-4 flex-row items-center justify-between">
                   <Text className="text-lg font-bold text-gray-900">입찰하기</Text>
                   <TouchableOpacity onPress={() => setBidModalVisible(false)}>
-                    <MaterialCommunityIcons name="close" size={24} color="#6B7280" />
+                    <MaterialCommunityIcons name="close" size={24} color={COLORS.textSecondary} />
                   </TouchableOpacity>
                 </View>
 

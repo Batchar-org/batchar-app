@@ -70,7 +70,7 @@ export default function ChangeNickname() {
             <TextInput
               className="flex-1 text-sm text-gray-900"
               placeholder="새 닉네임을 입력해주세요"
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={COLORS.textMuted}
               value={nickname}
               onChangeText={(value) => {
                 setNickname(value);
@@ -85,7 +85,7 @@ export default function ChangeNickname() {
               disabled={checkNicknameMutation.isPending}
               className="ml-2 rounded-full px-3 py-1.5"
               style={{
-                backgroundColor: checkNicknameMutation.isPending ? '#A3A3A3' : COLORS.primary,
+                backgroundColor: checkNicknameMutation.isPending ? COLORS.disabled : COLORS.primary,
               }}>
               <Text className="text-xs font-semibold text-white">
                 {checkNicknameMutation.isPending ? '검사 중' : '중복 검사'}

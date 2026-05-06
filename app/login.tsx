@@ -67,7 +67,7 @@ export default function LoginPage() {
                 <TextInput
                   className="text-base text-gray-900"
                   placeholder="예) 12345678@hanbat.edu.kr"
-                  placeholderTextColor="#9CA3AF"
+                  placeholderTextColor={COLORS.textMuted}
                   value={email}
                   onChangeText={setEmail}
                   keyboardType="email-address"
@@ -85,7 +85,7 @@ export default function LoginPage() {
                 <TextInput
                   className="flex-1 text-base text-gray-900"
                   placeholder="비밀번호를 입력해주세요"
-                  placeholderTextColor="#9CA3AF"
+                  placeholderTextColor={COLORS.textMuted}
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry={!isPasswordVisible}
@@ -97,7 +97,11 @@ export default function LoginPage() {
                   onPress={() => setIsPasswordVisible(!isPasswordVisible)}
                   style={{ minHeight: LAYOUT.touchTargetMinHeight }}
                   className="items-center justify-center p-1">
-                  <Feather name={isPasswordVisible ? 'eye' : 'eye-off'} size={20} color="#9CA3AF" />
+                  <Feather
+                    name={isPasswordVisible ? 'eye' : 'eye-off'}
+                    size={20}
+                    color={COLORS.textMuted}
+                  />
                 </TouchableOpacity>
               </View>
             </View>
@@ -122,7 +126,9 @@ export default function LoginPage() {
               onPress={handleLogin}
               disabled={loginMutation.isPending}
               className="mb-6 items-center rounded-full py-4"
-              style={{ backgroundColor: loginMutation.isPending ? '#A3A3A3' : COLORS.primary }}>
+              style={{
+                backgroundColor: loginMutation.isPending ? COLORS.disabled : COLORS.primary,
+              }}>
               <Text className="text-base font-semibold text-white">
                 {loginMutation.isPending ? '로그인 중...' : '로그인'}
               </Text>

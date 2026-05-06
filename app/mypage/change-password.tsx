@@ -83,7 +83,7 @@ export default function ChangePassword() {
             <TextInput
               className="flex-1 text-sm text-gray-900"
               placeholder="기존 비밀번호 입력"
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={COLORS.textMuted}
               secureTextEntry={!showCurrent}
               value={currentPassword}
               onChangeText={setCurrentPassword}
@@ -92,7 +92,7 @@ export default function ChangePassword() {
               <MaterialCommunityIcons
                 name={showCurrent ? 'eye-outline' : 'eye-off-outline'}
                 size={20}
-                color="#9CA3AF"
+                color={COLORS.textMuted}
               />
             </TouchableOpacity>
           </View>
@@ -104,12 +104,12 @@ export default function ChangePassword() {
           <View
             className="flex-row items-center rounded-lg border px-4 py-3"
             style={{
-              borderColor: !isNewPasswordValid ? COLORS.error : '#E5E7EB',
+              borderColor: !isNewPasswordValid ? COLORS.error : COLORS.border,
             }}>
             <TextInput
               className="flex-1 text-sm text-gray-900"
               placeholder="새 비밀번호"
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={COLORS.textMuted}
               secureTextEntry={!showNew}
               value={newPassword}
               onChangeText={setNewPassword}
@@ -118,7 +118,7 @@ export default function ChangePassword() {
               <MaterialCommunityIcons
                 name={showNew ? 'eye-outline' : 'eye-off-outline'}
                 size={20}
-                color="#9CA3AF"
+                color={COLORS.textMuted}
               />
             </TouchableOpacity>
           </View>
@@ -135,12 +135,12 @@ export default function ChangePassword() {
           <View
             className="flex-row items-center rounded-lg border px-4 py-3"
             style={{
-              borderColor: !isConfirmMatch ? COLORS.error : '#E5E7EB',
+              borderColor: !isConfirmMatch ? COLORS.error : COLORS.border,
             }}>
             <TextInput
               className="flex-1 text-sm text-gray-900"
               placeholder="새 비밀번호 확인"
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={COLORS.textMuted}
               secureTextEntry={!showConfirm}
               value={confirmPassword}
               onChangeText={setConfirmPassword}
@@ -149,7 +149,7 @@ export default function ChangePassword() {
               <MaterialCommunityIcons
                 name={showConfirm ? 'eye-outline' : 'eye-off-outline'}
                 size={20}
-                color="#9CA3AF"
+                color={COLORS.textMuted}
               />
             </TouchableOpacity>
           </View>
