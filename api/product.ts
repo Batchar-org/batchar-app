@@ -13,6 +13,7 @@ import {
   ProductUpdateResponse,
 } from './types';
 import { apiFetch } from './client';
+import { getMimeType } from '@/utils/mimeTypes';
 
 declare const process: {
   env: Record<string, string | undefined>;
@@ -57,24 +58,10 @@ export async function createProductApi(
   for (const file of files) {
     const uri = file.uri;
     const name = uri.split('/').pop() ?? 'image.jpg';
-    const ext = name.split('.').pop()?.toLowerCase() ?? 'jpg';
-
-    const mimeMap: Record<string, string> = {
-      jpg: 'image/jpeg',
-      jpeg: 'image/jpeg',
-      png: 'image/png',
-      gif: 'image/gif',
-      webp: 'image/webp',
-      mp4: 'video/mp4',
-      mov: 'video/quicktime',
-      avi: 'video/x-msvideo',
-      webm: 'video/webm',
-    };
-
     formData.append('files', {
       uri,
       name,
-      type: mimeMap[ext] ?? 'image/jpeg',
+      type: getMimeType(name),
     } as unknown as Blob);
   }
 
@@ -152,24 +139,10 @@ export async function updateProductApi(
   for (const file of files) {
     const uri = file.uri;
     const name = uri.split('/').pop() ?? 'image.jpg';
-    const ext = name.split('.').pop()?.toLowerCase() ?? 'jpg';
-
-    const mimeMap: Record<string, string> = {
-      jpg: 'image/jpeg',
-      jpeg: 'image/jpeg',
-      png: 'image/png',
-      gif: 'image/gif',
-      webp: 'image/webp',
-      mp4: 'video/mp4',
-      mov: 'video/quicktime',
-      avi: 'video/x-msvideo',
-      webm: 'video/webm',
-    };
-
     formData.append('files', {
       uri,
       name,
-      type: mimeMap[ext] ?? 'image/jpeg',
+      type: getMimeType(name),
     } as unknown as Blob);
   }
 

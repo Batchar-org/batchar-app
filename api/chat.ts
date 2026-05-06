@@ -2,6 +2,7 @@ import * as FileSystem from 'expo-file-system/legacy';
 import { ImagePickerAsset } from 'expo-image-picker';
 
 import { apiFetch } from './client';
+import { getMimeType } from '@/utils/mimeTypes';
 import {
   ChatCompleteDealResponse,
   ChatLeaveResponse,
@@ -74,24 +75,10 @@ export async function sendChatMediaApi(
 
   const uri = file.uri;
   const name = uri.split('/').pop() ?? 'file';
-  const ext = name.split('.').pop()?.toLowerCase() ?? 'jpg';
-
-  const mimeMap: Record<string, string> = {
-    jpg: 'image/jpeg',
-    jpeg: 'image/jpeg',
-    png: 'image/png',
-    gif: 'image/gif',
-    webp: 'image/webp',
-    mp4: 'video/mp4',
-    mov: 'video/quicktime',
-    avi: 'video/x-msvideo',
-    webm: 'video/webm',
-  };
-
   formData.append('file', {
     uri,
     name,
-    type: mimeMap[ext] ?? 'image/jpeg',
+    type: getMimeType(name),
   } as unknown as Blob);
 
   const response = await fetch(`${BASE_URL}/api/chats/${chatId}/media`, {

@@ -22,24 +22,11 @@ import { useProductDetailQuery } from '@/hooks/product/useProductDetailQuery';
 import { useBidHistoryQuery } from '@/hooks/bid/useBidHistoryQuery';
 import { usePlaceBidMutation } from '@/hooks/bid/usePlaceBidMutation';
 import { COLORS, LAYOUT } from '@/constants/theme';
-import { formatPrice } from '@/utils/format';
+import { formatPrice, formatRemainingTime } from '@/utils/format';
 import useAuthStore from '@/store/useAuthStore';
 import { useToggleWishMutation } from '@/hooks/wish/useToggleWishMutation';
 import { useCloseProductMutation } from '@/hooks/product/useCloseProductMutation';
 import { useProductSSE } from '@/hooks/product/useProductSSE';
-
-function formatRemainingTime(endTimeStr: string): string {
-  const end = new Date(endTimeStr);
-  const now = new Date();
-  const diff = end.getTime() - now.getTime();
-  if (diff <= 0) return '마감됨';
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-  if (days > 0) return `${days}일 ${hours}시간`;
-  if (hours > 0) return `${hours}시간 ${minutes}분`;
-  return `${minutes}분`;
-}
 
 function formatEndDate(endTimeStr: string): string {
   const date = new Date(endTimeStr);
