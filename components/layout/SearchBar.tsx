@@ -17,6 +17,9 @@ export default function SearchBar({ onSubmit }: Props) {
           placeholder="검색하기"
           placeholderTextColor={COLORS.textMuted}
           className="ml-3 flex-1 text-base"
+          autoCapitalize="none"
+          autoCorrect={false}
+          clearButtonMode="while-editing"
         />
       </View>
     </View>
