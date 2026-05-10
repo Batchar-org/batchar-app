@@ -12,6 +12,7 @@ import { COLORS } from '@/constants/theme';
 
 export default function Home() {
   const [activeCategory, setActiveCategory] = useState<ProductViewType>('ALL');
+  const [keyword, setKeyword] = useState('');
   const [refreshing, setRefreshing] = useState(false);
   const queryClient = useQueryClient();
 
@@ -26,7 +27,7 @@ export default function Home() {
     <SafeAreaView className="flex-1 bg-white" edges={['top']}>
       <View className="bg-white">
         <TopBar />
-        <SearchBar />
+        <SearchBar onSubmit={setKeyword} />
         <CategoryBar activeCategory={activeCategory} onCategoryPress={setActiveCategory} />
       </View>
       <ScrollView
@@ -42,7 +43,7 @@ export default function Home() {
             colors={[COLORS.primary]}
           />
         }>
-        <ProductList viewType={activeCategory} />
+        <ProductList viewType={activeCategory} keyword={keyword} />
       </ScrollView>
       <TabBar />
     </SafeAreaView>

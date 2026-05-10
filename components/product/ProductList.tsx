@@ -10,11 +10,12 @@ import { ProductViewType } from '@/api/types';
 
 interface ProductListProps {
   viewType?: ProductViewType;
+  keyword?: string;
 }
 
-export default function ProductList({ viewType = 'ALL' }: ProductListProps) {
+export default function ProductList({ viewType = 'ALL', keyword }: ProductListProps) {
   const router = useRouter();
-  const { data, isLoading, isError } = useProductsQuery({ view: viewType });
+  const { data, isLoading, isError } = useProductsQuery({ view: viewType, keyword });
   const { data: wishlistData } = useWishlistQuery({ size: 100 });
   const { mutate: toggleWish } = useToggleWishMutation();
 

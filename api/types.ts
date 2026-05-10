@@ -129,6 +129,7 @@ export type ProductViewType =
 export type ProductListParams = {
   view?: ProductViewType;
   category?: string;
+  keyword?: string;
   page?: number;
   size?: number;
 };
