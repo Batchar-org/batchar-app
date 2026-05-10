@@ -1,8 +1,10 @@
-import { View, TextInput, TouchableOpacity } from 'react-native';
+import { View, TextInput } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { COLORS } from '@/constants/theme';
 
-export default function SearchBar() {
+type Props = { onSubmit: (keyword: string) => void };
+
+export default function SearchBar({ onSubmit }: Props) {
   return (
     <View className="px-5 py-2">
       <View
@@ -10,13 +12,12 @@ export default function SearchBar() {
         style={{ borderColor: `${COLORS.primary}66` }}>
         <Feather name="search" size={20} color={COLORS.textMuted} />
         <TextInput
+          onSubmitEditing={(e) => onSubmit(e.nativeEvent.text.trim())}
+          returnKeyType="search"
           placeholder="검색하기"
           placeholderTextColor={COLORS.textMuted}
           className="ml-3 flex-1 text-base"
         />
-        <TouchableOpacity>
-          <Feather name="camera" size={20} color={COLORS.primary} />
-        </TouchableOpacity>
       </View>
     </View>
   );

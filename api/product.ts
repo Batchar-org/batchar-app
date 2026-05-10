@@ -92,6 +92,7 @@ export async function getProductsApi(
   const query = new URLSearchParams();
   if (params.view) query.set('view', params.view);
   if (params.category) query.set('category', params.category);
+  if (params.keyword) query.set('keyword', params.keyword);
   if (params.page !== undefined) query.set('page', String(params.page));
   if (params.size !== undefined) query.set('size', String(params.size));
 
