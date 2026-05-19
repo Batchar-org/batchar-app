@@ -1,13 +1,9 @@
 {
   "expo": {
-    "name": "batchar-app",
+    "name": "밭찰!",
     "slug": "batchar-app",
     "version": "1.0.0",
     "scheme": "batchar-app",
-    "web": {
-      "favicon": "./assets/public/favicon.png",
-      "bundler": "metro"
-    },
     "experiments": {
       "tsconfigPaths": true
     },
@@ -28,12 +24,19 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "bundleIdentifier": "com.kaeuhy.batchar",
+      "buildNumber": "1",
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "상품 사진 등록과 채팅 이미지 전송을 위해 사진 라이브러리 접근이 필요합니다.",
+        "NSCameraUsageDescription": "상품 사진 촬영과 채팅 이미지 전송을 위해 카메라 접근이 필요합니다.",
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/public/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "97b32bff-fea9-49f6-8ddc-451b62774264"
       }
     }
   }
