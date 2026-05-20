@@ -30,6 +30,9 @@ import { useDealStatus } from '@/hooks/chat/useDealStatus';
 import { COLORS, ICON_SIZES } from '@/constants/theme';
 import useAuthStore from '@/store/useAuthStore';
 import { displayUserName } from '@/utils/displayUserName';
+import ReportModal from '@/components/modals/ReportModal';
+import { useBlockUserMutation } from '@/hooks/block/useBlockUserMutation';
+import { useUnblockUserMutation } from '@/hooks/block/useUnblockUserMutation';
 
 function formatMessageTime(createdAt: string): string {
   const date = new Date(createdAt);
@@ -65,8 +68,9 @@ export default function ChatDetail() {
   const [messageText, setMessageText] = useState('');
   const scrollViewRef = useRef<ScrollView>(null);
   const [showMenu, setShowMenu] = useState(false);
+  const [reportVisible, setReportVisible] = useState(false);
   const sheetAnim = useRef(new Animated.Value(0)).current;
-  const SHEET_HEIGHT = 200;
+  const SHEET_HEIGHT = 320;
 
   const openMenu = () => {
     setShowMenu(true);
@@ -94,6 +98,8 @@ export default function ChatDetail() {
   const { mutate: leaveChat, isPending: isLeaving } = useLeaveChatMutation();
   const { mutate: completeDeal, isPending: isCompleting } = useCompleteDealMutation();
   const { mutate: sendMedia, isPending: isSendingMedia } = useSendChatMediaMutation();
+  const { mutate: blockUser, isPending: isBlocking } = useBlockUserMutation();
+  const { mutate: unblockUser, isPending: isUnblocking } = useUnblockUserMutation();
   const chatInfo = chatList?.find((c) => c.chat_id === chatId);
   const { dealCompleted, markMyConfirmed } = useDealStatus(chatId);
 
@@ -151,6 +157,64 @@ export default function ChatDetail() {
             onSuccess: () => {
               router.replace('/chat');
             },
+            onError: (error) => {
+              Alert.alert('오류', error.message);
+            },
+          });
+        },
+      },
+    ]);
+  };
+
+  const handleReport = () => {
+    // 바텀시트 닫힘 애니메이션이 완전히 끝난 후 ReportModal을 띄워야
+    // RN의 Modal 중첩 충돌(화면 멈춤) 방지됨
+    Animated.timing(sheetAnim, {
+      toValue: 0,
+      duration: 200,
+      useNativeDriver: true,
+    }).start(() => {
+      setShowMenu(false);
+      setReportVisible(true);
+    });
+  };
+
+  const handleBlock = () => {
+    closeMenu();
+    if (!chatInfo) return;
+    const partnerId = chatInfo.partner_id;
+    const partnerName = displayUserName(chatInfo.partner_name);
+    Alert.alert(
+      '차단하기',
+      `${partnerName}님을 차단하시겠습니까?\n차단하면 이 사용자의 상품이 더 이상 보이지 않고, 채팅 메시지도 보낼 수 없습니다.`,
+      [
+        { text: '취소', style: 'cancel' },
+        {
+          text: '차단',
+          style: 'destructive',
+          onPress: () => {
+            blockUser(partnerId, {
+              onError: (error) => {
+                Alert.alert('오류', error.message);
+              },
+            });
+          },
+        },
+      ]
+    );
+  };
+
+  const handleUnblock = () => {
+    closeMenu();
+    if (!chatInfo) return;
+    const partnerId = chatInfo.partner_id;
+    const partnerName = displayUserName(chatInfo.partner_name);
+    Alert.alert('차단 해제', `${partnerName}님의 차단을 해제하시겠습니까?`, [
+      { text: '취소', style: 'cancel' },
+      {
+        text: '해제',
+        onPress: () => {
+          unblockUser(partnerId, {
             onError: (error) => {
               Alert.alert('오류', error.message);
             },
@@ -316,6 +380,37 @@ export default function ChatDetail() {
                   거래 완료
                 </Text>
               </TouchableOpacity>
+              <TouchableOpacity className="flex-row items-center px-5 py-4" onPress={handleReport}>
+                <MaterialCommunityIcons name="flag-outline" size={22} color={COLORS.error} />
+                <Text className="ml-4 text-base font-medium" style={{ color: COLORS.error }}>
+                  신고하기
+                </Text>
+              </TouchableOpacity>
+              {chatInfo?.i_blocked ? (
+                <TouchableOpacity
+                  className="flex-row items-center px-5 py-4"
+                  disabled={isUnblocking}
+                  onPress={handleUnblock}>
+                  <MaterialCommunityIcons
+                    name="account-check-outline"
+                    size={22}
+                    color={COLORS.primary}
+                  />
+                  <Text className="ml-4 text-base font-medium" style={{ color: COLORS.primary }}>
+                    {isUnblocking ? '해제 중...' : '차단 해제하기'}
+                  </Text>
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity
+                  className="flex-row items-center px-5 py-4"
+                  disabled={isBlocking}
+                  onPress={handleBlock}>
+                  <MaterialCommunityIcons name="block-helper" size={22} color={COLORS.error} />
+                  <Text className="ml-4 text-base font-medium" style={{ color: COLORS.error }}>
+                    {isBlocking ? '차단 중...' : '차단하기'}
+                  </Text>
+                </TouchableOpacity>
+              )}
               <TouchableOpacity
                 className="flex-row items-center px-5 py-4"
                 disabled={isLeaving}
@@ -340,6 +435,24 @@ export default function ChatDetail() {
           </Animated.View>
         </View>
       </Modal>
+
+      {/* 차단 상태 배너 */}
+      {chatInfo?.i_blocked && (
+        <View className="flex-row items-center px-4 py-3.5" style={{ backgroundColor: '#FEF2F2' }}>
+          <MaterialCommunityIcons name="block-helper" size={20} color={COLORS.error} />
+          <Text className="ml-2.5 text-sm font-medium" style={{ color: COLORS.error }}>
+            차단한 사용자입니다. 메시지를 보낼 수 없습니다.
+          </Text>
+        </View>
+      )}
+      {!chatInfo?.i_blocked && chatInfo?.blocked_by_partner && (
+        <View className="flex-row items-center px-4 py-3.5" style={{ backgroundColor: '#FEF2F2' }}>
+          <MaterialCommunityIcons name="account-cancel" size={20} color={COLORS.error} />
+          <Text className="ml-2.5 text-sm font-medium" style={{ color: COLORS.error }}>
+            상대방이 회원님을 차단했습니다. 메시지를 보낼 수 없습니다.
+          </Text>
+        </View>
+      )}
 
       {/* 상품 정보 바 */}
       {chatInfo && (
@@ -381,7 +494,8 @@ export default function ChatDetail() {
           {!messages || messages.length === 0 ? (
             <View className="flex-1 items-center pt-20">
               <Text className="text-sm text-gray-400">
-                {chatInfo ? displayUserName(chatInfo.partner_name) : '상대방'}님과 대화를 시작해 보세요.
+                {chatInfo ? displayUserName(chatInfo.partner_name) : '상대방'}님과 대화를 시작해
+                보세요.
               </Text>
             </View>
           ) : (
@@ -511,11 +625,15 @@ export default function ChatDetail() {
           <TouchableOpacity
             className="mr-2 p-1"
             onPress={handlePickMedia}
-            disabled={isSendingMedia}>
+            disabled={isSendingMedia || !!(chatInfo?.i_blocked || chatInfo?.blocked_by_partner)}>
             <MaterialCommunityIcons
               name="plus-circle-outline"
               size={ICON_SIZES.lg}
-              color={isSendingMedia ? COLORS.textMuted : COLORS.primary}
+              color={
+                isSendingMedia || chatInfo?.i_blocked || chatInfo?.blocked_by_partner
+                  ? COLORS.textMuted
+                  : COLORS.primary
+              }
             />
           </TouchableOpacity>
           <View
@@ -523,10 +641,15 @@ export default function ChatDetail() {
             style={{ backgroundColor: COLORS.backgroundSecondary }}>
             <TextInput
               className="flex-1 text-sm"
-              placeholder="메시지를 입력하세요."
+              placeholder={
+                chatInfo?.i_blocked || chatInfo?.blocked_by_partner
+                  ? '채팅을 하려면 차단을 해제해 주세요.'
+                  : '메시지를 입력하세요.'
+              }
               placeholderTextColor={COLORS.textMuted}
               value={messageText}
               onChangeText={setMessageText}
+              editable={!(chatInfo?.i_blocked || chatInfo?.blocked_by_partner)}
               multiline
               style={{ color: COLORS.text, maxHeight: 80 }}
               onSubmitEditing={handleSend}
@@ -536,15 +659,31 @@ export default function ChatDetail() {
           <TouchableOpacity
             className="ml-2 p-1"
             onPress={handleSend}
-            disabled={isSending || !messageText.trim()}>
+            disabled={
+              isSending ||
+              !messageText.trim() ||
+              !!(chatInfo?.i_blocked || chatInfo?.blocked_by_partner)
+            }>
             <MaterialCommunityIcons
               name="arrow-up-circle"
               size={ICON_SIZES.lg}
-              color={messageText.trim() ? COLORS.primary : COLORS.textMuted}
+              color={
+                !(chatInfo?.i_blocked || chatInfo?.blocked_by_partner) && messageText.trim()
+                  ? COLORS.primary
+                  : COLORS.textMuted
+              }
             />
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
+
+      {chatInfo && (
+        <ReportModal
+          visible={reportVisible}
+          onClose={() => setReportVisible(false)}
+          target={{ kind: 'user', id: chatInfo.partner_id }}
+        />
+      )}
     </SafeAreaView>
   );
 }

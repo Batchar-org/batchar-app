@@ -5,7 +5,7 @@ export default function TopBar() {
   return (
     <View className="w-full bg-white px-5 py-3">
       <Text className="text-2xl font-black" style={{ color: COLORS.primary }}>
-        밭-찰!
+        밭찰!
       </Text>
     </View>
   );

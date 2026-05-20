@@ -1,4 +1,4 @@
-import * as FileSystem from "expo-file-system/legacy";
+import * as FileSystem from 'expo-file-system/legacy';
 
 /**
  * React Native(Expo)에서 로컬 파일 URI(file://...)를 ArrayBuffer로 변환합니다.

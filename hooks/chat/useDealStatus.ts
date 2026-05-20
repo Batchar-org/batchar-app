@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 
-import { ChatListItem, ChatListResponse } from '@/api/types';
+import { ChatListResponse } from '@/api/types';
 import { useChatListQuery } from '@/hooks/chat/useChatListQuery';
 
 /**

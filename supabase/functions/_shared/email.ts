@@ -1,4 +1,4 @@
-import nodemailer from "npm:nodemailer@6.9.16";
+import nodemailer from 'npm:nodemailer@6.9.16';
 
 export function buildVerificationHtml(code: string): string {
   return `<!DOCTYPE html>
@@ -44,21 +44,17 @@ export function buildTempPasswordHtml(tempPassword: string): string {
 </table></td></tr></table></body></html>`;
 }
 
-export async function sendEmail(
-  to: string,
-  subject: string,
-  html: string,
-): Promise<void> {
-  const username = Deno.env.get("MAIL_USERNAME");
-  const rawPassword = Deno.env.get("MAIL_PASSWORD");
-  if (!username || !rawPassword) throw new Error("MAIL_USERNAME_OR_PASSWORD_MISSING");
+export async function sendEmail(to: string, subject: string, html: string): Promise<void> {
+  const username = Deno.env.get('MAIL_USERNAME');
+  const rawPassword = Deno.env.get('MAIL_PASSWORD');
+  if (!username || !rawPassword) throw new Error('MAIL_USERNAME_OR_PASSWORD_MISSING');
 
   // Gmail 앱 비밀번호 표시 형식의 공백 제거
-  const password = rawPassword.replace(/\s+/g, "");
-  const fromName = Deno.env.get("MAIL_FROM_NAME") ?? "밭찰";
+  const password = rawPassword.replace(/\s+/g, '');
+  const fromName = Deno.env.get('MAIL_FROM_NAME') ?? '밭찰';
 
   const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
+    host: 'smtp.gmail.com',
     port: 465,
     secure: true,
     auth: { user: username, pass: password },

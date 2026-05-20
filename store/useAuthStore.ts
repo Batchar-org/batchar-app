@@ -60,7 +60,9 @@ const useAuthStore = create(
           initializeAuth: async () => {
             try {
               // Supabase 클라이언트가 SecureStore에서 세션을 자동 복원합니다.
-              const { data: { session } } = await supabase.auth.getSession();
+              const {
+                data: { session },
+              } = await supabase.auth.getSession();
               const storedUserName = await getStoredUserName();
 
               if (!session) {

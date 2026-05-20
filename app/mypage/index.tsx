@@ -8,12 +8,14 @@ import {
   Modal,
   Image,
   Pressable,
+  Linking,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import TabBar from '@/components/layout/TabBar';
 import { COLORS, SHADOWS } from '@/constants/theme';
+import { POLICY_URLS } from '@/constants/policy';
 import { useAuthActions } from '@/store/useAuthStore';
 import { useProductsQuery } from '@/hooks/product/useProductsQuery';
 import { useUserProfileQuery } from '@/hooks/user/useUserProfileQuery';
@@ -173,6 +175,28 @@ export default function MyPage() {
                 </Text>
               </View>
             ))}
+          </TouchableOpacity>
+        </View>
+
+        {/* 차단 목록 카드 */}
+        <View className="mx-4 mt-4 rounded-2xl bg-white px-5 py-4" style={SHADOWS.card}>
+          <TouchableOpacity onPress={() => router.push('/mypage/blocked-users')} className="py-2">
+            <Text className="text-base font-bold text-gray-900">차단 목록</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* 약관 카드 */}
+        <View className="mx-4 mt-4 rounded-2xl bg-white px-5 py-4" style={SHADOWS.card}>
+          <TouchableOpacity
+            onPress={() => Linking.openURL(POLICY_URLS.termsOfService)}
+            className="py-2">
+            <Text className="text-base font-bold text-gray-900">이용약관</Text>
+          </TouchableOpacity>
+          <View className="my-2 h-px bg-gray-100" />
+          <TouchableOpacity
+            onPress={() => Linking.openURL(POLICY_URLS.privacyPolicy)}
+            className="py-2">
+            <Text className="text-base font-bold text-gray-900">개인정보처리방침</Text>
           </TouchableOpacity>
         </View>
 

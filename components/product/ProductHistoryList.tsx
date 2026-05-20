@@ -52,16 +52,15 @@ export default function ProductHistoryList({ title, biddingLabel, view }: Produc
   };
 
   const { data, isLoading } = useProductsQuery({ view });
-  const products = data?.content ?? [];
 
-  const grouped = useMemo(
-    () => ({
+  const grouped = useMemo(() => {
+    const products = data?.content ?? [];
+    return {
       bidding: filterByTab(products, 'bidding'),
       inProgress: filterByTab(products, 'inProgress'),
       completed: filterByTab(products, 'completed'),
-    }),
-    [products]
-  );
+    };
+  }, [data]);
 
   const items = grouped[activeTab];
   const subHeaders = SUB_HEADERS[activeTab];

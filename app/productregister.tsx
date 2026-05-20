@@ -278,11 +278,10 @@ export default function Register() {
           {/* 카테고리 선택 */}
           <TouchableOpacity
             onPress={() => setShowCategoryModal(true)}
-            className="flex-row items-center justify-between border-b border-gray-200 py-3">
+            className="border-b border-gray-200 py-3">
             <Text className={category ? 'text-base text-black' : 'text-base text-gray-400'}>
               {category || '카테고리'}
             </Text>
-            <MaterialCommunityIcons name="chevron-right" size={24} color={COLORS.textMuted} />
           </TouchableOpacity>
         </View>
 

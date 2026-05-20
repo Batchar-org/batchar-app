@@ -268,6 +268,7 @@ export type PresignedUrlResponse = ApiResponse<{
 export type ChatListItem = {
   chat_id: number;
   product_id: number;
+  partner_id: string;
   partner_name: string;
   product_image_url: string;
   last_message: string;
@@ -275,6 +276,9 @@ export type ChatListItem = {
   updated_at: string;
   my_confirmed: boolean;
   partner_confirmed: boolean;
+  is_blocked: boolean;
+  i_blocked: boolean;
+  blocked_by_partner: boolean;
 };
 
 export type ChatListResponse = ApiResponse<ChatListItem[]>;
@@ -310,3 +314,32 @@ export type ChatMediaMessage = {
 };
 
 export type ChatMediaSendResponse = ApiResponse<ChatMediaMessage>;
+
+// ── Report ──
+
+export type ReportReasonCode = 'SPAM' | 'ABUSE' | 'FRAUD' | 'INAPPROPRIATE_CONTENT' | 'ETC';
+
+export type ReportRequestBase = {
+  reason: ReportReasonCode;
+  description?: string;
+};
+
+export type ReportUserRequest = ReportRequestBase & { targetUserId: string };
+export type ReportProductRequest = ReportRequestBase & { targetProductId: number };
+export type ReportMessageRequest = ReportRequestBase & { targetMessageId: number };
+
+export type ReportResponse = ApiResponse<{ report_id: number }>;
+
+// ── Block ──
+
+export type BlockSummary = {
+  block_id: number;
+  blocked_id: string;
+  blocked_name: string;
+  blocked_profile_image_url: string | null;
+  created_at: string;
+};
+
+export type BlockListResponse = ApiResponse<BlockSummary[]>;
+export type BlockAddResponse = ApiResponse<{ block_id: number }>;
+export type BlockRemoveResponse = ApiResponse<null>;

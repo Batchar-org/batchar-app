@@ -6,12 +6,14 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Linking,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { COLORS, INPUT_STYLE } from '@/constants/theme';
+import { POLICY_URLS } from '@/constants/policy';
 import EmailVerifyModal from '@/components/modals/EmailVerifyModal';
 import { useCheckEmailDuplicateMutation } from '@/hooks/auth/useCheckEmailDuplicateMutation';
 import { useCheckNicknameDuplicateMutation } from '@/hooks/auth/useCheckNicknameDuplicateMutation';
@@ -379,6 +381,25 @@ export default function RegisterPage() {
                 {signupMutation.isPending ? '회원가입 중...' : '회원가입'}
               </Text>
             </TouchableOpacity>
+
+            {/* 약관 동의 안내 */}
+            <Text
+              className="mt-4 text-center text-xs leading-5"
+              style={{ color: COLORS.textMuted }}>
+              회원가입 시{' '}
+              <Text
+                style={{ color: COLORS.primary, textDecorationLine: 'underline' }}
+                onPress={() => Linking.openURL(POLICY_URLS.termsOfService)}>
+                이용약관
+              </Text>
+              {'  및 '}
+              <Text
+                style={{ color: COLORS.primary, textDecorationLine: 'underline' }}
+                onPress={() => Linking.openURL(POLICY_URLS.privacyPolicy)}>
+                개인정보처리방침
+              </Text>
+              에 동의하는 것으로 간주됩니다.
+            </Text>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

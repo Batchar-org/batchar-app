@@ -1,7 +1,7 @@
-import { supabase } from "@/lib/supabase";
-import { getMimeType } from "@/utils/mimeTypes";
-import { uriToArrayBuffer } from "@/utils/uploadFile";
-import { ApiError, mapSupabaseAuthError, throwFromEdgeFunction } from "./errors";
+import { supabase } from '@/lib/supabase';
+import { getMimeType } from '@/utils/mimeTypes';
+import { uriToArrayBuffer } from '@/utils/uploadFile';
+import { ApiError, mapSupabaseAuthError, throwFromEdgeFunction } from './errors';
 import type {
   ChangePasswordRequest,
   ChangePasswordResponse,
@@ -14,12 +14,14 @@ import type {
   UpdateUserProfileResponse,
   UserProfile,
   UserProfileResponse,
-} from "./types";
+} from './types';
 
-const PROFILE_BUCKET = "profile-images";
+const PROFILE_BUCKET = 'profile-images';
 
 async function invokeEdgeFunction<T>(name: string, body: Record<string, unknown>): Promise<T> {
-  const { data: { session } } = await supabase.auth.getSession();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
   const headers: Record<string, string> = {};
   if (session?.access_token) {
     headers.Authorization = `Bearer ${session.access_token}`;
@@ -43,25 +45,27 @@ async function invokeEdgeFunction<T>(name: string, body: Record<string, unknown>
 }
 
 async function getCurrentUserId(): Promise<string> {
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) {
-    throw new ApiError("인증이 필요합니다.", { code: "UNAUTHORIZED", status: 401 });
+    throw new ApiError('인증이 필요합니다.', { code: 'UNAUTHORIZED', status: 401 });
   }
   return user.id;
 }
 
 async function fetchProfile(userId: string): Promise<UserProfile> {
   const { data, error } = await supabase
-    .from("users")
-    .select("id, email, name, address, profile_image_url")
-    .eq("id", userId)
+    .from('users')
+    .select('id, email, name, address, profile_image_url')
+    .eq('id', userId)
     .maybeSingle();
 
   if (error) {
     throw new ApiError(error.message, { code: error.code, status: 500 });
   }
   if (!data) {
-    throw new ApiError("사용자를 찾을 수 없습니다.", { code: "USER_NOT_FOUND", status: 404 });
+    throw new ApiError('사용자를 찾을 수 없습니다.', { code: 'USER_NOT_FOUND', status: 404 });
   }
   return {
     user_id: data.id,
@@ -75,7 +79,7 @@ async function fetchProfile(userId: string): Promise<UserProfile> {
 export async function getUserProfileApi(_accessToken?: string): Promise<UserProfileResponse> {
   const uid = await getCurrentUserId();
   const profile = await fetchProfile(uid);
-  return { data: profile, message: "프로필 조회 성공" };
+  return { data: profile, message: '프로필 조회 성공' };
 }
 
 export async function updateUserProfileApi(
@@ -89,14 +93,14 @@ export async function updateUserProfileApi(
 
   if (Object.keys(patch).length === 0) {
     const profile = await fetchProfile(uid);
-    return { data: profile, message: "변경된 항목이 없습니다." };
+    return { data: profile, message: '변경된 항목이 없습니다.' };
   }
 
-  const { error } = await supabase.from("users").update(patch).eq("id", uid);
+  const { error } = await supabase.from('users').update(patch).eq('id', uid);
   if (error) {
-    if (error.code === "23505") {
-      throw new ApiError("이미 사용 중인 닉네임입니다.", {
-        code: "DUPLICATE_NAME",
+    if (error.code === '23505') {
+      throw new ApiError('이미 사용 중인 닉네임입니다.', {
+        code: 'DUPLICATE_NAME',
         status: 409,
       });
     }
@@ -104,15 +108,15 @@ export async function updateUserProfileApi(
   }
 
   const profile = await fetchProfile(uid);
-  return { data: profile, message: "프로필이 수정되었습니다." };
+  return { data: profile, message: '프로필이 수정되었습니다.' };
 }
 
 export async function deleteUserApi(
   _accessToken?: string,
   _refreshToken?: string
 ): Promise<DeleteUserResponse> {
-  await invokeEdgeFunction<{ id: string }>("withdraw-user", {});
-  return { data: null, message: "탈퇴가 완료되었습니다." };
+  await invokeEdgeFunction<{ id: string }>('withdraw-user', {});
+  return { data: null, message: '탈퇴가 완료되었습니다.' };
 }
 
 // ── 프로필 이미지 ──
@@ -135,8 +139,8 @@ export async function updateProfileImageApi(
 ): Promise<UpdateProfileImageResponse> {
   const uid = await getCurrentUserId();
 
-  const filename = imageUri.split("/").pop() ?? "profile.jpg";
-  const ext = filename.split(".").pop()?.toLowerCase() ?? "jpg";
+  const filename = imageUri.split('/').pop() ?? 'profile.jpg';
+  const ext = filename.split('.').pop()?.toLowerCase() ?? 'jpg';
   const contentType = getMimeType(filename);
   const today = new Date().toISOString().slice(0, 10);
   const objectPath = `${today}/${uid}-${Date.now()}.${ext}`;
@@ -148,22 +152,22 @@ export async function updateProfileImageApi(
     .upload(objectPath, buffer, { contentType, upsert: false });
 
   if (uploadError) {
-    throw new ApiError(uploadError.message, { code: "FILE_UPLOAD_FAILED", status: 500 });
+    throw new ApiError(uploadError.message, { code: 'FILE_UPLOAD_FAILED', status: 500 });
   }
 
   const { data: publicData } = supabase.storage.from(PROFILE_BUCKET).getPublicUrl(objectPath);
   const publicUrl = publicData.publicUrl;
 
   const { data: prev } = await supabase
-    .from("users")
-    .select("profile_image_url")
-    .eq("id", uid)
+    .from('users')
+    .select('profile_image_url')
+    .eq('id', uid)
     .maybeSingle();
 
   const { error: updateError } = await supabase
-    .from("users")
+    .from('users')
     .update({ profile_image_url: publicUrl })
-    .eq("id", uid);
+    .eq('id', uid);
 
   if (updateError) {
     await supabase.storage.from(PROFILE_BUCKET).remove([objectPath]);
@@ -178,7 +182,7 @@ export async function updateProfileImageApi(
   }
 
   const profile = await fetchProfile(uid);
-  return { data: profile, message: "프로필 이미지가 변경되었습니다." };
+  return { data: profile, message: '프로필 이미지가 변경되었습니다.' };
 }
 
 export async function deleteProfileImageApi(
@@ -186,9 +190,9 @@ export async function deleteProfileImageApi(
 ): Promise<DeleteProfileImageResponse> {
   const uid = await getCurrentUserId();
   const { data: row } = await supabase
-    .from("users")
-    .select("profile_image_url")
-    .eq("id", uid)
+    .from('users')
+    .select('profile_image_url')
+    .eq('id', uid)
     .maybeSingle();
 
   if (row?.profile_image_url) {
@@ -198,16 +202,13 @@ export async function deleteProfileImageApi(
     }
   }
 
-  const { error } = await supabase
-    .from("users")
-    .update({ profile_image_url: null })
-    .eq("id", uid);
+  const { error } = await supabase.from('users').update({ profile_image_url: null }).eq('id', uid);
 
   if (error) {
     throw new ApiError(error.message, { code: error.code, status: 500 });
   }
 
-  return { data: null, message: "프로필 이미지가 삭제되었습니다." };
+  return { data: null, message: '프로필 이미지가 삭제되었습니다.' };
 }
 
 // ── 비밀번호 ──
@@ -216,9 +217,11 @@ export async function verifyPasswordApi(
   body: PasswordVerifyRequest,
   _accessToken?: string
 ): Promise<PasswordVerifyResponse> {
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user || !user.email) {
-    throw new ApiError("인증이 필요합니다.", { code: "UNAUTHORIZED", status: 401 });
+    throw new ApiError('인증이 필요합니다.', { code: 'UNAUTHORIZED', status: 401 });
   }
 
   const { error } = await supabase.auth.signInWithPassword({
@@ -226,9 +229,9 @@ export async function verifyPasswordApi(
     password: body.password,
   });
   if (error) {
-    throw mapSupabaseAuthError("비밀번호가 올바르지 않습니다.", error.status);
+    throw mapSupabaseAuthError('비밀번호가 올바르지 않습니다.', error.status);
   }
-  return { data: null, message: "비밀번호 확인 완료" };
+  return { data: null, message: '비밀번호 확인 완료' };
 }
 
 export async function changePasswordApi(
@@ -236,17 +239,19 @@ export async function changePasswordApi(
   _accessToken?: string
 ): Promise<ChangePasswordResponse> {
   // 1) 현재 비밀번호 재검증
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user || !user.email) {
-    throw new ApiError("인증이 필요합니다.", { code: "UNAUTHORIZED", status: 401 });
+    throw new ApiError('인증이 필요합니다.', { code: 'UNAUTHORIZED', status: 401 });
   }
   const { error: signInError } = await supabase.auth.signInWithPassword({
     email: user.email,
     password: body.current_password,
   });
   if (signInError) {
-    throw new ApiError("비밀번호가 올바르지 않습니다.", {
-      code: "INVALID_PASSWORD",
+    throw new ApiError('비밀번호가 올바르지 않습니다.', {
+      code: 'INVALID_PASSWORD',
       status: 401,
     });
   }
@@ -258,5 +263,5 @@ export async function changePasswordApi(
     throw new ApiError(error.message, { code: error.code, status: 500 });
   }
 
-  return { data: null, message: "비밀번호가 변경되었습니다." };
+  return { data: null, message: '비밀번호가 변경되었습니다.' };
 }

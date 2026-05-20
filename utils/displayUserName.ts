@@ -1,4 +1,4 @@
-const WITHDRAWN_LABEL = "탈퇴회원";
+const WITHDRAWN_LABEL = '탈퇴회원';
 
 /**
  * 탈퇴 처리된 사용자의 placeholder name을 "탈퇴회원"으로 변환합니다.
@@ -8,10 +8,10 @@ const WITHDRAWN_LABEL = "탈퇴회원";
  */
 export function displayUserName(name: string | null | undefined): string {
   if (!name) return WITHDRAWN_LABEL;
-  if (name.startsWith("withdrawn_")) return WITHDRAWN_LABEL;
+  if (name.startsWith('withdrawn_')) return WITHDRAWN_LABEL;
   return name;
 }
 
 export function isWithdrawnUser(name: string | null | undefined): boolean {
-  return !name || name.startsWith("withdrawn_");
+  return !name || name.startsWith('withdrawn_');
 }

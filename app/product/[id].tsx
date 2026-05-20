@@ -21,13 +21,14 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useProductDetailQuery } from '@/hooks/product/useProductDetailQuery';
 import { useBidHistoryQuery } from '@/hooks/bid/useBidHistoryQuery';
 import { usePlaceBidMutation } from '@/hooks/bid/usePlaceBidMutation';
-import { COLORS, LAYOUT } from '@/constants/theme';
+import { COLORS } from '@/constants/theme';
 import { formatPrice, formatRemainingTime } from '@/utils/format';
 import useAuthStore from '@/store/useAuthStore';
 import { useToggleWishMutation } from '@/hooks/wish/useToggleWishMutation';
 import { useCloseProductMutation } from '@/hooks/product/useCloseProductMutation';
 import { useProductRealtime } from '@/hooks/product/useProductRealtime';
 import { displayUserName } from '@/utils/displayUserName';
+import ReportModal from '@/components/modals/ReportModal';
 
 function formatEndDate(endTimeStr: string): string {
   const date = new Date(endTimeStr);
@@ -59,6 +60,7 @@ export default function ProductDetail() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [bidModalVisible, setBidModalVisible] = useState(false);
   const [bidPrice, setBidPrice] = useState('');
+  const [reportVisible, setReportVisible] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
 
   const productId = Number(id) || 0;
@@ -186,14 +188,22 @@ export default function ProductDetail() {
         <TouchableOpacity onPress={() => router.back()}>
           <MaterialCommunityIcons name="chevron-left" size={28} color={COLORS.active} />
         </TouchableOpacity>
-        <View className="flex-row items-center">
-          <TouchableOpacity onPress={() => router.push('/')}>
-            <MaterialCommunityIcons name="home-outline" size={22} color={COLORS.active} />
+        {!isOwner && userId && (
+          <TouchableOpacity
+            onPress={() =>
+              Alert.alert('상품 메뉴', undefined, [
+                {
+                  text: '신고하기',
+                  style: 'destructive',
+                  onPress: () => setReportVisible(true),
+                },
+                { text: '취소', style: 'cancel' },
+              ])
+            }
+            hitSlop={8}>
+            <MaterialCommunityIcons name="dots-vertical" size={22} color={COLORS.active} />
           </TouchableOpacity>
-          <TouchableOpacity style={{ marginLeft: LAYOUT.screenPadding }}>
-            <MaterialCommunityIcons name="share-variant-outline" size={22} color={COLORS.active} />
-          </TouchableOpacity>
-        </View>
+        )}
       </View>
 
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
@@ -538,6 +548,12 @@ export default function ProductDetail() {
           </Pressable>
         </KeyboardAvoidingView>
       </Modal>
+
+      <ReportModal
+        visible={reportVisible}
+        onClose={() => setReportVisible(false)}
+        target={{ kind: 'product', id: productId }}
+      />
     </SafeAreaView>
   );
 }

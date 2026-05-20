@@ -3,7 +3,7 @@ import { View, Text, TextInput, ScrollView, TouchableOpacity, Alert } from 'reac
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { COLORS, INPUT_STYLE } from '@/constants/theme';
+import { COLORS } from '@/constants/theme';
 import { useCheckNicknameDuplicateMutation } from '@/hooks/auth/useCheckNicknameDuplicateMutation';
 import { useUpdateUserProfileMutation } from '@/hooks/user/useUpdateUserProfileMutation';
 
