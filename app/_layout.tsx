@@ -1,4 +1,5 @@
 import '../global.css';
+import '@/lib/expo-image-setup';
 import { Stack, useRouter, useSegments, useRootNavigationState } from 'expo-router';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useEffect } from 'react';

@@ -4,13 +4,14 @@ import {
   ScrollView,
   TouchableOpacity,
   TextInput,
-  Image,
   Alert,
   Platform,
   Modal,
   FlatList,
   ActivityIndicator,
 } from 'react-native';
+import { Image } from 'expo-image';
+import { IMAGE_TRANSITION_MS, IMAGE_PLACEHOLDER } from '@/lib/expo-image-setup';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState, useEffect } from 'react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -23,6 +24,7 @@ import { useUpdateProductMutation } from '@/hooks/product/useUpdateProductMutati
 import { useDeleteProductMutation } from '@/hooks/product/useDeleteProductMutation';
 import { useProductDetailQuery } from '@/hooks/product/useProductDetailQuery';
 import { ProductMediaInfo } from '@/api/types';
+import { compressImages } from '@/utils/compressImage';
 
 const MAX_DESCRIPTION_LENGTH = 2000;
 const MAX_IMAGE_COUNT = 10;
@@ -99,7 +101,8 @@ export default function ProductEdit() {
     });
 
     if (!result.canceled && result.assets.length > 0) {
-      const total = [...newImages, ...result.assets].slice(
+      const compressed = await compressImages(result.assets);
+      const total = [...newImages, ...compressed].slice(
         0,
         MAX_IMAGE_COUNT - activeExistingMedia.length
       );
@@ -333,7 +336,12 @@ export default function ProductEdit() {
 
               {activeExistingMedia.map((media) => (
                 <View key={`existing-${media.id}`} className="relative">
-                  <Image source={{ uri: media.url }} className="h-20 w-20 rounded-lg" />
+                  <Image
+                    source={{ uri: media.url }}
+                    className="h-20 w-20 rounded-lg"
+                    transition={IMAGE_TRANSITION_MS}
+                    placeholder={IMAGE_PLACEHOLDER}
+                  />
                   <TouchableOpacity
                     onPress={() => handleRemoveExistingMedia(media.id)}
                     hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
@@ -346,7 +354,12 @@ export default function ProductEdit() {
 
               {newImages.map((img, index) => (
                 <View key={img.uri} className="relative">
-                  <Image source={{ uri: img.uri }} className="h-20 w-20 rounded-lg" />
+                  <Image
+                    source={{ uri: img.uri }}
+                    className="h-20 w-20 rounded-lg"
+                    transition={IMAGE_TRANSITION_MS}
+                    placeholder={IMAGE_PLACEHOLDER}
+                  />
                   <TouchableOpacity
                     onPress={() => handleRemoveNewImage(index)}
                     hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}

@@ -1,12 +1,6 @@
-import {
-  ActivityIndicator,
-  Alert,
-  Image,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { Image } from 'expo-image';
+import { IMAGE_TRANSITION_MS, IMAGE_PLACEHOLDER } from '@/lib/expo-image-setup';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -79,6 +73,8 @@ export default function BlockedUsersPage() {
                     borderRadius: 24,
                     backgroundColor: COLORS.border,
                   }}
+                  transition={IMAGE_TRANSITION_MS}
+                  placeholder={IMAGE_PLACEHOLDER}
                 />
               ) : (
                 <View className="h-12 w-12 items-center justify-center rounded-full bg-gray-200">

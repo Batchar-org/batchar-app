@@ -1,12 +1,6 @@
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Image,
-  ActivityIndicator,
-  Alert,
-} from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { Image } from 'expo-image';
+import { IMAGE_TRANSITION_MS, IMAGE_PLACEHOLDER } from '@/lib/expo-image-setup';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -16,6 +10,7 @@ import TabBar from '@/components/layout/TabBar';
 import { useUserProfileQuery } from '@/hooks/user/useUserProfileQuery';
 import { useUpdateProfileImageMutation } from '@/hooks/user/useUpdateProfileImageMutation';
 import { useDeleteProfileImageMutation } from '@/hooks/user/useDeleteProfileImageMutation';
+import { compressImage } from '@/utils/compressImage';
 
 type ProfileField = {
   label: string;
@@ -54,7 +49,8 @@ export default function EditProfile() {
 
     if (result.canceled || !result.assets[0]) return;
 
-    updateImageMutation.mutate(result.assets[0].uri, {
+    const compressed = await compressImage(result.assets[0]);
+    updateImageMutation.mutate(compressed.uri, {
       onError: (error) => Alert.alert('오류', error.message),
     });
   };
@@ -108,7 +104,9 @@ export default function EditProfile() {
                   <Image
                     source={{ uri: profile.profile_image_url }}
                     className="h-full w-full"
-                    resizeMode="cover"
+                    contentFit="cover"
+                    transition={IMAGE_TRANSITION_MS}
+                    placeholder={IMAGE_PLACEHOLDER}
                   />
                 ) : (
                   <MaterialCommunityIcons

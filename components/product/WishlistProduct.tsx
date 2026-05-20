@@ -1,7 +1,9 @@
-import { View, Text, Image, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
+import { Image } from 'expo-image';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { COLORS, SHADOWS } from '@/constants/theme';
 import { formatPrice, formatRemainingTime } from '@/utils/format';
+import { IMAGE_TRANSITION_MS, IMAGE_PLACEHOLDER } from '@/lib/expo-image-setup';
 
 interface WishlistProductProps {
   productId: number;
@@ -32,7 +34,13 @@ export default function WishlistProduct({
       <View className="flex-row">
         {/* 상품 이미지 */}
         <View className="mr-3 h-24 w-24 overflow-hidden rounded-xl bg-gray-100">
-          <Image source={{ uri: image }} className="h-full w-full" resizeMode="cover" />
+          <Image
+            source={{ uri: image }}
+            className="h-full w-full"
+            contentFit="cover"
+            transition={IMAGE_TRANSITION_MS}
+            placeholder={IMAGE_PLACEHOLDER}
+          />
         </View>
 
         {/* 상품 정보 */}

@@ -9,11 +9,12 @@ import {
   Platform,
   Alert,
   Modal,
-  Image,
   Animated,
   StyleSheet,
   Pressable,
 } from 'react-native';
+import { Image } from 'expo-image';
+import { IMAGE_TRANSITION_MS, IMAGE_PLACEHOLDER } from '@/lib/expo-image-setup';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState, useRef, useEffect, useCallback } from 'react';
@@ -33,6 +34,7 @@ import { displayUserName } from '@/utils/displayUserName';
 import ReportModal from '@/components/modals/ReportModal';
 import { useBlockUserMutation } from '@/hooks/block/useBlockUserMutation';
 import { useUnblockUserMutation } from '@/hooks/block/useUnblockUserMutation';
+import { compressImage } from '@/utils/compressImage';
 
 function formatMessageTime(createdAt: string): string {
   const date = new Date(createdAt);
@@ -262,8 +264,9 @@ export default function ChatDetail() {
     });
 
     if (!result.canceled && result.assets.length > 0) {
+      const compressed = await compressImage(result.assets[0]);
       sendMedia(
-        { chatId, file: result.assets[0] },
+        { chatId, file: compressed },
         {
           onSuccess: () => {
             setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 200);
@@ -573,7 +576,9 @@ export default function ChatDetail() {
                             <Image
                               source={{ uri: msg.content }}
                               style={{ width: 200, height: 200 }}
-                              resizeMode="cover"
+                              contentFit="cover"
+                              transition={IMAGE_TRANSITION_MS}
+                              placeholder={IMAGE_PLACEHOLDER}
                             />
                           )}
                         </View>

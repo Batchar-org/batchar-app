@@ -1,4 +1,6 @@
-import { View, Text, ScrollView, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { Image } from 'expo-image';
+import { IMAGE_TRANSITION_MS, IMAGE_PLACEHOLDER } from '@/lib/expo-image-setup';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -133,7 +135,9 @@ export default function ProductHistoryList({ title, biddingLabel, view }: Produc
                     <Image
                       source={{ uri: item.media_url }}
                       className="h-full w-full"
-                      resizeMode="cover"
+                      contentFit="cover"
+                      transition={IMAGE_TRANSITION_MS}
+                      placeholder={IMAGE_PLACEHOLDER}
                     />
                   ) : (
                     <View className="h-full w-full items-center justify-center bg-gray-200">

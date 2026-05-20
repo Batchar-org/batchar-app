@@ -1,7 +1,9 @@
-import { View, Text, Image, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, Platform } from 'react-native';
+import { Image } from 'expo-image';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { COLORS, SHADOWS } from '@/constants/theme';
 import { formatPrice, formatRemainingTime } from '@/utils/format';
+import { IMAGE_TRANSITION_MS, IMAGE_PLACEHOLDER } from '@/lib/expo-image-setup';
 
 interface ProductProps {
   id: string;
@@ -59,7 +61,13 @@ export default function Product({
               <Text className="ml-1 text-xs font-semibold text-white">{deadline}</Text>
             </View>
           )}
-          <Image source={{ uri: image }} className="h-full w-full" resizeMode="cover" />
+          <Image
+            source={{ uri: image }}
+            className="h-full w-full"
+            contentFit="cover"
+            transition={IMAGE_TRANSITION_MS}
+            placeholder={IMAGE_PLACEHOLDER}
+          />
         </View>
 
         {/* 상품 정보 */}

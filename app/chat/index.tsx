@@ -1,4 +1,6 @@
-import { View, Text, ScrollView, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { Image } from 'expo-image';
+import { IMAGE_TRANSITION_MS, IMAGE_PLACEHOLDER } from '@/lib/expo-image-setup';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import TabBar from '@/components/layout/TabBar';
@@ -80,6 +82,8 @@ export default function Chat() {
                 <Image
                   source={{ uri: chat.product_image_url }}
                   className="ml-3 h-12 w-12 rounded-lg"
+                  transition={IMAGE_TRANSITION_MS}
+                  placeholder={IMAGE_PLACEHOLDER}
                 />
               )}
             </TouchableOpacity>

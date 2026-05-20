@@ -4,13 +4,14 @@ import {
   ScrollView,
   TouchableOpacity,
   TextInput,
-  Image,
   Alert,
   Platform,
   Modal,
   FlatList,
   ActivityIndicator,
 } from 'react-native';
+import { Image } from 'expo-image';
+import { IMAGE_TRANSITION_MS, IMAGE_PLACEHOLDER } from '@/lib/expo-image-setup';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState } from 'react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -21,6 +22,7 @@ import TabBar from '@/components/layout/TabBar';
 import { COLORS, INPUT_STYLE, LAYOUT } from '@/constants/theme';
 import { useCreateProductMutation } from '@/hooks/product/useCreateProductMutation';
 import { useIsLoggedIn } from '@/store/useAuthStore';
+import { compressImages } from '@/utils/compressImage';
 
 const MAX_DESCRIPTION_LENGTH = 2000;
 const MAX_IMAGE_COUNT = 10;
@@ -73,7 +75,8 @@ export default function Register() {
     });
 
     if (!result.canceled && result.assets.length > 0) {
-      const total = [...images, ...result.assets].slice(0, MAX_IMAGE_COUNT);
+      const compressed = await compressImages(result.assets);
+      const total = [...images, ...compressed].slice(0, MAX_IMAGE_COUNT);
       setImages(total);
     }
   };
@@ -250,7 +253,12 @@ export default function Register() {
 
               {images.map((img, index) => (
                 <View key={img.uri} className="relative">
-                  <Image source={{ uri: img.uri }} className="h-20 w-20 rounded-lg" />
+                  <Image
+                    source={{ uri: img.uri }}
+                    className="h-20 w-20 rounded-lg"
+                    transition={IMAGE_TRANSITION_MS}
+                    placeholder={IMAGE_PLACEHOLDER}
+                  />
                   <TouchableOpacity
                     onPress={() => handleRemoveImage(index)}
                     hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}

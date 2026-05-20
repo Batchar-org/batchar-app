@@ -2,7 +2,6 @@ import {
   View,
   Text,
   ScrollView,
-  Image,
   TouchableOpacity,
   useWindowDimensions,
   ActivityIndicator,
@@ -14,6 +13,8 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import { Image } from 'expo-image';
+import { IMAGE_TRANSITION_MS, IMAGE_PLACEHOLDER } from '@/lib/expo-image-setup';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState, useRef } from 'react';
@@ -222,7 +223,9 @@ export default function ProductDetail() {
                 key={index}
                 source={{ uri: img }}
                 style={{ width: screenWidth, height: 280 }}
-                resizeMode="cover"
+                contentFit="cover"
+                transition={IMAGE_TRANSITION_MS}
+                placeholder={IMAGE_PLACEHOLDER}
               />
             ))}
           </ScrollView>

@@ -6,10 +6,11 @@ import {
   TouchableOpacity,
   Alert,
   Modal,
-  Image,
   Pressable,
   Linking,
 } from 'react-native';
+import { Image } from 'expo-image';
+import { IMAGE_TRANSITION_MS, IMAGE_PLACEHOLDER } from '@/lib/expo-image-setup';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -116,7 +117,9 @@ export default function MyPage() {
               <Image
                 source={{ uri: profile.profile_image_url }}
                 className="h-full w-full"
-                resizeMode="cover"
+                contentFit="cover"
+                transition={IMAGE_TRANSITION_MS}
+                placeholder={IMAGE_PLACEHOLDER}
               />
             ) : (
               <MaterialCommunityIcons name="account" size={48} color="white" />
