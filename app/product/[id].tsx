@@ -26,7 +26,8 @@ import { formatPrice, formatRemainingTime } from '@/utils/format';
 import useAuthStore from '@/store/useAuthStore';
 import { useToggleWishMutation } from '@/hooks/wish/useToggleWishMutation';
 import { useCloseProductMutation } from '@/hooks/product/useCloseProductMutation';
-import { useProductSSE } from '@/hooks/product/useProductSSE';
+import { useProductRealtime } from '@/hooks/product/useProductRealtime';
+import { displayUserName } from '@/utils/displayUserName';
 
 function formatEndDate(endTimeStr: string): string {
   const date = new Date(endTimeStr);
@@ -69,8 +70,8 @@ export default function ProductDetail() {
   const { mutate: placeBid, isPending: isBidding } = usePlaceBidMutation();
   const { mutate: closeProduct, isPending: isClosing } = useCloseProductMutation();
 
-  // SSE 실시간 입찰 업데이트 (경매 진행 중일 때만)
-  useProductSSE({
+  // Supabase Realtime 실시간 입찰 업데이트 (경매 진행 중일 때만)
+  useProductRealtime({
     productId,
     enabled: product?.status === 'ON_SALE',
   });
@@ -153,7 +154,7 @@ export default function ProductDetail() {
   const handleAwardAuction = () => {
     Alert.alert(
       '낙찰 확인',
-      `최고가 입찰자(${bidRecords[0]?.bidder_name})에게 낙찰됩니다. 진행하시겠습니까?`,
+      `최고가 입찰자(${displayUserName(bidRecords[0]?.bidder_name)})에게 낙찰됩니다. 진행하시겠습니까?`,
       [
         { text: '취소', style: 'cancel' },
         {
@@ -234,7 +235,7 @@ export default function ProductDetail() {
             </View>
             <View>
               <Text className="text-base font-medium text-gray-900">
-                {product.seller_name || '판매자'}
+                {displayUserName(product.seller_name) || '판매자'}
               </Text>
             </View>
           </View>
@@ -404,7 +405,7 @@ export default function ProductDetail() {
                           </View>
                         )}
                         <Text className="text-base font-medium text-gray-900">
-                          {bid.bidder_name}
+                          {displayUserName(bid.bidder_name)}
                         </Text>
                       </View>
                       <Text className="text-base font-bold" style={{ color: COLORS.active }}>

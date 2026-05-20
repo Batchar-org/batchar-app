@@ -22,13 +22,14 @@ import * as ImagePicker from 'expo-image-picker';
 import { useChatMessagesQuery } from '@/hooks/chat/useChatMessagesQuery';
 import { useSendMessageMutation } from '@/hooks/chat/useSendMessageMutation';
 import { useChatListQuery } from '@/hooks/chat/useChatListQuery';
-import { useStompClient } from '@/hooks/chat/useStompClient';
+import { useChatRealtime } from '@/hooks/chat/useChatRealtime';
 import { useLeaveChatMutation } from '@/hooks/chat/useLeaveChatMutation';
 import { useCompleteDealMutation } from '@/hooks/chat/useCompleteDealMutation';
 import { useSendChatMediaMutation } from '@/hooks/chat/useSendChatMediaMutation';
 import { useDealStatus } from '@/hooks/chat/useDealStatus';
 import { COLORS, ICON_SIZES } from '@/constants/theme';
 import useAuthStore from '@/store/useAuthStore';
+import { displayUserName } from '@/utils/displayUserName';
 
 function formatMessageTime(createdAt: string): string {
   const date = new Date(createdAt);
@@ -100,7 +101,7 @@ export default function ChatDetail() {
     setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 100);
   }, []);
 
-  const { sendMessage: stompSend } = useStompClient({
+  const { sendMessage: stompSend } = useChatRealtime({
     chatId,
     onMessageReceived,
   });
@@ -233,11 +234,12 @@ export default function ChatDetail() {
   const getDateKey = (createdAt: string) => new Date(createdAt).toDateString();
 
   const isMediaMessage = (content: string) => {
-    return /\.(jpg|jpeg|png|gif|webp|mp4|mov|avi|webm)$/i.test(content);
+    // Supabase signed URL은 끝에 ?token=...이 붙으므로 query string 허용
+    return /\.(jpg|jpeg|png|gif|webp|mp4|mov|avi|webm)(\?.*)?$/i.test(content);
   };
 
   const isVideoUrl = (url: string) => {
-    return /\.(mp4|mov|avi|webm)$/i.test(url);
+    return /\.(mp4|mov|avi|webm)(\?.*)?$/i.test(url);
   };
 
   return (
@@ -256,7 +258,7 @@ export default function ChatDetail() {
           </TouchableOpacity>
           <View className="ml-2">
             <Text className="text-lg font-bold" style={{ color: COLORS.text }}>
-              {chatInfo?.partner_name ?? '채팅'}
+              {chatInfo ? displayUserName(chatInfo.partner_name) : '채팅'}
             </Text>
           </View>
         </View>
@@ -379,7 +381,7 @@ export default function ChatDetail() {
           {!messages || messages.length === 0 ? (
             <View className="flex-1 items-center pt-20">
               <Text className="text-sm text-gray-400">
-                {chatInfo?.partner_name ?? '상대방'}님과 대화를 시작해 보세요.
+                {chatInfo ? displayUserName(chatInfo.partner_name) : '상대방'}님과 대화를 시작해 보세요.
               </Text>
             </View>
           ) : (

@@ -1,22 +1,19 @@
 import { create } from 'zustand';
 import { combine, devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
-import { logoutApi, refreshApi } from '@/api/auth';
+import { supabase } from '@/lib/supabase';
 import {
-  getRefreshToken,
-  getStoredUserId,
   getStoredUserName,
-  removeRefreshToken,
   removeStoredUserId,
   removeStoredUserName,
-  setRefreshToken,
+  setStoredUserId,
   setStoredUserName,
 } from '@/lib/secureStore';
 
 type AuthStatus = 'idle' | 'authenticated' | 'unauthenticated';
 
 type AuthStoreState = {
-  userId: number | null;
+  userId: string | null;
   userName: string | null;
   accessToken: string | null;
   status: AuthStatus;
@@ -28,7 +25,6 @@ const initialState: AuthStoreState = {
   userName: null,
   accessToken: null,
   status: 'idle' as AuthStatus,
-  // 초기 세션 복원이 끝나기 전에는 라우팅을 보류합니다.
   isInitialized: false,
 };
 
@@ -42,7 +38,7 @@ const useAuthStore = create(
             accessToken,
             userName,
           }: {
-            userId: number;
+            userId: string;
             accessToken: string;
             userName?: string | null;
           }) =>
@@ -63,12 +59,11 @@ const useAuthStore = create(
 
           initializeAuth: async () => {
             try {
-              // 앱 재실행 시에는 저장된 RT와 userId로 세션을 복구합니다.
-              const refreshToken = await getRefreshToken();
-              const storedUserId = await getStoredUserId();
+              // Supabase 클라이언트가 SecureStore에서 세션을 자동 복원합니다.
+              const { data: { session } } = await supabase.auth.getSession();
               const storedUserName = await getStoredUserName();
 
-              if (!refreshToken || storedUserId === null) {
+              if (!session) {
                 set((state) => {
                   state.userId = null;
                   state.userName = null;
@@ -79,22 +74,16 @@ const useAuthStore = create(
                 return;
               }
 
-              const response = await refreshApi({ refreshToken });
-              const { accessToken, refreshToken: nextRefreshToken } = response.data;
-
-              // refresh 응답의 RT는 항상 최신 값으로 교체합니다.
-              await setRefreshToken(nextRefreshToken);
+              await setStoredUserId(session.user.id);
 
               set((state) => {
-                state.userId = storedUserId;
+                state.userId = session.user.id;
                 state.userName = storedUserName;
-                state.accessToken = accessToken;
+                state.accessToken = session.access_token;
                 state.status = 'authenticated';
                 state.isInitialized = true;
               });
             } catch {
-              // 세션 복구에 실패하면 저장된 RT를 제거하고 비로그인 상태로 전환합니다.
-              await removeRefreshToken();
               await removeStoredUserId();
               await removeStoredUserName();
 
@@ -110,15 +99,10 @@ const useAuthStore = create(
 
           logout: async () => {
             try {
-              const refreshToken = await getRefreshToken();
-
-              if (refreshToken) {
-                await logoutApi({ refreshToken });
-              }
+              await supabase.auth.signOut();
             } catch {
               // 서버 응답과 무관하게 앱 쪽 세션은 반드시 종료합니다.
             } finally {
-              await removeRefreshToken();
               await removeStoredUserId();
               await removeStoredUserName();
 
@@ -137,11 +121,36 @@ const useAuthStore = create(
   )
 );
 
+supabase.auth.onAuthStateChange((event, session) => {
+  if (event === 'SIGNED_OUT' || !session) {
+    useAuthStore.setState((state) => ({
+      ...state,
+      userId: null,
+      userName: null,
+      accessToken: null,
+      status: 'unauthenticated',
+    }));
+    return;
+  }
+
+  if (event === 'TOKEN_REFRESHED' || event === 'SIGNED_IN' || event === 'USER_UPDATED') {
+    useAuthStore.setState((state) => ({
+      ...state,
+      userId: session.user.id,
+      accessToken: session.access_token,
+      status: 'authenticated',
+    }));
+  }
+});
+
 export default useAuthStore;
 
+export const useUserId = () => useAuthStore((state) => state.userId);
 export const useAuthStatus = () => useAuthStore((state) => state.status);
 export const useAccessToken = () => useAuthStore((state) => state.accessToken);
 export const useUserName = () => useAuthStore((state) => state.userName);
 export const useIsInitialized = () => useAuthStore((state) => state.isInitialized);
 export const useIsLoggedIn = () => useAuthStore((state) => state.status === 'authenticated');
 export const useAuthActions = () => useAuthStore((state) => state.actions);
+
+export { setStoredUserId, setStoredUserName };

@@ -1,34 +1,16 @@
 import * as SecureStore from 'expo-secure-store';
 
-const REFRESH_TOKEN_KEY = 'batchar_refresh_token';
+// Supabase 클라이언트가 access/refresh 토큰을 자체 SecureStore adapter로 관리하므로
+// 여기서는 라우팅 복원에 필요한 부가 정보(userId, userName)만 저장합니다.
 const USER_ID_KEY = 'batchar_user_id';
 const USER_NAME_KEY = 'batchar_user_name';
 
-export async function setRefreshToken(refreshToken: string) {
-  await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, refreshToken);
-}
-
-export async function getRefreshToken() {
-  return SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
-}
-
-export async function removeRefreshToken() {
-  await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
-}
-
-export async function setStoredUserId(userId: number) {
-  await SecureStore.setItemAsync(USER_ID_KEY, String(userId));
+export async function setStoredUserId(userId: string) {
+  await SecureStore.setItemAsync(USER_ID_KEY, userId);
 }
 
 export async function getStoredUserId() {
-  const userId = await SecureStore.getItemAsync(USER_ID_KEY);
-
-  if (!userId) {
-    return null;
-  }
-
-  const parsedUserId = Number(userId);
-  return Number.isFinite(parsedUserId) ? parsedUserId : null;
+  return SecureStore.getItemAsync(USER_ID_KEY);
 }
 
 export async function removeStoredUserId() {

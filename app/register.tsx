@@ -189,7 +189,7 @@ export default function RegisterPage() {
             {/* 앱 로고 */}
             <View className="mb-10 items-center">
               <Text className="text-5xl font-black" style={{ color: COLORS.primary }}>
-                밭-찰!
+                밭찰!
               </Text>
             </View>
 

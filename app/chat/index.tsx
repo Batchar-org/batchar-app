@@ -5,6 +5,7 @@ import TabBar from '@/components/layout/TabBar';
 import { useRouter } from 'expo-router';
 import { useChatListQuery } from '@/hooks/chat/useChatListQuery';
 import { COLORS } from '@/constants/theme';
+import { displayUserName } from '@/utils/displayUserName';
 
 function formatChatDate(updatedAt: string): string {
   const date = new Date(updatedAt);
@@ -56,7 +57,7 @@ export default function Chat() {
 
               {/* 채팅 정보 */}
               <View className="ml-3 flex-1">
-                <Text className="text-base font-semibold">{chat.partner_name}</Text>
+                <Text className="text-base font-semibold">{displayUserName(chat.partner_name)}</Text>
                 <Text className="mt-1 text-sm text-gray-500" numberOfLines={1}>
                   {chat.last_message || '대화를 시작해 보세요.'}
                 </Text>

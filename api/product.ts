@@ -1,188 +1,357 @@
-import * as FileSystem from 'expo-file-system/legacy';
-import { ImagePickerAsset } from 'expo-image-picker';
+import { ImagePickerAsset } from "expo-image-picker";
 
-import {
+import { supabase } from "@/lib/supabase";
+import { getMimeType } from "@/utils/mimeTypes";
+import { uriToArrayBuffer } from "@/utils/uploadFile";
+import { ApiError } from "./errors";
+import type {
   ProductCloseResponse,
   ProductCreateRequest,
   ProductCreateResponse,
   ProductDeleteResponse,
+  ProductDetail,
   ProductDetailResponse,
   ProductListParams,
   ProductListResponse,
+  ProductMediaInfo,
+  ProductSummary,
   ProductUpdateRequest,
   ProductUpdateResponse,
-} from './types';
-import { apiFetch } from './client';
-import { getMimeType } from '@/utils/mimeTypes';
+} from "./types";
 
-declare const process: {
-  env: Record<string, string | undefined>;
-};
+const PRODUCT_BUCKET = "product-media";
 
-const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL?.trim().replace(/\/+$/, '') ?? '';
+async function getCurrentUserId(): Promise<string> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    throw new ApiError("인증이 필요합니다.", { code: "UNAUTHORIZED", status: 401 });
+  }
+  return user.id;
+}
+
+function mediaTypeFromName(name: string): "IMAGE" | "VIDEO" {
+  const ext = name.split(".").pop()?.toLowerCase() ?? "";
+  if (["mp4", "mov", "avi", "webm"].includes(ext)) return "VIDEO";
+  return "IMAGE";
+}
+
+async function uploadProductMedia(
+  uid: string,
+  file: ImagePickerAsset,
+): Promise<{ url: string; type: "IMAGE" | "VIDEO"; path: string }> {
+  const filename = file.uri.split("/").pop() ?? "upload.jpg";
+  const ext = filename.split(".").pop()?.toLowerCase() ?? "jpg";
+  const today = new Date().toISOString().slice(0, 10);
+  const path = `${today}/${uid}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+  const contentType = getMimeType(filename);
+
+  const buffer = await uriToArrayBuffer(file.uri);
+  const { error } = await supabase.storage
+    .from(PRODUCT_BUCKET)
+    .upload(path, buffer, { contentType, upsert: false });
+
+  if (error) {
+    throw new ApiError(error.message, { code: "FILE_UPLOAD_FAILED", status: 500 });
+  }
+
+  const { data } = supabase.storage.from(PRODUCT_BUCKET).getPublicUrl(path);
+  return { url: data.publicUrl, type: mediaTypeFromName(filename), path };
+}
+
+function extractStoragePath(publicUrl: string): string | null {
+  try {
+    const url = new URL(publicUrl);
+    const marker = `/${PRODUCT_BUCKET}/`;
+    const idx = url.pathname.indexOf(marker);
+    if (idx < 0) return null;
+    return url.pathname.slice(idx + marker.length);
+  } catch {
+    return null;
+  }
+}
 
 export async function createProductApi(
   request: ProductCreateRequest,
   files: ImagePickerAsset[],
-  accessToken: string
+  _accessToken?: string,
 ): Promise<ProductCreateResponse> {
-  if (!BASE_URL) {
-    throw new Error('EXPO_PUBLIC_API_BASE_URL이 없습니다. Metro 서버를 재시작해 주세요.');
+  if (files.length === 0) {
+    throw new ApiError("상품 미디어는 최소 1개 이상이어야 합니다.", {
+      code: "PRODUCT_MEDIA_REQUIRED",
+      status: 400,
+    });
   }
 
-  // 백엔드 Jackson 설정이 SNAKE_CASE이므로 키를 snake_case로 변환
-  // endTime에서 타임존(Z) 제거 — Spring의 LocalDateTime 형식에 맞춤
-  const payload = {
-    title: request.title,
-    description: request.description,
-    category: request.category,
-    start_price: request.startPrice,
-    end_time: request.endTime.replace('Z', ''),
+  const uid = await getCurrentUserId();
+
+  const uploaded: { url: string; type: "IMAGE" | "VIDEO"; path: string }[] = [];
+  try {
+    for (const file of files) {
+      uploaded.push(await uploadProductMedia(uid, file));
+    }
+  } catch (e) {
+    await supabase.storage.from(PRODUCT_BUCKET).remove(uploaded.map((u) => u.path));
+    throw e;
+  }
+
+  const { data: product, error: productError } = await supabase
+    .from("products")
+    .insert({
+      seller_id: uid,
+      title: request.title,
+      description: request.description,
+      category: request.category,
+      start_price: request.startPrice,
+      current_price: request.startPrice,
+      end_time: request.endTime,
+    })
+    .select("id")
+    .single();
+
+  if (productError || !product) {
+    await supabase.storage.from(PRODUCT_BUCKET).remove(uploaded.map((u) => u.path));
+    throw new ApiError(productError?.message ?? "상품 등록에 실패했습니다.", {
+      code: productError?.code,
+      status: 500,
+    });
+  }
+
+  const { error: mediaError } = await supabase.from("product_media").insert(
+    uploaded.map((u) => ({
+      product_id: product.id,
+      media_url: u.url,
+      media_type: u.type,
+    })),
+  );
+
+  if (mediaError) {
+    await supabase.from("products").delete().eq("id", product.id);
+    await supabase.storage.from(PRODUCT_BUCKET).remove(uploaded.map((u) => u.path));
+    throw new ApiError(mediaError.message, { code: mediaError.code, status: 500 });
+  }
+
+  return {
+    data: { product_id: product.id },
+    message: "상품이 등록되었습니다.",
   };
-
-  // JSON을 임시 파일로 저장 후 application/json 타입으로 FormData에 첨부
-  // React Native FormData는 문자열을 text/plain으로 보내기 때문에
-  // Spring @RequestPart가 역직렬화하지 못함 → 파일 객체로 전송해야 함
-  const jsonUri = `${FileSystem.cacheDirectory}product_request_${Date.now()}.json`;
-  await FileSystem.writeAsStringAsync(jsonUri, JSON.stringify(payload));
-
-  const formData = new FormData();
-
-  formData.append('request', {
-    uri: jsonUri,
-    name: 'request.json',
-    type: 'application/json',
-  } as unknown as Blob);
-
-  // 파일 파트 첨부
-  for (const file of files) {
-    const uri = file.uri;
-    const name = uri.split('/').pop() ?? 'image.jpg';
-    formData.append('files', {
-      uri,
-      name,
-      type: getMimeType(name),
-    } as unknown as Blob);
-  }
-
-  const response = await fetch(`${BASE_URL}/api/products`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-    body: formData,
-  });
-
-  const contentType = response.headers.get('content-type');
-  const isJson = contentType?.includes('application/json');
-  const data = isJson ? await response.json() : null;
-
-  if (!response.ok) {
-    const message = data?.message ?? `상품 등록에 실패했습니다. status=${response.status}`;
-    throw new Error(message);
-  }
-
-  return data as ProductCreateResponse;
 }
 
 export async function getProductsApi(
   params: ProductListParams = {},
-  accessToken?: string | null
+  _accessToken?: string | null,
 ): Promise<ProductListResponse> {
-  const query = new URLSearchParams();
-  if (params.view) query.set('view', params.view);
-  if (params.category) query.set('category', params.category);
-  if (params.keyword) query.set('keyword', params.keyword);
-  if (params.page !== undefined) query.set('page', String(params.page));
-  if (params.size !== undefined) query.set('size', String(params.size));
+  const { data, error } = await supabase.rpc("list_products", {
+    p_view: params.view ?? "ALL",
+    p_category: params.category ?? undefined,
+    p_keyword: params.keyword ?? undefined,
+    p_page: params.page ?? 0,
+    p_size: params.size ?? 20,
+  });
 
-  const queryString = query.toString();
-  const path = `/api/products${queryString ? `?${queryString}` : ''}`;
+  if (error) {
+    throw new ApiError(error.message, { code: error.code, status: 500 });
+  }
 
-  return apiFetch<ProductListResponse>(path, { accessToken });
+  const payload = data as { items: ProductSummary[]; has_next: boolean };
+  return {
+    data: { content: payload.items, has_next: payload.has_next },
+    message: "상품 목록 조회 성공",
+  };
 }
 
 export async function getProductDetailApi(
   productId: number,
-  accessToken?: string | null
+  _accessToken?: string | null,
 ): Promise<ProductDetailResponse> {
-  return apiFetch<ProductDetailResponse>(`/api/products/${productId}`, { accessToken });
+  const { data, error } = await supabase.rpc("get_product_detail", {
+    p_product_id: productId,
+  });
+
+  if (error) {
+    if (error.code === "P0002") {
+      throw new ApiError("상품을 찾을 수 없습니다.", { code: "PRODUCT_NOT_FOUND", status: 404 });
+    }
+    throw new ApiError(error.message, { code: error.code, status: 500 });
+  }
+
+  const raw = data as {
+    product_id: number;
+    seller_id: string;
+    seller_name: string;
+    seller_profile_image_url: string | null;
+    title: string;
+    description: string;
+    category: string;
+    start_price: number;
+    current_price: number;
+    is_top_bidder: boolean;
+    is_wished: boolean;
+    status: string;
+    start_time: string;
+    end_time: string;
+    wish_count: number;
+    bid_count: number;
+    media_urls: { id: number; media_url: string; media_type: "IMAGE" | "VIDEO" }[];
+  };
+
+  const detail: ProductDetail = {
+    product_id: raw.product_id,
+    seller_id: raw.seller_id,
+    seller_name: raw.seller_name,
+    seller_profile_image_url: raw.seller_profile_image_url,
+    title: raw.title,
+    description: raw.description,
+    category: raw.category,
+    start_price: raw.start_price,
+    current_price: raw.current_price,
+    is_top_bidder: raw.is_top_bidder,
+    status: raw.status,
+    start_time: raw.start_time,
+    end_time: raw.end_time,
+    is_wished: raw.is_wished,
+    wish_count: raw.wish_count,
+    bid_count: raw.bid_count,
+    media_urls: raw.media_urls.map((m): ProductMediaInfo => ({ id: m.id, url: m.media_url })),
+  };
+
+  return { data: detail, message: "상품 상세 조회 성공" };
 }
 
 export async function updateProductApi(
   productId: number,
   request: ProductUpdateRequest,
   files: ImagePickerAsset[],
-  accessToken: string
+  _accessToken?: string,
 ): Promise<ProductUpdateResponse> {
-  if (!BASE_URL) {
-    throw new Error('EXPO_PUBLIC_API_BASE_URL이 없습니다. Metro 서버를 재시작해 주세요.');
+  const uid = await getCurrentUserId();
+
+  const patch: {
+    title?: string;
+    description?: string;
+    category?: string;
+    end_time?: string;
+  } = {};
+  if (request.title !== undefined) patch.title = request.title;
+  if (request.description !== undefined) patch.description = request.description;
+  if (request.category !== undefined) patch.category = request.category;
+  if (request.endTime !== undefined) patch.end_time = request.endTime;
+
+  if (Object.keys(patch).length > 0) {
+    const { error } = await supabase
+      .from("products")
+      .update(patch)
+      .eq("id", productId)
+      .eq("seller_id", uid);
+    if (error) {
+      throw new ApiError(error.message, { code: error.code, status: 500 });
+    }
   }
 
-  const payload: Record<string, unknown> = {};
-  if (request.title !== undefined) payload.title = request.title;
-  if (request.description !== undefined) payload.description = request.description;
-  if (request.category !== undefined) payload.category = request.category;
-  if (request.endTime !== undefined) payload.end_time = request.endTime.replace('Z', '');
-  if (request.deleteMediaIds !== undefined) payload.delete_media_ids = request.deleteMediaIds;
+  if (request.deleteMediaIds && request.deleteMediaIds.length > 0) {
+    const { data: toDelete } = await supabase
+      .from("product_media")
+      .select("id, media_url")
+      .in("id", request.deleteMediaIds)
+      .eq("product_id", productId);
 
-  const jsonUri = `${FileSystem.cacheDirectory}product_update_${Date.now()}.json`;
-  await FileSystem.writeAsStringAsync(jsonUri, JSON.stringify(payload));
-
-  const formData = new FormData();
-
-  formData.append('request', {
-    uri: jsonUri,
-    name: 'request.json',
-    type: 'application/json',
-  } as unknown as Blob);
-
-  for (const file of files) {
-    const uri = file.uri;
-    const name = uri.split('/').pop() ?? 'image.jpg';
-    formData.append('files', {
-      uri,
-      name,
-      type: getMimeType(name),
-    } as unknown as Blob);
+    if (toDelete && toDelete.length > 0) {
+      const paths = toDelete
+        .map((m) => extractStoragePath(m.media_url))
+        .filter((p): p is string => p !== null);
+      if (paths.length > 0) {
+        await supabase.storage.from(PRODUCT_BUCKET).remove(paths);
+      }
+      await supabase
+        .from("product_media")
+        .delete()
+        .in(
+          "id",
+          toDelete.map((m) => m.id),
+        );
+    }
   }
 
-  const response = await fetch(`${BASE_URL}/api/products/${productId}`, {
-    method: 'PATCH',
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-    body: formData,
-  });
-
-  const contentType = response.headers.get('content-type');
-  const isJson = contentType?.includes('application/json');
-  const data = isJson ? await response.json() : null;
-
-  if (!response.ok) {
-    const message = data?.message ?? `상품 수정에 실패했습니다. status=${response.status}`;
-    throw new Error(message);
+  if (files.length > 0) {
+    const uploaded: { url: string; type: "IMAGE" | "VIDEO"; path: string }[] = [];
+    try {
+      for (const file of files) {
+        uploaded.push(await uploadProductMedia(uid, file));
+      }
+    } catch (e) {
+      await supabase.storage.from(PRODUCT_BUCKET).remove(uploaded.map((u) => u.path));
+      throw e;
+    }
+    const { error: insertError } = await supabase.from("product_media").insert(
+      uploaded.map((u) => ({
+        product_id: productId,
+        media_url: u.url,
+        media_type: u.type,
+      })),
+    );
+    if (insertError) {
+      await supabase.storage.from(PRODUCT_BUCKET).remove(uploaded.map((u) => u.path));
+      throw new ApiError(insertError.message, { code: insertError.code, status: 500 });
+    }
   }
 
-  return data as ProductUpdateResponse;
+  return getProductDetailApi(productId);
 }
 
 export async function closeProductApi(
   productId: number,
-  accessToken: string
+  _accessToken?: string,
 ): Promise<ProductCloseResponse> {
-  return apiFetch<ProductCloseResponse>(`/api/products/${productId}/close`, {
-    method: 'POST',
-    accessToken,
-  });
+  const { error } = await supabase.rpc("close_auction_manual", { p_product_id: productId });
+  if (error) {
+    if (error.message.includes("AUCTION_CLOSED")) {
+      throw new ApiError("이미 마감된 경매입니다.", {
+        code: "AUCTION_ALREADY_CLOSED",
+        status: 400,
+      });
+    }
+    if (error.message.includes("NOT_SELLER")) {
+      throw new ApiError("본인 상품만 경매 마감을 할 수 있습니다.", {
+        code: "PRODUCT_CLOSE_FORBIDDEN",
+        status: 403,
+      });
+    }
+    if (error.message.includes("PRODUCT_NOT_FOUND")) {
+      throw new ApiError("상품을 찾을 수 없습니다.", { code: "PRODUCT_NOT_FOUND", status: 404 });
+    }
+    throw new ApiError(error.message, { code: error.code, status: 500 });
+  }
+  return { data: undefined, message: "경매가 마감되었습니다." };
 }
 
 export async function deleteProductApi(
   productId: number,
-  accessToken: string
+  _accessToken?: string,
 ): Promise<ProductDeleteResponse> {
-  return apiFetch<ProductDeleteResponse>(`/api/products/${productId}`, {
-    method: 'DELETE',
-    accessToken,
-  });
+  const uid = await getCurrentUserId();
+
+  const { data: mediaRows } = await supabase
+    .from("product_media")
+    .select("media_url")
+    .eq("product_id", productId);
+
+  const { error } = await supabase
+    .from("products")
+    .delete()
+    .eq("id", productId)
+    .eq("seller_id", uid);
+
+  if (error) {
+    throw new ApiError(error.message, { code: error.code, status: 500 });
+  }
+
+  if (mediaRows && mediaRows.length > 0) {
+    const paths = mediaRows
+      .map((m) => extractStoragePath(m.media_url))
+      .filter((p): p is string => p !== null);
+    if (paths.length > 0) {
+      await supabase.storage.from(PRODUCT_BUCKET).remove(paths);
+    }
+  }
+
+  return { data: { product_id: productId }, message: "상품이 삭제되었습니다." };
 }

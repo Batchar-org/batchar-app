@@ -37,7 +37,7 @@ export type LogoutRequest = {
 };
 
 export type AuthTokenPayload = {
-  userId: number;
+  userId: string;
   accessToken: string;
   refreshToken: string;
 };
@@ -72,7 +72,7 @@ export type PasswordResetResponse = ApiResponse<null>;
 // ── User ──
 
 export type UserProfile = {
-  user_id: number;
+  user_id: string;
   email: string;
   name: string;
   address: string;
@@ -157,8 +157,9 @@ export type ProductMediaInfo = {
 
 export type ProductDetail = {
   product_id: number;
-  seller_id: number;
+  seller_id: string;
   seller_name: string;
+  seller_profile_image_url?: string | null;
   title: string;
   description: string;
   category: string;
@@ -227,7 +228,7 @@ export type BidCreateRequest = {
 export type BidCreateResponse = ApiResponse<{
   bid_id: number;
   product_id: number;
-  bidder_id: number;
+  bidder_id: string;
   price: number;
   created_at: string;
 }>;
@@ -249,15 +250,6 @@ export type BidListResponse = ApiResponse<{
   content: BidSummary[];
   has_next: boolean;
 }>;
-
-// ── SSE ──
-
-export type BidBroadcast = {
-  productId: number;
-  currentPrice: number;
-  bidderName: string;
-  createdAt: string;
-};
 
 // ── Storage ──
 
@@ -293,7 +285,7 @@ export type ChatMessageRequest = {
 
 export type ChatMessage = {
   message_id: number;
-  sender_id: number;
+  sender_id: string;
   content: string;
   is_read: boolean;
   created_at: string;
@@ -309,7 +301,7 @@ export type ChatCompleteDealResponse = ApiResponse<null>;
 
 export type ChatMediaMessage = {
   message_id: number;
-  sender_id: number;
+  sender_id: string;
   content: string;
   media_url: string;
   media_type: 'IMAGE' | 'VIDEO';
