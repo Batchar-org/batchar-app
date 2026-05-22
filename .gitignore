@@ -95,6 +95,7 @@ sketch
 
 .expo
 __generated__
+eas.json
 
 ### ReactNative.macOS Stack ###
 # General
@@ -956,6 +957,13 @@ hs_err_pid*
 # End of https://www.toptal.com/developers/gitignore/api/macos,windows,web,webstorm,vs,visualstudiocode,react,reactnative,android,androidstudio,xcode
 # Allow ESLint config
 !.eslintrc.js
+# Allow NativeWind global stylesheet
+!global.css
+# Allow build configs (excluded by the Web template's *.js rule above) — required for EAS Build
+!babel.config.js
+!metro.config.js
+!tailwind.config.js
+!prettier.config.js
 
 # Claude Code local settings (may contain secrets like MCP tokens)
 .claude/settings.local.json

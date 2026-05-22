@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "밭찰!",
+    "name": "밭찰",
     "slug": "batchar-app",
-    "version": "1.0.0",
+    "version": "0.1.0",
     "scheme": "batchar-app",
     "experiments": {
       "tsconfigPaths": true
@@ -12,7 +12,8 @@
       "expo-router",
       "expo-font",
       "expo-secure-store",
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      "expo-asset"
     ],
     "orientation": "portrait",
     "icon": "./assets/public/icon.png",
@@ -22,9 +23,11 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
-      "bundleIdentifier": "com.kaeuhy.batchar",
+      "bundleIdentifier": "com.batchar.app",
       "buildNumber": "1",
       "supportsTablet": true,
       "infoPlist": {
