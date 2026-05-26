@@ -57,23 +57,21 @@ function RouteGuard() {
     void initializeAuth();
   }, [initializeAuth]);
 
+  const currentSegment = segments[0];
+
   useEffect(() => {
-    // 네비게이터 준비 전이나 세션 복원 전에는 리다이렉트를 막습니다.
     if (!navigationState?.key) return;
     if (!isInitialized) return;
 
-    const currentSegment = segments[0] as string | undefined;
     const isPublicRoute = PUBLIC_ROUTES.includes(currentSegment ?? '');
 
     if (!isLoggedIn && !isPublicRoute) {
-      // [TODO] 비로그인 상태 → 로그인 페이지로 리다이렉트
-      // 토큰 구현 후: 저장된 토큰 유효성 검사 후 리다이렉트 여부 결정
       router.replace('/login');
     } else if (isLoggedIn && isPublicRoute) {
       // 로그인 상태에서 /login 또는 /register 접근 → 홈으로 리다이렉트
       router.replace('/');
     }
-  }, [isInitialized, isLoggedIn, router, segments, navigationState?.key]);
+  }, [isInitialized, isLoggedIn, router, currentSegment, navigationState?.key]);
 
   if (!isInitialized) {
     return (

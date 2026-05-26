@@ -115,9 +115,11 @@ export default function ChatDetail() {
   });
 
   useEffect(() => {
-    if (messages && messages.length > 0) {
-      setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: false }), 100);
-    }
+    if (!messages?.length) return;
+    const timerId = setTimeout(() => {
+      scrollViewRef.current?.scrollToEnd({ animated: false });
+    }, 100);
+    return () => clearTimeout(timerId);
   }, [messages]);
 
   const handleSend = () => {

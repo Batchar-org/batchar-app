@@ -13,7 +13,7 @@ import {
 import { Image } from 'expo-image';
 import { IMAGE_TRANSITION_MS, IMAGE_PLACEHOLDER } from '@/lib/expo-image-setup';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
@@ -66,20 +66,22 @@ export default function ProductEdit() {
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [tempDate, setTempDate] = useState(new Date());
 
+  const prefilledRef = useRef(false);
+
   // 카테고리 모달
   const [showCategoryModal, setShowCategoryModal] = useState(false);
 
   // 기존 데이터 프리필
   useEffect(() => {
-    if (product) {
-      setProductName(product.title);
-      setCategory(product.category);
-      setDescription(product.description);
-      setStartingPrice(String(product.start_price));
-      setExistingMedia(product.media_urls.map((m) => ({ ...m, markedForDeletion: false })));
-      if (product.end_time) {
-        setEndTime(new Date(product.end_time));
-      }
+    if (!product || prefilledRef.current) return;
+    prefilledRef.current = true;
+    setProductName(product.title);
+    setCategory(product.category);
+    setDescription(product.description);
+    setStartingPrice(String(product.start_price));
+    setExistingMedia(product.media_urls.map((m) => ({ ...m, markedForDeletion: false })));
+    if (product.end_time) {
+      setEndTime(new Date(product.end_time));
     }
   }, [product]);
 

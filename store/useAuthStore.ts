@@ -18,6 +18,7 @@ type AuthStoreState = {
   accessToken: string | null;
   status: AuthStatus;
   isInitialized: boolean;
+  isInitializing: boolean;
 };
 
 const initialState: AuthStoreState = {
@@ -26,12 +27,13 @@ const initialState: AuthStoreState = {
   accessToken: null,
   status: 'idle' as AuthStatus,
   isInitialized: false,
+  isInitializing: false,
 };
 
 const useAuthStore = create(
   devtools(
     immer(
-      combine(initialState, (set) => ({
+      combine(initialState, (set, get) => ({
         actions: {
           setSession: ({
             userId,
@@ -58,6 +60,13 @@ const useAuthStore = create(
             }),
 
           initializeAuth: async () => {
+            const { isInitialized, isInitializing } = get();
+            if (isInitialized || isInitializing) return;
+
+            set((state) => {
+              state.isInitializing = true;
+            });
+
             try {
               // Supabase 클라이언트가 SecureStore에서 세션을 자동 복원합니다.
               const {
@@ -95,6 +104,10 @@ const useAuthStore = create(
                 state.accessToken = null;
                 state.status = 'unauthenticated';
                 state.isInitialized = true;
+              });
+            } finally {
+              set((state) => {
+                state.isInitializing = false;
               });
             }
           },
