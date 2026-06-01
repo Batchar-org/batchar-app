@@ -9,7 +9,7 @@ interface WishlistProductProps {
   productId: number;
   title: string;
   currentPrice: number;
-  category: string;
+  category?: string;
   endTime: string;
   image: string;
   onPress?: () => void;

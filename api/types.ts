@@ -36,21 +36,22 @@ export type LogoutRequest = {
   refreshToken: string;
 };
 
+// 응답 키는 snake_case (NestJS SnakeCaseInterceptor). userId는 number(bigint).
 export type AuthTokenPayload = {
-  userId: string;
-  accessToken: string;
-  refreshToken: string;
+  user_id: number;
+  access_token: string;
+  refresh_token: string;
 };
 
 export type LoginResponse = ApiResponse<AuthTokenPayload>;
 export type SignupResponse = ApiResponse<AuthTokenPayload>;
 
 export type RefreshResponse = ApiResponse<{
-  accessToken: string;
-  refreshToken: string;
+  access_token: string;
+  refresh_token: string;
 }>;
 
-export type SendEmailCodeResponse = ApiResponse<string>;
+export type SendEmailCodeResponse = ApiResponse<null>;
 export type CheckNicknameDuplicateResponse = ApiResponse<null>;
 export type CheckEmailDuplicateRequest = {
   email: string;
@@ -72,7 +73,7 @@ export type PasswordResetResponse = ApiResponse<null>;
 // ── User ──
 
 export type UserProfile = {
-  user_id: string;
+  user_id: number;
   email: string;
   name: string;
   address: string;
@@ -86,11 +87,8 @@ export type UpdateUserProfileRequest = {
   address?: string;
 };
 
-export type UpdateUserProfileResponse = ApiResponse<UserProfile>;
-
 export type DeleteUserResponse = ApiResponse<null>;
 
-export type UpdateProfileImageResponse = ApiResponse<UserProfile>;
 export type DeleteProfileImageResponse = ApiResponse<null>;
 
 export type PasswordVerifyRequest = {
@@ -115,8 +113,6 @@ export type ProductCreateRequest = {
   startPrice: number;
   endTime: string;
 };
-
-export type ProductCreateResponse = ApiResponse<{ product_id: number }>;
 
 export type ProductViewType =
   | 'ALL'
@@ -157,7 +153,7 @@ export type ProductMediaInfo = {
 
 export type ProductDetail = {
   product_id: number;
-  seller_id: string;
+  seller_id: number;
   seller_name: string;
   seller_profile_image_url?: string | null;
   title: string;
@@ -183,11 +179,12 @@ export type WishSummary = {
   wish_id: number;
   product_id: number;
   title: string;
-  category: string;
   current_price: number;
+  status: string;
   end_time: string;
   media_url: string;
-  wished_at: string;
+  // NestJS WishSummary에는 category가 없음(백엔드 추가 시 채워짐).
+  category?: string;
 };
 
 export type WishListParams = {
@@ -200,7 +197,7 @@ export type WishListResponse = ApiResponse<{
   has_next: boolean;
 }>;
 
-export type WishAddResponse = ApiResponse<{ wish_id: number }>;
+export type WishAddResponse = ApiResponse<null>;
 export type WishRemoveResponse = ApiResponse<null>;
 
 // ── Product Update/Delete ──
@@ -213,10 +210,6 @@ export type ProductUpdateRequest = {
   deleteMediaIds?: number[];
 };
 
-export type ProductUpdateResponse = ProductDetailResponse;
-
-export type ProductDeleteResponse = ApiResponse<{ product_id: number }>;
-
 export type ProductCloseResponse = ApiResponse<void>;
 
 // ── Bid ──
@@ -225,19 +218,9 @@ export type BidCreateRequest = {
   price: number;
 };
 
-export type BidCreateResponse = ApiResponse<{
-  bid_id: number;
-  product_id: number;
-  bidder_id: string;
-  price: number;
-  created_at: string;
-}>;
-
 export type BidSummary = {
-  bid_id: number;
   bidder_name: string;
   price: number;
-  status: 'ACTIVE' | 'WON';
   created_at: string;
 };
 
@@ -251,26 +234,16 @@ export type BidListResponse = ApiResponse<{
   has_next: boolean;
 }>;
 
-// ── Storage ──
-
-export type PresignedUrlRequest = {
-  fileName: string;
-  contentType: string;
-};
-
-export type PresignedUrlResponse = ApiResponse<{
-  presignedUrl: string;
-  objectUrl: string;
-}>;
-
 // ── Chat ──
 
 export type ChatListItem = {
   chat_id: number;
   product_id: number;
-  partner_id: string;
+  // NestJS ChatListResponse DTO에는 현재 partner_id가 없음(백엔드 추가 권장). 차단/신고 연동에 필요.
+  partner_id?: number;
   partner_name: string;
-  product_image_url: string;
+  partner_profile_image_url?: string | null;
+  product_image_url: string | null;
   last_message: string;
   unread_count: number;
   updated_at: string;
@@ -289,9 +262,11 @@ export type ChatMessageRequest = {
 
 export type ChatMessage = {
   message_id: number;
-  sender_id: string;
+  sender_id: number;
+  sender_profile_image_url?: string | null;
   content: string;
   is_read: boolean;
+  hidden?: boolean;
   created_at: string;
 };
 
@@ -303,18 +278,6 @@ export type ChatLeaveResponse = ApiResponse<null>;
 
 export type ChatCompleteDealResponse = ApiResponse<null>;
 
-export type ChatMediaMessage = {
-  message_id: number;
-  sender_id: string;
-  content: string;
-  media_url: string;
-  media_type: 'IMAGE' | 'VIDEO';
-  is_read: boolean;
-  created_at: string;
-};
-
-export type ChatMediaSendResponse = ApiResponse<ChatMediaMessage>;
-
 // ── Report ──
 
 export type ReportReasonCode = 'SPAM' | 'ABUSE' | 'FRAUD' | 'INAPPROPRIATE_CONTENT' | 'ETC';
@@ -324,7 +287,7 @@ export type ReportRequestBase = {
   description?: string;
 };
 
-export type ReportUserRequest = ReportRequestBase & { targetUserId: string };
+export type ReportUserRequest = ReportRequestBase & { targetUserId: number };
 export type ReportProductRequest = ReportRequestBase & { targetProductId: number };
 export type ReportMessageRequest = ReportRequestBase & { targetMessageId: number };
 
@@ -334,7 +297,7 @@ export type ReportResponse = ApiResponse<{ report_id: number }>;
 
 export type BlockSummary = {
   block_id: number;
-  blocked_id: string;
+  blocked_id: number;
   blocked_name: string;
   blocked_profile_image_url: string | null;
   created_at: string;

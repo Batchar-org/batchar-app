@@ -1,5 +1,5 @@
 {
-  "name": "batchar-app",
+  "name": "nest-batchar-app",
   "version": "1.0.0",
   "scripts": {
     "android": "expo start --android",
@@ -14,7 +14,7 @@
   "dependencies": {
     "@expo/vector-icons": "^15.1.1",
     "@react-native-community/datetimepicker": "^8.4.4",
-    "@supabase/supabase-js": "^2.106.0",
+    "@stomp/stompjs": "^7.3.0",
     "@tanstack/react-query": "^5.94.5",
     "expo": "~54.0.34",
     "expo-asset": "~12.0.13",
@@ -37,10 +37,11 @@
     "react-native-reanimated": "~4.1.1",
     "react-native-safe-area-context": "~5.6.0",
     "react-native-screens": "~4.16.0",
+    "react-native-sse": "^1.2.1",
     "react-native-svg": "^15.12.1",
-    "react-native-url-polyfill": "^3.0.0",
     "react-native-web": "^0.21.2",
     "react-native-worklets": "0.5.1",
+    "text-encoding": "^0.7.0",
     "zustand": "^5.0.11"
   },
   "devDependencies": {

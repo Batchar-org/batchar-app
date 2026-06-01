@@ -6,7 +6,7 @@ export function useUnblockUserMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (targetUserId: string) => unblockUserApi(targetUserId),
+    mutationFn: (targetUserId: string | number) => unblockUserApi(targetUserId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['chatList'] });
       queryClient.invalidateQueries({ queryKey: ['products'] });

@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import { loginApi } from '@/api/auth';
-import { setStoredUserId, setStoredUserName } from '@/lib/secureStore';
+import { setRefreshToken, setStoredUserId, setStoredUserName } from '@/lib/secureStore';
 import { useAuthActions } from '@/store/useAuthStore';
 
 export function useLoginMutation() {
@@ -9,11 +9,12 @@ export function useLoginMutation() {
   return useMutation({
     mutationFn: loginApi,
     onSuccess: async (response) => {
-      const { userId, accessToken } = response.data;
-      // Supabase 클라이언트가 access/refresh 토큰을 SecureStore adapter로 자동 관리하므로
-      // 여기서는 라우팅 복원에 필요한 userId / userName 만 추가로 저장합니다.
-      await setStoredUserId(userId);
-      setSession({ userId, accessToken });
+      // 응답 키는 snake_case (NestJS SnakeCaseInterceptor)
+      const { user_id, access_token, refresh_token } = response.data;
+      // refresh 토큰 + userId를 영속 저장(앱 재실행 시 세션 복구용), access 토큰은 메모리에 둔다.
+      await setRefreshToken(refresh_token);
+      await setStoredUserId(user_id);
+      setSession({ userId: user_id, accessToken: access_token });
     },
   });
 }

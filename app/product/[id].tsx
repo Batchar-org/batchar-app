@@ -27,7 +27,7 @@ import { formatPrice, formatRemainingTime } from '@/utils/format';
 import useAuthStore from '@/store/useAuthStore';
 import { useToggleWishMutation } from '@/hooks/wish/useToggleWishMutation';
 import { useCloseProductMutation } from '@/hooks/product/useCloseProductMutation';
-import { useProductRealtime } from '@/hooks/product/useProductRealtime';
+import { useProductSSE } from '@/hooks/product/useProductSSE';
 import { displayUserName } from '@/utils/displayUserName';
 import ReportModal from '@/components/modals/ReportModal';
 
@@ -73,8 +73,8 @@ export default function ProductDetail() {
   const { mutate: placeBid, isPending: isBidding } = usePlaceBidMutation();
   const { mutate: closeProduct, isPending: isClosing } = useCloseProductMutation();
 
-  // Supabase Realtime 실시간 입찰 업데이트 (경매 진행 중일 때만)
-  useProductRealtime({
+  // SSE 실시간 입찰/현재가 업데이트 (경매 진행 중일 때만)
+  useProductSSE({
     productId,
     enabled: product?.status === 'ON_SALE',
   });
@@ -366,7 +366,7 @@ export default function ProductDetail() {
                 const date = new Date(bid.created_at);
                 const label = `${date.getMonth() + 1}/${date.getDate()}`;
                 return (
-                  <View key={bid.bid_id} className="items-center" style={{ flex: 1 }}>
+                  <View key={index} className="items-center" style={{ flex: 1 }}>
                     <Text className="mb-1 text-xs text-gray-500">{formatPrice(bid.price)}</Text>
                     <View
                       className="w-10 rounded-t-md"
@@ -402,7 +402,7 @@ export default function ProductDetail() {
                 const isHighest = index === 0;
                 return (
                   <View
-                    key={bid.bid_id}
+                    key={index}
                     className={`py-4 ${
                       index !== bidRecords.length - 1 ? 'border-b border-gray-100' : ''
                     }`}>

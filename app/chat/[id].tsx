@@ -23,7 +23,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { useChatMessagesQuery } from '@/hooks/chat/useChatMessagesQuery';
 import { useSendMessageMutation } from '@/hooks/chat/useSendMessageMutation';
 import { useChatListQuery } from '@/hooks/chat/useChatListQuery';
-import { useChatRealtime } from '@/hooks/chat/useChatRealtime';
+import { useStompClient } from '@/hooks/chat/useStompClient';
 import { useLeaveChatMutation } from '@/hooks/chat/useLeaveChatMutation';
 import { useCompleteDealMutation } from '@/hooks/chat/useCompleteDealMutation';
 import { useSendChatMediaMutation } from '@/hooks/chat/useSendChatMediaMutation';
@@ -109,7 +109,7 @@ export default function ChatDetail() {
     setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 100);
   }, []);
 
-  const { sendMessage: stompSend } = useChatRealtime({
+  const { sendMessage: stompSend } = useStompClient({
     chatId,
     onMessageReceived,
   });
@@ -187,6 +187,11 @@ export default function ChatDetail() {
     closeMenu();
     if (!chatInfo) return;
     const partnerId = chatInfo.partner_id;
+    // NestJS ChatListResponse에는 아직 partner_id가 없어 undefined일 수 있다(백엔드 추가 필요).
+    if (partnerId == null) {
+      Alert.alert('오류', '상대 사용자 정보를 불러올 수 없습니다.');
+      return;
+    }
     const partnerName = displayUserName(chatInfo.partner_name);
     Alert.alert(
       '차단하기',
@@ -212,6 +217,11 @@ export default function ChatDetail() {
     closeMenu();
     if (!chatInfo) return;
     const partnerId = chatInfo.partner_id;
+    // NestJS ChatListResponse에는 아직 partner_id가 없어 undefined일 수 있다(백엔드 추가 필요).
+    if (partnerId == null) {
+      Alert.alert('오류', '상대 사용자 정보를 불러올 수 없습니다.');
+      return;
+    }
     const partnerName = displayUserName(chatInfo.partner_name);
     Alert.alert('차단 해제', `${partnerName}님의 차단을 해제하시겠습니까?`, [
       { text: '취소', style: 'cancel' },
@@ -303,7 +313,7 @@ export default function ChatDetail() {
   const getDateKey = (createdAt: string) => new Date(createdAt).toDateString();
 
   const isMediaMessage = (content: string) => {
-    // Supabase signed URL은 끝에 ?token=...이 붙으므로 query string 허용
+    // S3 presigned/서명 URL은 끝에 ?X-Amz-...가 붙으므로 query string 허용
     return /\.(jpg|jpeg|png|gif|webp|mp4|mov|avi|webm)(\?.*)?$/i.test(content);
   };
 
@@ -688,7 +698,7 @@ export default function ChatDetail() {
         <ReportModal
           visible={reportVisible}
           onClose={() => setReportVisible(false)}
-          target={{ kind: 'user', id: chatInfo.partner_id }}
+          target={{ kind: 'user', id: chatInfo.partner_id ?? 0 }}
         />
       )}
     </SafeAreaView>
