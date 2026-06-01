@@ -4,7 +4,7 @@ import { reportMessageApi, reportProductApi, reportUserApi } from '@/api/report'
 import type { ReportReasonCode } from '@/api/types';
 
 export type ReportTarget =
-  | { kind: 'user'; id: string }
+  | { kind: 'user'; id: number }
   | { kind: 'product'; id: number }
   | { kind: 'message'; id: number };
 

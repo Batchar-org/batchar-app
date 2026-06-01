@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { placeBidApi } from '@/api/bid';
-import { BidCreateResponse, ProductDetailResponse } from '@/api/types';
+import { ProductDetailResponse } from '@/api/types';
 import { useAccessToken } from '@/store/useAuthStore';
 
 type PlaceBidParams = {
@@ -17,7 +17,7 @@ export function usePlaceBidMutation() {
   const accessToken = useAccessToken();
   const queryClient = useQueryClient();
 
-  return useMutation<BidCreateResponse, Error, PlaceBidParams, PlaceBidContext>({
+  return useMutation<void, Error, PlaceBidParams, PlaceBidContext>({
     mutationFn: async ({ productId, price }) => {
       if (!accessToken) {
         throw new Error('로그인이 필요합니다.');
