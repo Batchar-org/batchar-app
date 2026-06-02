@@ -45,10 +45,11 @@ export function useTabNavigation() {
 
       setActiveTab(tab);
 
-      // 해당 탭에 매핑된 경로가 있으면 이동
+      // 해당 탭에 매핑된 경로로 이동.
+      // push 대신 navigate를 써서 이미 방문한 탭은 스택을 쌓지 않고 기존 화면으로 되돌아간다.
       const route = TAB_TO_ROUTE[tab];
       if (route) {
-        router.push(route as any);
+        router.navigate(route as any);
       }
     },
     [activeTab, setActiveTab, router]
