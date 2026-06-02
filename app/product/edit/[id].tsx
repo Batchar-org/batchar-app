@@ -20,6 +20,7 @@ import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/dat
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import TabBar from '@/components/layout/TabBar';
 import { COLORS, INPUT_STYLE, LAYOUT } from '@/constants/theme';
+import { CATEGORY_LABELS } from '@/constants/categories';
 import { useUpdateProductMutation } from '@/hooks/product/useUpdateProductMutation';
 import { useDeleteProductMutation } from '@/hooks/product/useDeleteProductMutation';
 import { useProductDetailQuery } from '@/hooks/product/useProductDetailQuery';
@@ -28,19 +29,6 @@ import { compressImages } from '@/utils/compressImage';
 
 const MAX_DESCRIPTION_LENGTH = 2000;
 const MAX_IMAGE_COUNT = 10;
-
-const CATEGORIES = [
-  '전자기기',
-  '패션/의류',
-  '가구/인테리어',
-  '스포츠/레저',
-  '도서/음반',
-  '생활/주방',
-  '뷰티/미용',
-  '자동차/오토바이',
-  '게임/취미',
-  '기타',
-];
 
 type ExistingMedia = ProductMediaInfo & { markedForDeletion?: boolean };
 
@@ -498,10 +486,10 @@ export default function ProductEdit() {
           onPress={() => setShowCategoryModal(false)}
           className="flex-1 justify-end"
           style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}>
-          <View className="rounded-t-2xl bg-white pb-8 pt-4">
+          <View className="rounded-t-2xl bg-white pb-8 pt-4" style={{ maxHeight: '50%' }}>
             <Text className="mb-4 px-5 text-lg font-bold">카테고리 선택</Text>
             <FlatList
-              data={CATEGORIES}
+              data={CATEGORY_LABELS}
               keyExtractor={(item) => item}
               renderItem={({ item }) => (
                 <TouchableOpacity

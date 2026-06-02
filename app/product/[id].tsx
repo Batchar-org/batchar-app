@@ -278,6 +278,20 @@ export default function ProductDetail() {
           </TouchableOpacity>
         </View>
 
+        {/* 카테고리 (탭하면 같은 카테고리 목록으로 이동) */}
+        {product.category ? (
+          <View className="bg-white px-4 pb-3">
+            <TouchableOpacity
+              onPress={() =>
+                router.push({ pathname: '/category/list', params: { category: product.category } })
+              }
+              className="flex-row items-center self-start rounded-full bg-gray-100 px-3 py-1.5">
+              <MaterialCommunityIcons name="tag-outline" size={13} color={COLORS.textSecondary} />
+              <Text className="ml-1 text-xs font-medium text-gray-600">{product.category}</Text>
+            </TouchableOpacity>
+          </View>
+        ) : null}
+
         {/* 가격 정보 */}
         <View className="flex-row bg-white px-4 pb-4">
           <View className="mr-2 flex-1 items-center rounded-xl bg-gray-100 py-3">
