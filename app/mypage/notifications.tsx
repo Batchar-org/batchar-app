@@ -1,5 +1,6 @@
-import { ActivityIndicator, FlatList, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Swipeable } from 'react-native-gesture-handler';
 import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
@@ -7,6 +8,8 @@ import { COLORS } from '@/constants/theme';
 import { useNotificationsQuery } from '@/hooks/notification/useNotificationsQuery';
 import { useMarkNotificationReadMutation } from '@/hooks/notification/useMarkNotificationReadMutation';
 import { useMarkAllNotificationsReadMutation } from '@/hooks/notification/useMarkAllNotificationsReadMutation';
+import { useDeleteNotificationMutation } from '@/hooks/notification/useDeleteNotificationMutation';
+import { useDeleteAllNotificationsMutation } from '@/hooks/notification/useDeleteAllNotificationsMutation';
 import { buildNotificationRoute } from '@/lib/notificationRoute';
 import type { NotificationCategory, NotificationItem } from '@/api/types';
 
@@ -38,6 +41,16 @@ export default function NotificationsPage() {
   } = useNotificationsQuery();
   const { mutate: markRead } = useMarkNotificationReadMutation();
   const { mutate: markAllRead } = useMarkAllNotificationsReadMutation();
+  const { mutate: deleteNotification } = useDeleteNotificationMutation();
+  const { mutate: deleteAllNotifications } = useDeleteAllNotificationsMutation();
+
+  const handleDeleteAll = () => {
+    if (!notifications || notifications.length === 0) return;
+    Alert.alert('전체 삭제', '모든 알림을 삭제하시겠어요?', [
+      { text: '취소', style: 'cancel' },
+      { text: '삭제', style: 'destructive', onPress: () => deleteAllNotifications() },
+    ]);
+  };
 
   const handlePress = (item: NotificationItem) => {
     if (!item.is_read) markRead(item.id);
@@ -48,7 +61,7 @@ export default function NotificationsPage() {
 
   return (
     <SafeAreaView className="flex-1 bg-white" edges={['top']}>
-      {/* 헤더 — 마이페이지 스타일과 동일 */}
+      {/* 헤더 — 제목 가운데 정렬(좌우 28px 대칭) */}
       <View className="flex-row items-center px-4 py-3">
         <TouchableOpacity onPress={() => router.back()}>
           <MaterialCommunityIcons name="chevron-left" size={28} color={COLORS.active} />
@@ -56,9 +69,19 @@ export default function NotificationsPage() {
         <View className="flex-1 items-center">
           <Text className="text-lg font-bold text-gray-900">알림</Text>
         </View>
+        <View style={{ width: 28 }} />
+      </View>
+
+      {/* 액션 바 — 모두 읽음 / 전체 삭제 (별도 줄) */}
+      <View className="flex-row items-center justify-end px-4 pb-2">
         <TouchableOpacity onPress={() => markAllRead()}>
           <Text className="text-sm" style={{ color: COLORS.textSecondary }}>
             모두 읽음
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={handleDeleteAll} className="ml-4">
+          <Text className="text-sm" style={{ color: COLORS.error }}>
+            전체 삭제
           </Text>
         </TouchableOpacity>
       </View>
@@ -82,33 +105,43 @@ export default function NotificationsPage() {
             if (hasNextPage && !isFetchingNextPage) void fetchNextPage();
           }}
           renderItem={({ item }) => (
-            <TouchableOpacity
-              onPress={() => handlePress(item)}
-              className="flex-row items-start px-4 py-4"
-              style={{ backgroundColor: item.is_read ? COLORS.background : COLORS.primaryLight }}>
-              <View
-                className="mr-3 h-10 w-10 items-center justify-center rounded-full"
-                style={{ backgroundColor: COLORS.backgroundSecondary }}>
-                <MaterialCommunityIcons
-                  name={item.data ? ICON_BY_CATEGORY[item.data.category] : 'bell-outline'}
-                  size={22}
-                  color={COLORS.active}
-                />
-              </View>
-              <View className="flex-1">
-                <Text className="text-base font-semibold text-gray-900">{item.title}</Text>
-                <Text className="mt-0.5 text-sm text-gray-600" numberOfLines={2}>
-                  {item.body}
-                </Text>
-                <Text className="mt-1 text-xs text-gray-400">{formatTime(item.created_at)}</Text>
-              </View>
-              {!item.is_read && (
+            <Swipeable
+              renderRightActions={() => (
+                <TouchableOpacity
+                  onPress={() => deleteNotification(item.id)}
+                  className="items-center justify-center"
+                  style={{ width: 80, backgroundColor: COLORS.error }}>
+                  <Text className="text-sm font-semibold text-white">삭제</Text>
+                </TouchableOpacity>
+              )}>
+              <TouchableOpacity
+                onPress={() => handlePress(item)}
+                className="flex-row items-start px-4 py-4"
+                style={{ backgroundColor: item.is_read ? COLORS.background : COLORS.primaryLight }}>
                 <View
-                  className="ml-2 mt-1.5 h-2 w-2 rounded-full"
-                  style={{ backgroundColor: COLORS.error }}
-                />
-              )}
-            </TouchableOpacity>
+                  className="mr-3 h-10 w-10 items-center justify-center rounded-full"
+                  style={{ backgroundColor: COLORS.backgroundSecondary }}>
+                  <MaterialCommunityIcons
+                    name={item.data ? ICON_BY_CATEGORY[item.data.category] : 'bell-outline'}
+                    size={22}
+                    color={COLORS.active}
+                  />
+                </View>
+                <View className="flex-1">
+                  <Text className="text-base font-semibold text-gray-900">{item.title}</Text>
+                  <Text className="mt-0.5 text-sm text-gray-600" numberOfLines={2}>
+                    {item.body}
+                  </Text>
+                  <Text className="mt-1 text-xs text-gray-400">{formatTime(item.created_at)}</Text>
+                </View>
+                {!item.is_read && (
+                  <View
+                    className="ml-2 mt-1.5 h-2 w-2 rounded-full"
+                    style={{ backgroundColor: COLORS.error }}
+                  />
+                )}
+              </TouchableOpacity>
+            </Swipeable>
           )}
         />
       )}

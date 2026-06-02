@@ -38,6 +38,14 @@ export function markAllNotificationsReadApi(): Promise<ApiResponse<null>> {
   return apiFetch<ApiResponse<null>>('/api/notifications/read-all', { method: 'PATCH' });
 }
 
+export function deleteNotificationApi(id: number): Promise<ApiResponse<null>> {
+  return apiFetch<ApiResponse<null>>(`/api/notifications/${id}`, { method: 'DELETE' });
+}
+
+export function deleteAllNotificationsApi(): Promise<ApiResponse<null>> {
+  return apiFetch<ApiResponse<null>>('/api/notifications', { method: 'DELETE' });
+}
+
 export function getNotificationSettingsApi(): Promise<NotificationSettingResponse> {
   return apiFetch<NotificationSettingResponse>('/api/notifications/settings', { method: 'GET' });
 }
