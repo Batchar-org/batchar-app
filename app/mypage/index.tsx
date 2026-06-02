@@ -14,6 +14,8 @@ import { IMAGE_TRANSITION_MS, IMAGE_PLACEHOLDER } from '@/lib/expo-image-setup';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { useQueryClient } from '@tanstack/react-query';
+import * as Notifications from 'expo-notifications';
 import TabBar from '@/components/layout/TabBar';
 import { COLORS, SHADOWS } from '@/constants/theme';
 import { POLICY_URLS } from '@/constants/policy';
@@ -21,6 +23,7 @@ import { useAuthActions } from '@/store/useAuthStore';
 import { useProductsQuery } from '@/hooks/product/useProductsQuery';
 import { useUserProfileQuery } from '@/hooks/user/useUserProfileQuery';
 import { useDeleteUserMutation } from '@/hooks/user/useDeleteUserMutation';
+import { unregisterPushNotifications } from '@/lib/pushNotifications';
 import type { ProductSummary } from '@/api/types';
 
 function countByStatus(products: ProductSummary[]) {
@@ -57,6 +60,7 @@ export default function MyPage() {
   const [selectedReason, setSelectedReason] = useState<string | null>(null);
 
   const deleteUserMutation = useDeleteUserMutation();
+  const queryClient = useQueryClient();
 
   const { data: bidsData } = useProductsQuery({ view: 'MY_BIDS' });
   const { data: productsData } = useProductsQuery({ view: 'MY_PRODUCTS' });
@@ -64,10 +68,18 @@ export default function MyPage() {
   const purchaseCounts = useMemo(() => countByStatus(bidsData?.content ?? []), [bidsData]);
   const saleCounts = useMemo(() => countByStatus(productsData?.content ?? []), [productsData]);
 
+  // 로그아웃: 푸시 토큰 해제(access 유효할 때 먼저) + 앱 아이콘 배지 0 + 쿼리 캐시 정리
+  const performLogout = async () => {
+    await unregisterPushNotifications();
+    await logout();
+    await Notifications.setBadgeCountAsync(0);
+    queryClient.clear();
+  };
+
   const handleLogout = () => {
     Alert.alert('로그아웃', '정말 로그아웃 하시겠습니까?', [
       { text: '취소', style: 'cancel' },
-      { text: '확인', onPress: () => logout() },
+      { text: '확인', onPress: () => void performLogout() },
     ]);
   };
 
@@ -85,7 +97,7 @@ export default function MyPage() {
     deleteUserMutation.mutate(undefined, {
       onSuccess: () => {
         setShowConfirmModal(false);
-        logout();
+        void performLogout();
       },
       onError: (error) => {
         setShowConfirmModal(false);
@@ -178,6 +190,15 @@ export default function MyPage() {
                 </Text>
               </View>
             ))}
+          </TouchableOpacity>
+        </View>
+
+        {/* 알림 설정 카드 */}
+        <View className="mx-4 mt-4 rounded-2xl bg-white px-5 py-4" style={SHADOWS.card}>
+          <TouchableOpacity
+            onPress={() => router.push('/mypage/notification-settings')}
+            className="py-2">
+            <Text className="text-base font-bold text-gray-900">알림 설정</Text>
           </TouchableOpacity>
         </View>
 

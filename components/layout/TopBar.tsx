@@ -1,12 +1,39 @@
-import { View, Text } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
+import { Image } from 'expo-image';
+import { useRouter } from 'expo-router';
 import { COLORS } from '@/constants/theme';
+import { useUnreadNotificationCountQuery } from '@/hooks/notification/useUnreadNotificationCountQuery';
 
 export default function TopBar() {
+  const router = useRouter();
+  const { data: unreadCount } = useUnreadNotificationCountQuery();
+  const hasUnread = unreadCount != null && unreadCount > 0;
+
   return (
-    <View className="w-full bg-white px-5 py-3">
+    <View className="w-full flex-row items-center justify-between bg-white px-5 py-3">
       <Text className="text-2xl font-black" style={{ color: COLORS.primary }}>
         밭찰!
       </Text>
+
+      {/* 알림 페이지로 이동하는 벨 버튼 (미읽음 수 뱃지) */}
+      <TouchableOpacity
+        onPress={() => router.push('/mypage/notifications')}
+        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+        <Image
+          source={require('../../assets/public/Notification.png')}
+          style={{ width: 28, height: 28 }}
+          contentFit="contain"
+        />
+        {hasUnread && (
+          <View
+            className="absolute -right-1.5 -top-1.5 h-[18px] min-w-[18px] items-center justify-center rounded-full px-1"
+            style={{ backgroundColor: COLORS.error }}>
+            <Text className="text-[10px] font-bold text-white">
+              {unreadCount != null && unreadCount > 99 ? '99+' : unreadCount}
+            </Text>
+          </View>
+        )}
+      </TouchableOpacity>
     </View>
   );
 }

@@ -8,6 +8,8 @@ import { focusManager, QueryClient, QueryClientProvider } from '@tanstack/react-
 import { StatusBar } from 'expo-status-bar';
 import { useAuthActions, useIsInitialized, useIsLoggedIn } from '@/store/useAuthStore';
 import { COLORS } from '@/constants/theme';
+import { registerForPushNotifications, syncBadgeCount } from '@/lib/pushNotifications';
+import { useNotificationListeners } from '@/hooks/notification/useNotificationListeners';
 
 // React Native에서 앱이 포그라운드로 돌아올 때 refetchOnWindowFocus 동작을 위한 설정
 focusManager.setEventListener((handleFocus) => {
@@ -52,10 +54,21 @@ function RouteGuard() {
   // key가 undefined이면 아직 Stack이 준비되지 않은 상태
   const navigationState = useRootNavigationState();
 
+  // 푸시 알림 리스너(수신/탭/콜드스타트/배지) 등록
+  useNotificationListeners();
+
   useEffect(() => {
     // 앱 시작 시 저장된 RT로 로그인 상태를 먼저 복구합니다.
     void initializeAuth();
   }, [initializeAuth]);
+
+  // 로그인 상태가 되면(최초 로그인 또는 세션 복구 후) 푸시 토큰을 등록하고 배지를 동기화합니다.
+  useEffect(() => {
+    if (isInitialized && isLoggedIn) {
+      void registerForPushNotifications();
+      void syncBadgeCount();
+    }
+  }, [isInitialized, isLoggedIn]);
 
   const currentSegment = segments[0];
 
