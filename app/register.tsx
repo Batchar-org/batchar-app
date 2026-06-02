@@ -15,6 +15,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { COLORS, INPUT_STYLE } from '@/constants/theme';
 import { POLICY_URLS } from '@/constants/policy';
 import EmailVerifyModal from '@/components/modals/EmailVerifyModal';
+import Logo from '@/components/layout/Logo';
 import { useCheckEmailDuplicateMutation } from '@/hooks/auth/useCheckEmailDuplicateMutation';
 import { useCheckNicknameDuplicateMutation } from '@/hooks/auth/useCheckNicknameDuplicateMutation';
 import { useSendEmailCodeMutation } from '@/hooks/auth/useSendEmailCodeMutation';
@@ -189,10 +190,8 @@ export default function RegisterPage() {
           showsVerticalScrollIndicator={false}>
           <View className="flex-1 px-6 pb-10 pt-4">
             {/* 앱 로고 */}
-            <View className="mb-10 items-center">
-              <Text className="text-5xl font-black" style={{ color: COLORS.primary }}>
-                밭찰!
-              </Text>
+            <View className="mb-20 items-center">
+              <Logo height={44} />
             </View>
 
             {/* 타이틀 */}
@@ -250,7 +249,7 @@ export default function RegisterPage() {
               <View className="flex-row items-center border-b border-gray-300">
                 <TextInput
                   className="flex-1 text-base text-gray-900"
-                  placeholder="예) 12345678@hanbat.edu.kr"
+                  placeholder="예) 학번@(edu/o365).hanbat.edu.kr"
                   placeholderTextColor={COLORS.textMuted}
                   value={email}
                   onChangeText={(value) => {
@@ -384,7 +383,7 @@ export default function RegisterPage() {
 
             {/* 약관 동의 안내 */}
             <Text
-              className="mt-4 text-center text-xs leading-5"
+              className="mt-6 text-center text-sm leading-5"
               style={{ color: COLORS.textMuted }}>
               회원가입 시{' '}
               <Text

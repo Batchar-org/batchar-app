@@ -13,6 +13,7 @@ import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { COLORS, INPUT_STYLE, LAYOUT } from '@/constants/theme';
 import PasswordResetModal from '@/components/modals/PasswordResetModal';
+import Logo from '@/components/layout/Logo';
 import { useLoginMutation } from '@/hooks/auth/useLoginMutation';
 
 export default function LoginPage() {
@@ -51,14 +52,12 @@ export default function LoginPage() {
           showsVerticalScrollIndicator={false}>
           <View className="flex-1 px-6 py-10">
             {/* 앱 로고 */}
-            <View className="mb-12 mt-8 items-center">
-              <Text className="text-5xl font-black" style={{ color: COLORS.primary }}>
-                밭찰!
-              </Text>
+            <View className="mb-28 mt-12 items-center">
+              <Logo height={44} />
             </View>
 
             {/* 로그인 타이틀 */}
-            <Text className="mb-6 text-xl font-bold text-gray-900">Login</Text>
+            <Text className="mb-6 text-xl font-bold text-gray-900">로그인</Text>
 
             {/* 이메일 입력 */}
             <View className="mb-6">
@@ -66,7 +65,7 @@ export default function LoginPage() {
               <View className="border-b border-gray-300">
                 <TextInput
                   className="text-base text-gray-900"
-                  placeholder="예) 12345678@hanbat.edu.kr"
+                  placeholder="예) 학번@(edu/o365).hanbat.edu.kr"
                   placeholderTextColor={COLORS.textMuted}
                   value={email}
                   onChangeText={setEmail}

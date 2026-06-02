@@ -3,6 +3,7 @@ import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { COLORS } from '@/constants/theme';
 import { useUnreadNotificationCountQuery } from '@/hooks/notification/useUnreadNotificationCountQuery';
+import Logo from '@/components/layout/Logo';
 
 export default function TopBar() {
   const router = useRouter();
@@ -10,10 +11,8 @@ export default function TopBar() {
   const hasUnread = unreadCount != null && unreadCount > 0;
 
   return (
-    <View className="w-full flex-row items-center justify-between bg-white px-5 py-3">
-      <Text className="text-2xl font-black" style={{ color: COLORS.primary }}>
-        밭찰!
-      </Text>
+    <View className="w-full flex-row items-center justify-between bg-white px-7 py-6">
+      <Logo height={24} />
 
       {/* 알림 페이지로 이동하는 벨 버튼 (미읽음 수 뱃지) */}
       <TouchableOpacity
