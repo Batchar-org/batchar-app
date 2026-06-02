@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { Modal, Pressable, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { COLORS, INPUT_STYLE, LAYOUT } from '@/constants/theme';
+import { Animated, Modal, Pressable, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { COLORS, LAYOUT } from '@/constants/theme';
 
 // 백엔드 명세 기준 6자리 코드를 입력받습니다.
 const CODE_LENGTH = 6;
@@ -40,11 +40,28 @@ export default function EmailVerifyModal({
   isSubmitting = false,
 }: EmailVerifyModalProps) {
   const [code, setCode] = useState<string[]>(Array(CODE_LENGTH).fill(''));
+  const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
   const inputRefs = useRef<(TextInput | null)[]>(Array(CODE_LENGTH).fill(null));
+
+  // 포커스된 입력칸 주변에 은은한 초록 글로우를 반복 펄스로 표현
+  const glow = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(glow, { toValue: 1, duration: 1100, useNativeDriver: false }),
+        Animated.timing(glow, { toValue: 0, duration: 1100, useNativeDriver: false }),
+      ])
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [glow]);
+  const glowOpacity = glow.interpolate({ inputRange: [0, 1], outputRange: [0.2, 0.55] });
+  const glowRadius = glow.interpolate({ inputRange: [0, 1], outputRange: [5, 12] });
 
   useEffect(() => {
     if (!visible) {
       setCode(Array(CODE_LENGTH).fill(''));
+      setFocusedIndex(null);
     }
   }, [visible]);
 
@@ -137,43 +154,55 @@ export default function EmailVerifyModal({
 
           {/* 6자리 코드 입력 박스 */}
           <View style={{ flexDirection: 'row', marginBottom: 20 }}>
-            {Array(CODE_LENGTH)
-              .fill(null)
-              .map((_, index) => (
-                <View
+            {code.map((digit, index) => {
+              const active = focusedIndex === index;
+              const filled = !!digit;
+              return (
+                <Animated.View
                   key={index}
                   style={{
                     flex: 1,
                     marginRight: index === CODE_LENGTH - 1 ? 0 : 8,
                     borderWidth: 2,
                     borderRadius: 12,
-                    borderColor: code[index] ? COLORS.primary : COLORS.border,
-                    backgroundColor: code[index] ? '#F0FDF4' : '#F9FAFB',
+                    borderColor: active || filled ? COLORS.primary : COLORS.border,
+                    backgroundColor: filled ? '#F0FDF4' : '#F9FAFB',
                     alignItems: 'center',
                     justifyContent: 'center',
                     minHeight: LAYOUT.inputMinHeight,
+                    // 포커스된 칸에만 은은한 초록 글로우(펄스)
+                    shadowColor: COLORS.primary,
+                    shadowOffset: { width: 0, height: 0 },
+                    shadowOpacity: active ? glowOpacity : 0,
+                    shadowRadius: active ? glowRadius : 0,
+                    elevation: active ? 6 : 0,
                   }}>
                   <TextInput
                     ref={(ref) => {
                       inputRefs.current[index] = ref;
                     }}
-                    value={code[index]}
+                    value={digit}
                     onChangeText={(text) => handleCodeChange(text, index)}
                     onKeyPress={({ nativeEvent }) => handleCodeKeyPress(nativeEvent.key, index)}
+                    onFocus={() => setFocusedIndex(index)}
+                    onBlur={() => setFocusedIndex((cur) => (cur === index ? null : cur))}
                     keyboardType="number-pad"
                     maxLength={1}
                     selectTextOnFocus
                     style={{
                       width: '100%',
+                      height: LAYOUT.inputMinHeight,
+                      padding: 0,
                       textAlign: 'center',
-                      ...INPUT_STYLE,
+                      textAlignVertical: 'center',
                       fontSize: 20,
                       fontWeight: 'bold',
                       color: '#111827',
                     }}
                   />
-                </View>
-              ))}
+                </Animated.View>
+              );
+            })}
           </View>
 
           {/* 남은 시간과 재전송 액션을 함께 표시합니다. */}

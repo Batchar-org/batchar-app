@@ -216,13 +216,9 @@ export default function Register() {
 
   return (
     <SafeAreaView className="flex-1 bg-white" edges={['top']}>
-      {/* 헤더 영역 */}
-      <View className="flex-row items-center justify-between px-4 py-4">
-        <TouchableOpacity onPress={() => router.back()}>
-          <MaterialCommunityIcons name="arrow-left" size={24} color={COLORS.text} />
-        </TouchableOpacity>
+      {/* 헤더 영역 — 하단 탭으로 접근하므로 뒤로가기 버튼 없음 */}
+      <View className="items-center px-4 py-4">
         <Text className="text-lg font-bold">경매품 등록</Text>
-        <View className="w-8" />
       </View>
 
       {/* 스크롤 콘텐츠 영역 */}

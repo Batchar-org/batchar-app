@@ -1,7 +1,6 @@
-import { View, Text, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import TabBar from '@/components/layout/TabBar';
 import WishlistProduct from '@/components/product/WishlistProduct';
 import { useWishlistQuery } from '@/hooks/wish/useWishlistQuery';
@@ -36,11 +35,6 @@ export default function Wishlist() {
       {/* 헤더 */}
       <View className="flex-row items-center justify-center bg-white px-5 py-4">
         <Text className="text-lg font-bold text-gray-900">관심목록</Text>
-        <TouchableOpacity
-          className="absolute right-5"
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-          <MaterialCommunityIcons name="dots-horizontal" size={24} color={COLORS.text} />
-        </TouchableOpacity>
       </View>
 
       {/* 관심 상품 목록 */}

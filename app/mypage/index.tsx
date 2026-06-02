@@ -108,15 +108,9 @@ export default function MyPage() {
 
   return (
     <SafeAreaView className="flex-1 bg-white" edges={['top']}>
-      {/* 헤더 */}
-      <View className="flex-row items-center px-4 py-3">
-        <TouchableOpacity onPress={() => router.back()}>
-          <MaterialCommunityIcons name="chevron-left" size={28} color={COLORS.active} />
-        </TouchableOpacity>
-        <View className="flex-1 items-center">
-          <Text className="text-lg font-bold text-gray-900">마이페이지</Text>
-        </View>
-        <View style={{ width: 28 }} />
+      {/* 헤더 — 하단 탭으로 접근하므로 뒤로가기 버튼 없음 */}
+      <View className="items-center px-4 py-3">
+        <Text className="text-lg font-bold text-gray-900">마이페이지</Text>
       </View>
 
       <ScrollView className="flex-1 bg-white" showsVerticalScrollIndicator={false}>
@@ -253,9 +247,9 @@ export default function MyPage() {
           style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
           onPress={() => setShowWithdrawModal(false)}>
           <Pressable onPress={(e) => e.stopPropagation()}>
-            <View className="w-full rounded-2xl bg-white px-6 pb-6 pt-8">
+            <View className="w-full rounded-2xl bg-white px-12 pb-10 pt-12">
               <Text className="mb-4 text-center text-xl font-bold text-gray-900">회원탈퇴</Text>
-              <Text className="mb-8 text-center text-sm leading-6 text-gray-500">
+              <Text className="mb-7 text-center text-sm leading-5 text-black">
                 서비스를 아껴주신 시간에 감사드립니다.{'\n'}고객님이 느끼셨던 점을 저희에게{'\n'}
                 공유해주시면 더욱 건강한 서비스를{'\n'}제공할 수 있도록 하겠습니다.
               </Text>
@@ -266,27 +260,27 @@ export default function MyPage() {
                   className="mb-5 flex-row items-center"
                   onPress={() => setSelectedReason(reason)}>
                   <View
-                    className="mr-3 h-5 w-5 items-center justify-center rounded-full border-2"
+                    className="mr-3.5 h-6 w-6 items-center justify-center rounded-full border-2"
                     style={{
                       borderColor: selectedReason === reason ? COLORS.error : COLORS.inactive,
                       backgroundColor: selectedReason === reason ? COLORS.error : 'transparent',
                     }}>
                     {selectedReason === reason && (
-                      <View className="h-2 w-2 rounded-full bg-white" />
+                      <View className="h-2.5 w-2.5 rounded-full bg-white" />
                     )}
                   </View>
-                  <Text className="text-sm text-gray-700">{reason}</Text>
+                  <Text className="text-[14px] text-black">{reason}</Text>
                 </TouchableOpacity>
               ))}
 
-              <View className="mt-8 flex-row">
+              <View className="mt-7 flex-row">
                 <TouchableOpacity
-                  className="mr-3 flex-1 items-center rounded-lg border border-gray-200 py-3"
+                  className="mr-3 flex-1 items-center rounded-xl bg-gray-100 py-3.5"
                   onPress={() => setShowWithdrawModal(false)}>
-                  <Text className="text-sm font-semibold text-gray-500">취소</Text>
+                  <Text className="text-sm font-semibold text-gray-600">취소</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  className="flex-1 items-center rounded-lg py-3"
+                  className="flex-1 items-center rounded-xl py-3.5"
                   style={{ backgroundColor: COLORS.error }}
                   onPress={handleWithdrawSubmit}>
                   <Text className="text-sm font-semibold text-white">탈퇴 하기</Text>
@@ -308,20 +302,20 @@ export default function MyPage() {
           style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
           onPress={() => setShowConfirmModal(false)}>
           <Pressable onPress={(e) => e.stopPropagation()}>
-            <View className="w-full rounded-2xl bg-white px-6 py-6">
+            <View className="w-full rounded-2xl bg-white px-12 py-6">
               <Text className="mb-2 text-center text-lg font-bold text-gray-900">회원탈퇴</Text>
-              <Text className="mb-5 text-center text-sm leading-5 text-gray-500">
+              <Text className="mb-5 text-center text-sm leading-5 text-black">
                 탈퇴 버튼 선택 시, 계정은 삭제되며{'\n'}복구되지 않습니다.
               </Text>
 
               <View className="flex-row">
                 <TouchableOpacity
-                  className="mr-3 flex-1 items-center rounded-lg border border-gray-200 py-3"
+                  className="mr-3 flex-1 items-center rounded-xl bg-gray-100 py-3.5"
                   onPress={() => setShowConfirmModal(false)}>
-                  <Text className="text-sm font-semibold text-gray-500">취소</Text>
+                  <Text className="text-sm font-semibold text-gray-600">취소</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  className="flex-1 items-center rounded-lg py-3"
+                  className="flex-1 items-center rounded-xl py-3.5"
                   style={{ backgroundColor: COLORS.error }}
                   onPress={handleConfirmWithdraw}>
                   <Text className="text-sm font-semibold text-white">탈퇴</Text>
