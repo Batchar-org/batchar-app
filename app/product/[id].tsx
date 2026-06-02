@@ -31,6 +31,7 @@ import { useProductSSE } from '@/hooks/product/useProductSSE';
 import { displayUserName } from '@/utils/displayUserName';
 import ReportModal from '@/components/modals/ReportModal';
 import { useOpenProductChatRoom } from '@/hooks/chat/useOpenProductChatRoom';
+import FertilityBadge from '@/components/fertility/FertilityBadge';
 
 function formatEndDate(endTimeStr: string): string {
   const date = new Date(endTimeStr);
@@ -251,16 +252,15 @@ export default function ProductDetail() {
         </View>
 
         {/* 판매자 정보 */}
-        <View className="bg-white px-4 pb-2 pt-4">
-          <View className="flex-row items-center">
-            <View className="mr-3 h-10 w-10 items-center justify-center rounded-full bg-gray-100">
-              <MaterialCommunityIcons name="account" size={24} color={COLORS.textMuted} />
-            </View>
-            <View>
-              <Text className="text-base font-medium text-gray-900">
-                {displayUserName(product.seller_name) || '판매자'}
-              </Text>
-            </View>
+        <View className="flex-row items-center bg-white px-4 pb-2 pt-4">
+          <View className="mr-3 h-10 w-10 items-center justify-center rounded-full bg-gray-100">
+            <MaterialCommunityIcons name="account" size={24} color={COLORS.textMuted} />
+          </View>
+          <Text className="text-base font-medium text-gray-900">
+            {displayUserName(product.seller_name) || '판매자'}
+          </Text>
+          <View className="ml-2">
+            <FertilityBadge percent={product.seller_fertility} />
           </View>
         </View>
 

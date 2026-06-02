@@ -31,9 +31,11 @@ import { useDealStatus } from '@/hooks/chat/useDealStatus';
 import { COLORS, ICON_SIZES } from '@/constants/theme';
 import useAuthStore from '@/store/useAuthStore';
 import { displayUserName } from '@/utils/displayUserName';
+import { formatPrice } from '@/utils/format';
 import ReportModal from '@/components/modals/ReportModal';
 import { useBlockUserMutation } from '@/hooks/block/useBlockUserMutation';
 import { useUnblockUserMutation } from '@/hooks/block/useUnblockUserMutation';
+import { useFertilityReactionMutation } from '@/hooks/fertility/useFertilityReactionMutation';
 import { compressImage } from '@/utils/compressImage';
 
 function formatMessageTime(createdAt: string): string {
@@ -103,7 +105,31 @@ export default function ChatDetail() {
   const { mutate: blockUser, isPending: isBlocking } = useBlockUserMutation();
   const { mutate: unblockUser, isPending: isUnblocking } = useUnblockUserMutation();
   const chatInfo = chatList?.find((c) => c.chat_id === chatId);
-  const { dealCompleted, myConfirmed, partnerConfirmed, markMyConfirmed } = useDealStatus(chatId);
+  const { dealCompleted, myConfirmed, markMyConfirmed } = useDealStatus(chatId);
+
+  // 비옥도 평가(물 주기/산성비) — 거래당 1회. 경계/중복/거래완료/차단 검증은 백엔드가 강제한다.
+  const { mutate: reactFertility, isPending: isReacting } = useFertilityReactionMutation();
+  const [reacted, setReacted] = useState(false);
+  const reactionBlocked = !!(chatInfo?.i_blocked || chatInfo?.blocked_by_partner);
+
+  const handleReact = (action: 'water' | 'acid-rain') => {
+    const label = action === 'water' ? '물 주기' : '산성비 내리기';
+    reactFertility(
+      { chatId, action },
+      {
+        onSuccess: () => {
+          setReacted(true);
+          Alert.alert(
+            label,
+            action === 'water'
+              ? '상대방의 밭에 물을 줬어요. 🌱'
+              : '상대방의 밭에 산성비를 내렸어요. 🥀'
+          );
+        },
+        onError: (error) => Alert.alert(label, error.message),
+      }
+    );
+  };
 
   const onMessageReceived = useCallback(() => {
     setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 100);
@@ -472,62 +498,118 @@ export default function ChatDetail() {
         </View>
       )}
 
-      {/* 상품 정보 바 */}
+      {/* 거래 상품 바 (헤더 아래 고정) + 물 주기·거래 완료 */}
       {chatInfo && (
-        <TouchableOpacity
-          className="flex-row items-center px-4 py-3"
-          style={{ borderBottomWidth: 1, borderBottomColor: COLORS.border }}
-          onPress={() => router.push(`/product/${chatInfo.product_id}`)}>
-          <View className="ml-3 flex-1">
-            <Text className="text-sm font-medium" style={{ color: COLORS.textSecondary }}>
-              상품 상세 보기
-            </Text>
-          </View>
-          <MaterialCommunityIcons name="chevron-right" size={20} color={COLORS.textMuted} />
-        </TouchableOpacity>
-      )}
+        <View style={{ borderBottomWidth: 1, borderBottomColor: COLORS.border }}>
+          <TouchableOpacity
+            className="flex-row items-center px-4 pt-3"
+            onPress={() => router.push(`/product/${chatInfo.product_id}`)}>
+            {chatInfo.product_image_url ? (
+              <Image
+                source={{ uri: chatInfo.product_image_url }}
+                style={{ width: 48, height: 48, borderRadius: 8 }}
+                contentFit="cover"
+                transition={IMAGE_TRANSITION_MS}
+                placeholder={IMAGE_PLACEHOLDER}
+              />
+            ) : (
+              <View
+                className="items-center justify-center rounded-lg"
+                style={{ width: 48, height: 48, backgroundColor: COLORS.backgroundSecondary }}>
+                <MaterialCommunityIcons name="image-outline" size={22} color={COLORS.textMuted} />
+              </View>
+            )}
+            <View className="ml-3 flex-1">
+              <View className="flex-row items-center">
+                <View
+                  className="mr-1.5 rounded px-1.5 py-0.5"
+                  style={{
+                    backgroundColor: dealCompleted
+                      ? COLORS.primaryLight
+                      : COLORS.backgroundSecondary,
+                  }}>
+                  <Text
+                    className="text-xs font-bold"
+                    style={{ color: dealCompleted ? COLORS.primary : COLORS.textSecondary }}>
+                    {dealCompleted ? '거래완료' : '거래중'}
+                  </Text>
+                </View>
+                <Text
+                  className="flex-1 text-sm font-bold"
+                  style={{ color: COLORS.text }}
+                  numberOfLines={1}>
+                  {chatInfo.product_title ?? '상품 정보'}
+                </Text>
+              </View>
+              {chatInfo.product_price != null && (
+                <Text className="mt-0.5 text-sm font-bold" style={{ color: COLORS.text }}>
+                  {formatPrice(chatInfo.product_price)}원
+                </Text>
+              )}
+            </View>
+            <MaterialCommunityIcons name="chevron-right" size={20} color={COLORS.textMuted} />
+          </TouchableOpacity>
 
-      {/* 거래 완료 상태 배너 (양쪽 확인 흐름) */}
-      {chatInfo &&
-        (dealCompleted ? (
-          <View
-            className="flex-row items-center justify-center px-4 py-3"
-            style={{ backgroundColor: COLORS.primaryLight }}>
-            <MaterialCommunityIcons name="check-circle" size={18} color={COLORS.primary} />
-            <Text className="ml-2 text-sm font-semibold" style={{ color: COLORS.primary }}>
-              거래가 완료되었어요
-            </Text>
-          </View>
-        ) : myConfirmed ? (
-          <View
-            className="flex-row items-center px-4 py-3"
-            style={{ backgroundColor: COLORS.backgroundSecondary }}>
-            <MaterialCommunityIcons name="clock-outline" size={18} color={COLORS.textMuted} />
-            <Text className="ml-2 flex-1 text-sm" style={{ color: COLORS.textSecondary }}>
-              {chatInfo.is_seller ? '판매' : '구매'} 완료를 확인했어요. 상대방의 확인을 기다리는
-              중이에요.
-            </Text>
-          </View>
-        ) : (
-          <View
-            className="flex-row items-center px-4 py-3"
-            style={{ backgroundColor: COLORS.backgroundSecondary }}>
-            <Text className="flex-1 text-sm" style={{ color: COLORS.textSecondary }}>
-              {partnerConfirmed
-                ? '상대방이 거래 완료를 확인했어요. 거래를 마무리해 주세요.'
-                : '거래가 끝났다면 완료를 눌러 마무리해 주세요.'}
-            </Text>
-            <TouchableOpacity
-              className="ml-3 rounded-full px-4 py-2"
-              style={{ backgroundColor: COLORS.primary }}
-              disabled={isCompleting}
-              onPress={handleCompleteDeal}>
-              <Text className="text-sm font-semibold text-white">
-                {chatInfo.is_seller ? '판매 완료' : '구매 완료'}
+          {/* 거래 완료 흐름 → 완료 후 평가(물 주기/산성비). 차단·중복 평가는 차단 */}
+          <View className="flex-row items-center px-4 pb-3 pt-2">
+            {!dealCompleted ? (
+              myConfirmed ? (
+                <View className="flex-row items-center">
+                  <MaterialCommunityIcons name="clock-outline" size={15} color={COLORS.textMuted} />
+                  <Text className="ml-1 text-xs" style={{ color: COLORS.textSecondary }}>
+                    상대방 확인 대기중
+                  </Text>
+                </View>
+              ) : (
+                <TouchableOpacity
+                  className="flex-row items-center rounded-full px-3 py-1.5"
+                  style={{ backgroundColor: COLORS.primaryLight }}
+                  disabled={isCompleting}
+                  onPress={handleCompleteDeal}>
+                  <MaterialCommunityIcons
+                    name="check-circle-outline"
+                    size={16}
+                    color={COLORS.primary}
+                  />
+                  <Text className="ml-1 text-xs font-bold" style={{ color: COLORS.primary }}>
+                    {chatInfo.is_seller ? '판매 완료' : '구매 완료'}
+                  </Text>
+                </TouchableOpacity>
+              )
+            ) : reactionBlocked ? (
+              <Text className="text-xs" style={{ color: COLORS.textMuted }}>
+                차단 상태에서는 평가할 수 없어요.
               </Text>
-            </TouchableOpacity>
+            ) : reacted ? (
+              <View className="flex-row items-center">
+                <MaterialCommunityIcons name="check-circle" size={15} color={COLORS.primary} />
+                <Text className="ml-1 text-xs font-bold" style={{ color: COLORS.primary }}>
+                  평가 완료
+                </Text>
+              </View>
+            ) : (
+              <>
+                <TouchableOpacity
+                  onPress={() => handleReact('water')}
+                  disabled={isReacting}
+                  className="mr-2 flex-row items-center rounded-full px-3 py-1.5"
+                  style={{ backgroundColor: COLORS.primary, opacity: isReacting ? 0.6 : 1 }}>
+                  <MaterialCommunityIcons name="water-outline" size={16} color="#FFFFFF" />
+                  <Text className="ml-1 text-xs font-bold text-white">물 주기</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => handleReact('acid-rain')}
+                  disabled={isReacting}
+                  className="flex-row items-center rounded-full px-3 py-1.5"
+                  style={{ backgroundColor: COLORS.error, opacity: isReacting ? 0.6 : 1 }}>
+                  <MaterialCommunityIcons name="weather-pouring" size={16} color="#FFFFFF" />
+                  <Text className="ml-1 text-xs font-bold text-white">산성비</Text>
+                </TouchableOpacity>
+              </>
+            )}
           </View>
-        ))}
+        </View>
+      )}
 
       <KeyboardAvoidingView
         className="flex-1"

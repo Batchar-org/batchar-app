@@ -35,6 +35,7 @@ type ProductDetailRaw = {
   seller_id: number;
   seller_name: string;
   seller_profile_image_url: string | null;
+  seller_fertility: number;
   title: string;
   description: string;
   category: string;
@@ -77,6 +78,7 @@ function toProductDetail(raw: ProductDetailRaw): ProductDetail {
     seller_id: Number(raw.seller_id),
     seller_name: raw.seller_name,
     seller_profile_image_url: raw.seller_profile_image_url,
+    seller_fertility: Number(raw.seller_fertility),
     title: raw.title,
     description: raw.description,
     category: raw.category,

@@ -78,6 +78,7 @@ export type UserProfile = {
   name: string;
   address: string;
   profile_image_url: string | null;
+  fertility: number;
 };
 
 export type UserProfileResponse = ApiResponse<UserProfile>;
@@ -156,6 +157,7 @@ export type ProductDetail = {
   seller_id: number;
   seller_name: string;
   seller_profile_image_url?: string | null;
+  seller_fertility: number;
   title: string;
   description: string;
   category: string;
@@ -256,6 +258,9 @@ export type ChatListItem = {
   is_seller: boolean;
   // 상대방이 채팅방을 나갔는지 여부
   partner_left: boolean;
+  // 거래 상품 바 표시용 — 백엔드 ChatListResponse에 추가 예정(현재는 미내려옴).
+  product_title?: string;
+  product_price?: number;
 };
 
 export type ChatListResponse = ApiResponse<ChatListItem[]>;

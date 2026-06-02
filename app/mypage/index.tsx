@@ -17,7 +17,9 @@ import { useRouter } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
 import * as Notifications from 'expo-notifications';
 import TabBar from '@/components/layout/TabBar';
+import FertilityCard from '@/components/fertility/FertilityCard';
 import { COLORS, SHADOWS } from '@/constants/theme';
+import { FERTILITY_BASE } from '@/constants/fertility';
 import { POLICY_URLS } from '@/constants/policy';
 import { useAuthActions } from '@/store/useAuthStore';
 import { useProductsQuery } from '@/hooks/product/useProductsQuery';
@@ -142,8 +144,11 @@ export default function MyPage() {
           </TouchableOpacity>
         </View>
 
+        {/* 밭비옥도 (당근 매너온도 패러디) */}
+        <FertilityCard percent={profile?.fertility ?? FERTILITY_BASE} />
+
         {/* 구매/판매 내역 카드 */}
-        <View className="mx-4 rounded-2xl bg-white p-5" style={SHADOWS.card}>
+        <View className="mx-4 mt-4 rounded-2xl bg-white p-5" style={SHADOWS.card}>
           <Text className="mb-3 text-base font-bold text-gray-900">구매 내역</Text>
           <TouchableOpacity
             className="mb-5 flex-row rounded-xl border border-gray-200 bg-white py-3"

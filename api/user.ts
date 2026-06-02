@@ -21,6 +21,7 @@ type UserMeRaw = {
   name: string;
   address: string;
   profile_image_url: string | null;
+  fertility: number;
 };
 
 function toUserProfile(raw: UserMeRaw): UserProfile {
@@ -30,6 +31,7 @@ function toUserProfile(raw: UserMeRaw): UserProfile {
     name: raw.name,
     address: raw.address,
     profile_image_url: raw.profile_image_url,
+    fertility: Number(raw.fertility),
   };
 }
 
