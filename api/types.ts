@@ -252,6 +252,10 @@ export type ChatListItem = {
   is_blocked: boolean;
   i_blocked: boolean;
   blocked_by_partner: boolean;
+  // 내가 이 거래의 판매자인지 여부
+  is_seller: boolean;
+  // 상대방이 채팅방을 나갔는지 여부
+  partner_left: boolean;
 };
 
 export type ChatListResponse = ApiResponse<ChatListItem[]>;

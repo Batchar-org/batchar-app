@@ -30,6 +30,7 @@ import { useCloseProductMutation } from '@/hooks/product/useCloseProductMutation
 import { useProductSSE } from '@/hooks/product/useProductSSE';
 import { displayUserName } from '@/utils/displayUserName';
 import ReportModal from '@/components/modals/ReportModal';
+import { useOpenProductChatRoom } from '@/hooks/chat/useOpenProductChatRoom';
 
 function formatEndDate(endTimeStr: string): string {
   const date = new Date(endTimeStr);
@@ -72,6 +73,7 @@ export default function ProductDetail() {
   const { mutate: toggleWish } = useToggleWishMutation();
   const { mutate: placeBid, isPending: isBidding } = usePlaceBidMutation();
   const { mutate: closeProduct, isPending: isClosing } = useCloseProductMutation();
+  const openProductChatRoom = useOpenProductChatRoom();
 
   // SSE 실시간 입찰/현재가 업데이트 (경매 진행 중일 때만)
   useProductSSE({
@@ -109,7 +111,8 @@ export default function ProductDetail() {
     );
   }
 
-  const isOwner = userId !== null && product.seller_id === userId;
+  // bigint id는 문자열/숫자로 혼재될 수 있으므로 Number로 정규화해 비교한다.
+  const isOwner = userId !== null && Number(product.seller_id) === Number(userId);
   const images = product.media_urls.map((m) => m.url);
 
   const handleScroll = (event: any) => {
@@ -164,7 +167,14 @@ export default function ProductDetail() {
           text: '낙찰하기',
           onPress: () => {
             closeProduct(productId, {
-              onSuccess: () => {
+              onSuccess: async () => {
+                // 낙찰 시 생성된 채팅방으로 바로 이동 (UX 개선)
+                try {
+                  const opened = await openProductChatRoom(productId);
+                  if (opened) return;
+                } catch {
+                  // 채팅방 조회 실패 시 완료 안내만 표시
+                }
                 Alert.alert('낙찰 완료', '낙찰이 완료되었습니다.');
               },
               onError: (error) => {

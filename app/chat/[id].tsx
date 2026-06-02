@@ -103,7 +103,7 @@ export default function ChatDetail() {
   const { mutate: blockUser, isPending: isBlocking } = useBlockUserMutation();
   const { mutate: unblockUser, isPending: isUnblocking } = useUnblockUserMutation();
   const chatInfo = chatList?.find((c) => c.chat_id === chatId);
-  const { dealCompleted, markMyConfirmed } = useDealStatus(chatId);
+  const { dealCompleted, myConfirmed, partnerConfirmed, markMyConfirmed } = useDealStatus(chatId);
 
   const onMessageReceived = useCallback(() => {
     setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 100);
@@ -147,7 +147,7 @@ export default function ChatDetail() {
   const handleLeaveChat = () => {
     if (!dealCompleted) {
       closeMenu();
-      Alert.alert('알림', '거래가 완료된 후에 채팅방을 나갈 수 있습니다.');
+      Alert.alert('알림', '양쪽 모두 거래를 완료해야 채팅방을 나갈 수 있어요.');
       return;
     }
     closeMenu();
@@ -382,19 +382,6 @@ export default function ChatDetail() {
                   }}
                 />
               </View>
-              <TouchableOpacity
-                className="flex-row items-center px-5 py-4"
-                disabled={isCompleting}
-                onPress={handleCompleteDeal}>
-                <MaterialCommunityIcons
-                  name="check-circle-outline"
-                  size={22}
-                  color={COLORS.primary}
-                />
-                <Text className="ml-4 text-base font-medium" style={{ color: COLORS.text }}>
-                  거래 완료
-                </Text>
-              </TouchableOpacity>
               <TouchableOpacity className="flex-row items-center px-5 py-4" onPress={handleReport}>
                 <MaterialCommunityIcons name="flag-outline" size={22} color={COLORS.error} />
                 <Text className="ml-4 text-base font-medium" style={{ color: COLORS.error }}>
@@ -442,7 +429,7 @@ export default function ChatDetail() {
                 </Text>
                 {!dealCompleted && (
                   <Text className="ml-auto text-xs" style={{ color: COLORS.textMuted }}>
-                    거래 완료 후 가능
+                    양쪽 완료 후 가능
                   </Text>
                 )}
               </TouchableOpacity>
@@ -469,6 +456,22 @@ export default function ChatDetail() {
         </View>
       )}
 
+      {/* 상대방 퇴장 안내 */}
+      {chatInfo?.partner_left && (
+        <View
+          className="flex-row items-center px-4 py-3.5"
+          style={{ backgroundColor: COLORS.backgroundSecondary }}>
+          <MaterialCommunityIcons
+            name="account-arrow-left-outline"
+            size={20}
+            color={COLORS.textMuted}
+          />
+          <Text className="ml-2.5 text-sm font-medium" style={{ color: COLORS.textSecondary }}>
+            상대방이 채팅방을 나갔어요.
+          </Text>
+        </View>
+      )}
+
       {/* 상품 정보 바 */}
       {chatInfo && (
         <TouchableOpacity
@@ -484,17 +487,47 @@ export default function ChatDetail() {
         </TouchableOpacity>
       )}
 
-      {/* 거래 완료 배너 */}
-      {dealCompleted && (
-        <View
-          className="flex-row items-center justify-center px-4 py-3"
-          style={{ backgroundColor: COLORS.primaryLight }}>
-          <MaterialCommunityIcons name="check-circle" size={18} color={COLORS.primary} />
-          <Text className="ml-2 text-sm font-semibold" style={{ color: COLORS.primary }}>
-            거래가 완료되었습니다
-          </Text>
-        </View>
-      )}
+      {/* 거래 완료 상태 배너 (양쪽 확인 흐름) */}
+      {chatInfo &&
+        (dealCompleted ? (
+          <View
+            className="flex-row items-center justify-center px-4 py-3"
+            style={{ backgroundColor: COLORS.primaryLight }}>
+            <MaterialCommunityIcons name="check-circle" size={18} color={COLORS.primary} />
+            <Text className="ml-2 text-sm font-semibold" style={{ color: COLORS.primary }}>
+              거래가 완료되었어요
+            </Text>
+          </View>
+        ) : myConfirmed ? (
+          <View
+            className="flex-row items-center px-4 py-3"
+            style={{ backgroundColor: COLORS.backgroundSecondary }}>
+            <MaterialCommunityIcons name="clock-outline" size={18} color={COLORS.textMuted} />
+            <Text className="ml-2 flex-1 text-sm" style={{ color: COLORS.textSecondary }}>
+              {chatInfo.is_seller ? '판매' : '구매'} 완료를 확인했어요. 상대방의 확인을 기다리는
+              중이에요.
+            </Text>
+          </View>
+        ) : (
+          <View
+            className="flex-row items-center px-4 py-3"
+            style={{ backgroundColor: COLORS.backgroundSecondary }}>
+            <Text className="flex-1 text-sm" style={{ color: COLORS.textSecondary }}>
+              {partnerConfirmed
+                ? '상대방이 거래 완료를 확인했어요. 거래를 마무리해 주세요.'
+                : '거래가 끝났다면 완료를 눌러 마무리해 주세요.'}
+            </Text>
+            <TouchableOpacity
+              className="ml-3 rounded-full px-4 py-2"
+              style={{ backgroundColor: COLORS.primary }}
+              disabled={isCompleting}
+              onPress={handleCompleteDeal}>
+              <Text className="text-sm font-semibold text-white">
+                {chatInfo.is_seller ? '판매 완료' : '구매 완료'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        ))}
 
       <KeyboardAvoidingView
         className="flex-1"
@@ -515,14 +548,17 @@ export default function ChatDetail() {
             </View>
           ) : (
             messages.map((msg, index) => {
-              const isMe = msg.sender_id === userId;
+              const isMe = Number(msg.sender_id) === Number(userId);
               const showDate =
                 index === 0 ||
                 getDateKey(msg.created_at) !== getDateKey(messages[index - 1].created_at);
 
               // 상대방 메시지: 연속 메시지면 아바타 숨김
               const showPartnerAvatar =
-                !isMe && (index === 0 || messages[index - 1].sender_id === userId || showDate);
+                !isMe &&
+                (index === 0 ||
+                  Number(messages[index - 1].sender_id) === Number(userId) ||
+                  showDate);
 
               // 같은 발신자 + 같은 시간이면 마지막 메시지에만 시간 표시
               const nextMsg = messages[index + 1];

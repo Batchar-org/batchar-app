@@ -18,7 +18,9 @@ export function useDealStatus(chatId: number) {
 
   const myConfirmed = chatInfo?.my_confirmed ?? false;
   const partnerConfirmed = chatInfo?.partner_confirmed ?? false;
-  const dealCompleted = myConfirmed;
+  // 거래는 양쪽 모두 완료를 눌러야 최종 완료된다.
+  const bothConfirmed = myConfirmed && partnerConfirmed;
+  const dealCompleted = bothConfirmed;
 
   // 거래 완료 API 성공 후 캐시 낙관적 업데이트
   const markMyConfirmed = useCallback(() => {
