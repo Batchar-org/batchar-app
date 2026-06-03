@@ -78,7 +78,7 @@ export default function FertilityCard({ percent }: FertilityCardProps) {
               </View>
 
               <Text className="mb-4 text-sm leading-5 text-gray-500">
-                {`거래 상대에게 받은 평가로 키우는 내 밭의 비옥도예요.\n기본 ${FERTILITY_BASE}%에서 시작하고, 거래를 완료하면 상대가 거래당 한 번 💧 물 주기(+0.5%)나 🌧️ 산성비(-0.5%)로 평가해요.`}
+                {`거래 상대에게 받은 평가로 키우는 내 밭의 비옥도예요.\n기본 ${FERTILITY_BASE}%에서 시작하고, 거래를 완료하면 상대가 거래당 한 번 물 주기(+0.5%)나 산성비(-0.5%)로 평가해요.`}
               </Text>
 
               <View className="rounded-xl bg-gray-50 p-4">

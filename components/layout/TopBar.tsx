@@ -1,5 +1,4 @@
 import { View, Text, TouchableOpacity } from 'react-native';
-import { Image } from 'expo-image';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { COLORS } from '@/constants/theme';
@@ -20,14 +19,10 @@ export default function TopBar() {
         <TouchableOpacity
           onPress={() => router.push('/mypage/notifications')}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-          <Image
-            source={require('../../assets/public/Notification.png')}
-            style={{ width: 28, height: 28 }}
-            contentFit="contain"
-          />
+          <MaterialCommunityIcons name="bell-outline" size={26} color={COLORS.active} />
           {hasUnread && (
             <View
-              className="absolute -right-1.5 -top-1.5 h-[18px] min-w-[18px] items-center justify-center rounded-full px-1"
+              className="absolute -right-1.5 -top-1.5 h-[17px] min-w-[17px] items-center justify-center rounded-full px-1"
               style={{ backgroundColor: COLORS.error }}>
               <Text className="text-[10px] font-bold text-white">
                 {unreadCount != null && unreadCount > 99 ? '99+' : unreadCount}
