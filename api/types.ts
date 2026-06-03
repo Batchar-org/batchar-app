@@ -244,6 +244,7 @@ export type ChatListItem = {
   // NestJS ChatListResponse DTO에는 현재 partner_id가 없음(백엔드 추가 권장). 차단/신고 연동에 필요.
   partner_id?: number;
   partner_name: string;
+  partner_fertility?: number;
   partner_profile_image_url?: string | null;
   product_image_url: string | null;
   last_message: string;
@@ -258,7 +259,7 @@ export type ChatListItem = {
   is_seller: boolean;
   // 상대방이 채팅방을 나갔는지 여부
   partner_left: boolean;
-  // 거래 상품 바 표시용 — 백엔드 ChatListResponse에 추가 예정(현재는 미내려옴).
+  // 거래 상품 바 표시용
   product_title?: string;
   product_price?: number;
 };
