@@ -28,6 +28,7 @@ type ProductSummaryRaw = {
   main_image_url: string | null;
   wish_count: number;
   bid_count: number;
+  is_winner?: boolean;
 };
 
 type ProductDetailRaw = {
@@ -69,6 +70,7 @@ function toProductSummary(raw: ProductSummaryRaw): ProductSummary {
     bid_count: raw.bid_count,
     status: raw.status,
     end_time: raw.end_time,
+    is_winner: Boolean(raw.is_winner),
   };
 }
 

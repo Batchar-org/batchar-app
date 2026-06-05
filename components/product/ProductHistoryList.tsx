@@ -18,22 +18,24 @@ const SUB_HEADERS: Record<TabId, string[]> = {
   completed: ['거래일'],
 };
 
-function filterByTab(products: ProductSummary[], tab: TabId): ProductSummary[] {
+function filterByTab(
+  products: ProductSummary[],
+  tab: TabId,
+  view: ProductHistoryListProps['view']
+): ProductSummary[] {
   switch (tab) {
     case 'bidding':
       return products.filter((p) => p.status === 'ON_SALE');
     case 'completed':
-      return products.filter(
-        (p) => p.status === 'ENDED' || p.status === 'FAILED' || p.status === 'CANCELED'
-      );
+      return products.filter((p) => {
+        if (p.status === 'TRADED' || p.status === 'FAILED' || p.status === 'CANCELED') return true;
+        return false;
+      });
     case 'inProgress':
-      return products.filter(
-        (p) =>
-          p.status !== 'ON_SALE' &&
-          p.status !== 'ENDED' &&
-          p.status !== 'FAILED' &&
-          p.status !== 'CANCELED'
-      );
+      return products.filter((p) => {
+        if (p.status !== 'ENDED') return false;
+        return view === 'MY_PRODUCTS' || p.is_winner;
+      });
   }
 }
 
@@ -56,13 +58,16 @@ export default function ProductHistoryList({ title, biddingLabel, view }: Produc
   const { data, isLoading } = useProductsQuery({ view });
 
   const grouped = useMemo(() => {
-    const products = data?.content ?? [];
+    const products =
+      view === 'MY_BIDS'
+        ? (data?.content ?? []).filter((p) => p.status === 'ON_SALE' || p.is_winner)
+        : (data?.content ?? []);
     return {
-      bidding: filterByTab(products, 'bidding'),
-      inProgress: filterByTab(products, 'inProgress'),
-      completed: filterByTab(products, 'completed'),
+      bidding: filterByTab(products, 'bidding', view),
+      inProgress: filterByTab(products, 'inProgress', view),
+      completed: filterByTab(products, 'completed', view),
     };
-  }, [data]);
+  }, [data, view]);
 
   const items = grouped[activeTab];
   const subHeaders = SUB_HEADERS[activeTab];

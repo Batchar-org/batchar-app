@@ -19,6 +19,8 @@ export function useCompleteDealMutation() {
     onSuccess: (_data, chatId) => {
       queryClient.invalidateQueries({ queryKey: ['chatMessages', chatId] });
       queryClient.invalidateQueries({ queryKey: ['chatList'] });
+      queryClient.invalidateQueries({ queryKey: ['product'] });
+      queryClient.invalidateQueries({ queryKey: ['products'] });
     },
   });
 }

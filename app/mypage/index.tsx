@@ -28,22 +28,21 @@ import { useDeleteUserMutation } from '@/hooks/user/useDeleteUserMutation';
 import { unregisterPushNotifications } from '@/lib/pushNotifications';
 import type { ProductSummary } from '@/api/types';
 
-function countByStatus(products: ProductSummary[]) {
+function countByStatus(products: ProductSummary[], view: 'MY_BIDS' | 'MY_PRODUCTS') {
   let bidding = 0;
   let inProgress = 0;
   let completed = 0;
-  for (const p of products) {
+  const visibleProducts =
+    view === 'MY_BIDS' ? products.filter((p) => p.status === 'ON_SALE' || p.is_winner) : products;
+
+  for (const p of visibleProducts) {
     if (p.status === 'ON_SALE') bidding++;
-    else if (
-      p.status === 'ENDED' ||
-      p.status === 'FAILED' ||
-      p.status === 'CANCELED' ||
-      p.status === 'TRADED'
-    )
+    else if (p.status === 'ENDED') {
+      if (view === 'MY_PRODUCTS' || p.is_winner) inProgress++;
+    } else if (p.status === 'FAILED' || p.status === 'CANCELED' || p.status === 'TRADED')
       completed++;
-    else inProgress++;
   }
-  return { total: products.length, bidding, inProgress, completed };
+  return { total: visibleProducts.length, bidding, inProgress, completed };
 }
 
 const WITHDRAWAL_REASONS = [
@@ -67,8 +66,14 @@ export default function MyPage() {
   const { data: bidsData } = useProductsQuery({ view: 'MY_BIDS' });
   const { data: productsData } = useProductsQuery({ view: 'MY_PRODUCTS' });
 
-  const purchaseCounts = useMemo(() => countByStatus(bidsData?.content ?? []), [bidsData]);
-  const saleCounts = useMemo(() => countByStatus(productsData?.content ?? []), [productsData]);
+  const purchaseCounts = useMemo(
+    () => countByStatus(bidsData?.content ?? [], 'MY_BIDS'),
+    [bidsData]
+  );
+  const saleCounts = useMemo(
+    () => countByStatus(productsData?.content ?? [], 'MY_PRODUCTS'),
+    [productsData]
+  );
 
   // 로그아웃: 푸시 토큰 해제(access 유효할 때 먼저) + 앱 아이콘 배지 0 + 쿼리 캐시 정리
   const performLogout = async () => {

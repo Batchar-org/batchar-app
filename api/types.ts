@@ -140,6 +140,7 @@ export type ProductSummary = {
   bid_count: number;
   status: string;
   end_time: string;
+  is_winner: boolean;
 };
 
 export type ProductListResponse = ApiResponse<{

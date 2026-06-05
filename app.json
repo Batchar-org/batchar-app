@@ -2,7 +2,7 @@
   "expo": {
     "name": "밭찰",
     "slug": "batchar-app",
-    "version": "1.0.0",
+    "version": "0.1.2",
     "scheme": "batchar-app",
     "experiments": {
       "tsconfigPaths": true
