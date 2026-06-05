@@ -117,10 +117,13 @@ export type ProductCreateRequest = {
 
 export type ProductViewType =
   | 'ALL'
+  | 'BIDDING'
+  | 'BID_CLOSED'
   | 'LATEST'
   | 'POPULAR'
   | 'ENDING_SOON'
   | 'MY_PRODUCTS'
+  | 'MY_ACTIVE_BIDS'
   | 'MY_BIDS';
 
 export type ProductListParams = {
@@ -135,7 +138,9 @@ export type ProductSummary = {
   product_id: number;
   title: string;
   media_url: string;
+  start_price: number;
   current_price: number;
+  my_bid_price: number | null;
   wish_count: number;
   bid_count: number;
   status: string;
@@ -182,7 +187,9 @@ export type WishSummary = {
   wish_id: number;
   product_id: number;
   title: string;
+  start_price: number;
   current_price: number;
+  bid_count: number;
   status: string;
   end_time: string;
   media_url: string;

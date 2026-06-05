@@ -1,4 +1,4 @@
-import { RefreshControl, ScrollView, View } from 'react-native';
+import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useCallback, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
@@ -8,7 +8,6 @@ import CategoryBar from '@/components/layout/CategoryBar';
 import ProductList from '@/components/product/ProductList';
 import TabBar from '@/components/layout/TabBar';
 import { ProductViewType } from '@/api/types';
-import { COLORS } from '@/constants/theme';
 
 export default function Home() {
   const [activeCategory, setActiveCategory] = useState<ProductViewType>('ALL');
@@ -30,21 +29,12 @@ export default function Home() {
         <SearchBar onSubmit={setKeyword} />
         <CategoryBar activeCategory={activeCategory} onCategoryPress={setActiveCategory} />
       </View>
-      <ScrollView
-        className="flex-1 bg-gray-50 px-5"
-        contentContainerStyle={{ flexGrow: 1 }}
-        scrollEventThrottle={16}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={handleRefresh}
-            tintColor={COLORS.primary}
-            colors={[COLORS.primary]}
-          />
-        }>
-        <ProductList viewType={activeCategory} keyword={keyword} />
-      </ScrollView>
+      <ProductList
+        viewType={activeCategory}
+        keyword={keyword}
+        refreshing={refreshing}
+        onRefresh={handleRefresh}
+      />
       <TabBar />
     </SafeAreaView>
   );

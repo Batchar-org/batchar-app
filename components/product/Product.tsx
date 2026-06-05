@@ -3,20 +3,25 @@ import { Image } from 'expo-image';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { COLORS, SHADOWS } from '@/constants/theme';
 import { formatPrice, formatRemainingTime } from '@/utils/format';
+import { getProductDisplayStatus, isProductClosedForDisplay } from '@/utils/productStatus';
 import { IMAGE_TRANSITION_MS, IMAGE_PLACEHOLDER } from '@/lib/expo-image-setup';
+import ProductStatusOverlay from './ProductStatusOverlay';
 
 interface ProductProps {
   id: string;
   title: string;
-  originalPrice: number;
+  originalPrice?: number;
   currentPrice: number;
+  currentPriceLabel?: string;
   location: string;
   participants: number;
   image: string;
   badge?: 'HOT' | 'NEW';
+  status?: string;
   endTime?: string;
   deadline?: string;
   isFavorite?: boolean;
+  showFavorite?: boolean;
   onPress?: () => void;
   onFavoritePress?: () => void;
 }
@@ -25,16 +30,24 @@ export default function Product({
   title,
   originalPrice,
   currentPrice,
+  currentPriceLabel,
   location,
   participants,
   image,
   badge,
+  status,
   endTime,
   deadline,
   isFavorite = false,
+  showFavorite = true,
   onPress,
   onFavoritePress,
 }: ProductProps) {
+  const isEnded = isProductClosedForDisplay(status, endTime);
+  const displayStatus = getProductDisplayStatus(status);
+  const overlayStatus = displayStatus;
+  const priceLabel = currentPriceLabel ?? (isEnded ? '최종가' : '현재가');
+
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -68,6 +81,7 @@ export default function Product({
             transition={IMAGE_TRANSITION_MS}
             placeholder={IMAGE_PLACEHOLDER}
           />
+          <ProductStatusOverlay status={overlayStatus} />
         </View>
 
         {/* 상품 정보 */}
@@ -81,7 +95,9 @@ export default function Product({
           {endTime ? (
             <View className="mb-3 flex-row items-center">
               <MaterialCommunityIcons name="clock-outline" size={12} color={COLORS.textMuted} />
-              <Text className="ml-1 text-xs text-gray-500">{formatRemainingTime(endTime)}</Text>
+              <Text className="ml-1 text-xs text-gray-500">
+                {isEnded ? '입찰 종료' : formatRemainingTime(endTime)}
+              </Text>
             </View>
           ) : (
             <View className="mb-3" style={{ height: 16 }} />
@@ -101,7 +117,7 @@ export default function Product({
               }}>
               <Text className="text-xs text-gray-500">시작가</Text>
               <Text className="text-xs font-bold text-gray-700">
-                {formatPrice(originalPrice)}원
+                {formatPrice(originalPrice ?? currentPrice)}원
               </Text>
             </TouchableOpacity>
 
@@ -110,31 +126,35 @@ export default function Product({
               activeOpacity={0.7}
               className="flex-1 items-center rounded-lg px-2.5 py-1.5"
               style={{
-                backgroundColor: COLORS.primary,
+                backgroundColor: isEnded ? '#6B7280' : COLORS.primary,
                 ...(Platform.OS === 'web' && {
                   cursor: 'pointer',
                 }),
               }}>
-              <Text className="text-xs text-white">현재가</Text>
+              <Text className="text-xs text-white">{priceLabel}</Text>
               <Text className="text-xs font-bold text-white">{formatPrice(currentPrice)}원</Text>
             </TouchableOpacity>
           </View>
         </View>
 
         {/* 찜 버튼 */}
-        <TouchableOpacity onPress={onFavoritePress} activeOpacity={0.7} className="ml-2">
-          <MaterialCommunityIcons
-            name={isFavorite ? 'heart' : 'heart-outline'}
-            size={24}
-            color={isFavorite ? COLORS.primary : COLORS.inactive}
-          />
-        </TouchableOpacity>
+        {showFavorite && (
+          <TouchableOpacity onPress={onFavoritePress} activeOpacity={0.7} className="ml-2">
+            <MaterialCommunityIcons
+              name={isFavorite ? 'heart' : 'heart-outline'}
+              size={24}
+              color={isFavorite ? COLORS.primary : COLORS.inactive}
+            />
+          </TouchableOpacity>
+        )}
       </View>
 
       {/* 참여자 수 */}
       <View className="mt-2 flex-row items-center pl-1">
         <MaterialCommunityIcons name="account-outline" size={14} color={COLORS.textMuted} />
-        <Text className="ml-1 text-xs text-gray-500">{participants}명 참여중</Text>
+        <Text className="ml-1 text-xs text-gray-500">
+          {participants}명 {isEnded ? '참여' : '참여중'}
+        </Text>
       </View>
     </TouchableOpacity>
   );

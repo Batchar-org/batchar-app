@@ -1,22 +1,16 @@
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { Image } from 'expo-image';
-import { IMAGE_TRANSITION_MS, IMAGE_PLACEHOLDER } from '@/lib/expo-image-setup';
+import { View, Text, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useState, useMemo } from 'react';
-import { COLORS, SHADOWS } from '@/constants/theme';
-import { formatPrice, formatRemainingTime } from '@/utils/format';
-import { useProductsQuery } from '@/hooks/product/useProductsQuery';
+import { useEffect, useState, useMemo } from 'react';
+import { COLORS } from '@/constants/theme';
+import { useInfiniteProductsQuery } from '@/hooks/product/useInfiniteProductsQuery';
+import Product from './Product';
 import type { ProductSummary } from '@/api/types';
 
-type TabId = 'bidding' | 'inProgress' | 'completed';
+type TabId = 'all' | 'bidding' | 'inProgress' | 'completed';
 
-const SUB_HEADERS: Record<TabId, string[]> = {
-  bidding: ['현재가', '만료일'],
-  inProgress: ['거래 예정일'],
-  completed: ['거래일'],
-};
+const HISTORY_PAGE_SIZE = 10;
 
 function filterByTab(
   products: ProductSummary[],
@@ -24,8 +18,13 @@ function filterByTab(
   view: ProductHistoryListProps['view']
 ): ProductSummary[] {
   switch (tab) {
+    case 'all':
+      return products;
     case 'bidding':
-      return products.filter((p) => p.status === 'ON_SALE');
+      return products.filter((p) => {
+        if (p.status !== 'ON_SALE') return false;
+        return view === 'MY_BIDS' || p.bid_count > 0;
+      });
     case 'completed':
       return products.filter((p) => {
         if (p.status === 'TRADED' || p.status === 'FAILED' || p.status === 'CANCELED') return true;
@@ -47,30 +46,38 @@ interface ProductHistoryListProps {
 
 export default function ProductHistoryList({ title, biddingLabel, view }: ProductHistoryListProps) {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<TabId>('bidding');
+  const [activeTab, setActiveTab] = useState<TabId>('all');
 
   const TAB_LABELS: Record<TabId, string> = {
+    all: '전체',
     bidding: biddingLabel,
     inProgress: '진행 중',
     completed: '종료',
   };
 
-  const { data, isLoading } = useProductsQuery({ view });
+  const { data, isLoading, isRefetching, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useInfiniteProductsQuery({ view });
 
   const grouped = useMemo(() => {
     const products =
       view === 'MY_BIDS'
-        ? (data?.content ?? []).filter((p) => p.status === 'ON_SALE' || p.is_winner)
-        : (data?.content ?? []);
+        ? (data ?? []).filter((p) => p.status === 'ON_SALE' || p.is_winner)
+        : (data ?? []);
     return {
       bidding: filterByTab(products, 'bidding', view),
       inProgress: filterByTab(products, 'inProgress', view),
       completed: filterByTab(products, 'completed', view),
+      all: filterByTab(products, 'all', view),
     };
   }, [data, view]);
 
   const items = grouped[activeTab];
-  const subHeaders = SUB_HEADERS[activeTab];
+
+  useEffect(() => {
+    if (!isLoading && items.length < HISTORY_PAGE_SIZE && hasNextPage && !isFetchingNextPage) {
+      void fetchNextPage();
+    }
+  }, [activeTab, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, items.length]);
 
   return (
     <SafeAreaView className="flex-1 bg-white" edges={['top']}>
@@ -87,7 +94,7 @@ export default function ProductHistoryList({ title, biddingLabel, view }: Produc
 
       {/* 탭 */}
       <View className="flex-row border-b border-gray-100">
-        {(['bidding', 'inProgress', 'completed'] as TabId[]).map((tabId) => {
+        {(['all', 'bidding', 'inProgress', 'completed'] as TabId[]).map((tabId) => {
           const isActive = activeTab === tabId;
           return (
             <TouchableOpacity
@@ -110,106 +117,65 @@ export default function ProductHistoryList({ title, biddingLabel, view }: Produc
         })}
       </View>
 
-      {/* 서브 헤더 */}
-      <View className="flex-row justify-end px-5 py-2">
-        {subHeaders.map((header) => (
-          <Text key={header} className="ml-4 text-xs text-gray-400">
-            {header}
-          </Text>
-        ))}
-      </View>
-
       {/* 리스트 */}
       {isLoading ? (
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="large" color={COLORS.primary} />
         </View>
       ) : (
-        <ScrollView className="flex-1 px-4" showsVerticalScrollIndicator={false}>
-          {items.map((item) => (
-            <TouchableOpacity
-              key={item.product_id}
-              className="mb-4 rounded-2xl bg-white p-3"
-              style={SHADOWS.card}
-              activeOpacity={0.7}
-              onPress={() => router.push(`/product/${item.product_id}`)}>
-              <View className="flex-row">
-                {/* 상품 이미지 */}
-                <View className="relative mr-3 h-24 w-24 overflow-hidden rounded-xl bg-gray-100">
-                  {item.media_url ? (
-                    <Image
-                      source={{ uri: item.media_url }}
-                      className="h-full w-full"
-                      contentFit="cover"
-                      transition={IMAGE_TRANSITION_MS}
-                      placeholder={IMAGE_PLACEHOLDER}
-                    />
-                  ) : (
-                    <View className="h-full w-full items-center justify-center bg-gray-200">
-                      <MaterialCommunityIcons
-                        name="image-outline"
-                        size={32}
-                        color={COLORS.textMuted}
-                      />
-                    </View>
-                  )}
-                </View>
-
-                {/* 상품 정보 */}
-                <View className="flex-1">
-                  <Text
-                    className="mb-1 text-base font-bold text-gray-900"
-                    numberOfLines={1}
-                    ellipsizeMode="tail">
-                    {item.title}
-                  </Text>
-
-                  {/* 남은 시간 */}
-                  <View className="mb-3 flex-row items-center">
-                    <MaterialCommunityIcons
-                      name="clock-outline"
-                      size={12}
-                      color={COLORS.textMuted}
-                    />
-                    <Text className="ml-1 text-xs text-gray-500">
-                      {formatRemainingTime(item.end_time)}
-                    </Text>
-                  </View>
-
-                  {/* 가격 정보 */}
-                  <View
-                    className="items-center self-start rounded-lg px-4 py-1.5"
-                    style={{ backgroundColor: COLORS.primary }}>
-                    <Text className="text-xs text-white">현재가</Text>
-                    <Text className="text-xs font-bold text-white">
-                      {formatPrice(item.current_price)}원
-                    </Text>
-                  </View>
-                </View>
-              </View>
-
-              {/* 참여자 수 */}
-              {item.bid_count > 0 && (
-                <View className="mt-2 flex-row items-center pl-1">
-                  <MaterialCommunityIcons
-                    name="account-outline"
-                    size={14}
-                    color={COLORS.textMuted}
-                  />
-                  <Text className="ml-1 text-xs text-gray-500">{item.bid_count}명 참여중</Text>
-                </View>
-              )}
-            </TouchableOpacity>
-          ))}
-
-          {items.length === 0 && (
-            <View className="items-center pt-20">
+        <FlatList
+          data={items}
+          keyExtractor={(item) => String(item.product_id)}
+          className="flex-1 px-4"
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{
+            flexGrow: items.length === 0 ? 1 : undefined,
+            paddingTop: 12,
+            paddingBottom: 32,
+          }}
+          refreshing={isRefetching}
+          onRefresh={() => void refetch()}
+          onEndReachedThreshold={0.5}
+          onEndReached={() => {
+            if (hasNextPage && !isFetchingNextPage) void fetchNextPage();
+          }}
+          ListEmptyComponent={
+            <View className="flex-1 items-center justify-center pt-20">
               <Text className="text-gray-400">내역이 없습니다</Text>
             </View>
-          )}
+          }
+          ListFooterComponent={
+            isFetchingNextPage ? (
+              <View className="items-center py-4">
+                <ActivityIndicator size="small" color={COLORS.primary} />
+              </View>
+            ) : null
+          }
+          renderItem={({ item }) => {
+            const shouldShowMyBidPrice = view === 'MY_BIDS' && item.my_bid_price !== null;
+            const displayPrice = shouldShowMyBidPrice
+              ? (item.my_bid_price ?? item.current_price)
+              : item.current_price;
 
-          <View className="h-8" />
-        </ScrollView>
+            return (
+              <Product
+                key={item.product_id}
+                id={String(item.product_id)}
+                title={item.title}
+                originalPrice={item.start_price}
+                currentPrice={displayPrice}
+                currentPriceLabel={shouldShowMyBidPrice ? '입찰가' : undefined}
+                location=""
+                participants={item.bid_count}
+                image={item.media_url}
+                status={item.status}
+                endTime={item.end_time}
+                showFavorite={false}
+                onPress={() => router.push(`/product/${item.product_id}`)}
+              />
+            );
+          }}
+        />
       )}
     </SafeAreaView>
   );

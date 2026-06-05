@@ -23,6 +23,7 @@ type ProductSummaryRaw = {
   title: string;
   start_price: number;
   current_price: number;
+  my_bid_price?: number | null;
   status: string;
   end_time: string;
   main_image_url: string | null;
@@ -65,7 +66,9 @@ function toProductSummary(raw: ProductSummaryRaw): ProductSummary {
     product_id: Number(raw.id),
     title: raw.title,
     media_url: raw.main_image_url ?? '',
+    start_price: raw.start_price,
     current_price: raw.current_price,
+    my_bid_price: raw.my_bid_price ?? null,
     wish_count: raw.wish_count,
     bid_count: raw.bid_count,
     status: raw.status,

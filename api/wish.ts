@@ -12,7 +12,9 @@ type WishSummaryRaw = {
   id: number;
   product_id: number;
   title: string;
+  start_price: number;
   current_price: number;
+  bid_count: number;
   status: string;
   end_time: string;
   main_image_url: string | null;
@@ -36,7 +38,9 @@ export async function getWishlistApi(
     wish_id: Number(raw.id),
     product_id: Number(raw.product_id),
     title: raw.title,
+    start_price: raw.start_price,
     current_price: raw.current_price,
+    bid_count: raw.bid_count,
     status: raw.status,
     end_time: raw.end_time,
     media_url: raw.main_image_url ?? '',

@@ -36,8 +36,9 @@ function countByStatus(products: ProductSummary[], view: 'MY_BIDS' | 'MY_PRODUCT
     view === 'MY_BIDS' ? products.filter((p) => p.status === 'ON_SALE' || p.is_winner) : products;
 
   for (const p of visibleProducts) {
-    if (p.status === 'ON_SALE') bidding++;
-    else if (p.status === 'ENDED') {
+    if (p.status === 'ON_SALE') {
+      if (view === 'MY_BIDS' || p.bid_count > 0) bidding++;
+    } else if (p.status === 'ENDED') {
       if (view === 'MY_PRODUCTS' || p.is_winner) inProgress++;
     } else if (p.status === 'FAILED' || p.status === 'CANCELED' || p.status === 'TRADED')
       completed++;

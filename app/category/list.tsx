@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -24,12 +24,7 @@ export default function CategoryList() {
         </Text>
       </View>
 
-      <ScrollView
-        className="flex-1 bg-gray-50 px-5"
-        contentContainerStyle={{ flexGrow: 1 }}
-        showsVerticalScrollIndicator={false}>
-        <ProductList category={category} />
-      </ScrollView>
+      <ProductList category={category} />
     </SafeAreaView>
   );
 }

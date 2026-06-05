@@ -9,7 +9,7 @@ interface CategoryBarProps {
 
 const CATEGORIES: { id: ProductViewType; label: string }[] = [
   { id: 'ALL', label: '전체' },
-  { id: 'MY_BIDS', label: '참여중' },
+  { id: 'MY_ACTIVE_BIDS', label: '참여중' },
   { id: 'POPULAR', label: '인기' },
   { id: 'ENDING_SOON', label: '마감임박' },
   { id: 'LATEST', label: '최신' },

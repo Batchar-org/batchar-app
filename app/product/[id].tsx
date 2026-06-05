@@ -24,6 +24,7 @@ import { useBidHistoryQuery } from '@/hooks/bid/useBidHistoryQuery';
 import { usePlaceBidMutation } from '@/hooks/bid/usePlaceBidMutation';
 import { COLORS } from '@/constants/theme';
 import { formatPrice, formatRemainingTime } from '@/utils/format';
+import { getProductDisplayStatus, isProductClosedForDisplay } from '@/utils/productStatus';
 import useAuthStore from '@/store/useAuthStore';
 import { useToggleWishMutation } from '@/hooks/wish/useToggleWishMutation';
 import { useCloseProductMutation } from '@/hooks/product/useCloseProductMutation';
@@ -32,6 +33,7 @@ import { displayUserName } from '@/utils/displayUserName';
 import ReportModal from '@/components/modals/ReportModal';
 import { useOpenProductChatRoom } from '@/hooks/chat/useOpenProductChatRoom';
 import FertilityBadge from '@/components/fertility/FertilityBadge';
+import ProductStatusOverlay from '@/components/product/ProductStatusOverlay';
 
 function formatEndDate(endTimeStr: string): string {
   const date = new Date(endTimeStr);
@@ -155,7 +157,9 @@ export default function ProductDetail() {
     ]);
   };
 
-  const isAuctionActive = product.status === 'ON_SALE';
+  const isAuctionActive =
+    product.status === 'ON_SALE' && !isProductClosedForDisplay(product.status, product.end_time);
+  const imageStatus = getProductDisplayStatus(product.status);
   const bidRecords = bidHistory?.content ?? [];
 
   const handleAwardAuction = () => {
@@ -240,11 +244,12 @@ export default function ProductDetail() {
               />
             ))}
           </ScrollView>
+          <ProductStatusOverlay status={imageStatus} size="detail" />
           {/* 페이지 인디케이터 */}
           <View
             pointerEvents="none"
             className="absolute bottom-4 right-4 rounded-full px-3 py-1"
-            style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}>
+            style={{ backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 20 }}>
             <Text className="text-sm font-medium text-white">
               {currentImageIndex + 1} / {images.length}
             </Text>
@@ -311,18 +316,14 @@ export default function ProductDetail() {
         </View>
 
         {/* 입찰 상태 알림 */}
-        {bidRecords.length > 0 && !isOwner && (
-          <View
-            className="mx-4 mb-2 flex-row items-center rounded-xl px-4 py-3"
-            style={{ backgroundColor: product.is_top_bidder ? '#E8F5E9' : '#FFF8E1' }}>
+        {bidRecords.length > 0 && !isOwner && isAuctionActive && (
+          <View className="mx-4 mb-2 flex-row items-center rounded-xl border border-gray-100 bg-white px-4 py-3">
             <MaterialCommunityIcons
               name={product.is_top_bidder ? 'check-circle' : 'alert-circle-outline'}
               size={20}
               color={product.is_top_bidder ? COLORS.active : '#FFA000'}
             />
-            <Text
-              className="ml-2 flex-1 text-sm font-medium"
-              style={{ color: product.is_top_bidder ? COLORS.active : '#F57C00' }}>
+            <Text className="ml-2 flex-1 text-sm font-medium" style={{ color: '#374151' }}>
               {product.is_top_bidder
                 ? '안심하세요, 1등을 유지하고 있어요'
                 : '다른 사람이 더 높은 금액을 제시했어요'}
@@ -336,7 +337,9 @@ export default function ProductDetail() {
             <MaterialCommunityIcons name="clock-outline" size={16} color={COLORS.textSecondary} />
             <Text className="ml-1 text-sm text-gray-500">남은 시간:</Text>
             <Text className="ml-1 text-sm font-bold text-gray-900">
-              {product.end_time ? formatRemainingTime(product.end_time) : '-'}
+              {isAuctionActive && product.end_time
+                ? formatRemainingTime(product.end_time)
+                : '입찰 종료'}
             </Text>
           </View>
           <Text className="text-sm text-gray-500">
@@ -491,14 +494,22 @@ export default function ProductDetail() {
                 </Text>
               </TouchableOpacity>
             )}
-            <TouchableOpacity
-              className="flex-1 items-center rounded-full py-4"
-              style={{ backgroundColor: COLORS.active }}
-              onPress={() => router.push(`/product/edit/${productId}`)}>
-              <Text className="text-base font-semibold text-white">수정하기</Text>
-            </TouchableOpacity>
+            {isAuctionActive ? (
+              <TouchableOpacity
+                className="flex-1 items-center rounded-full py-4"
+                style={{ backgroundColor: COLORS.active }}
+                onPress={() => router.push(`/product/edit/${productId}`)}>
+                <Text className="text-base font-semibold text-white">수정하기</Text>
+              </TouchableOpacity>
+            ) : (
+              <View
+                className="flex-1 items-center rounded-full py-4"
+                style={{ backgroundColor: '#9CA3AF' }}>
+                <Text className="text-base font-semibold text-white">입찰 종료</Text>
+              </View>
+            )}
           </View>
-        ) : (
+        ) : isAuctionActive ? (
           <TouchableOpacity
             className="flex-1 items-center rounded-full py-4"
             style={{ backgroundColor: COLORS.active }}
@@ -507,6 +518,12 @@ export default function ProductDetail() {
               {product.is_top_bidder ? '추가 입찰하기' : '입찰하기'}
             </Text>
           </TouchableOpacity>
+        ) : (
+          <View
+            className="flex-1 items-center rounded-full py-4"
+            style={{ backgroundColor: '#9CA3AF' }}>
+            <Text className="text-base font-semibold text-white">입찰 종료</Text>
+          </View>
         )}
       </View>
 

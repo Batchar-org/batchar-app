@@ -3,14 +3,23 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import TabBar from '@/components/layout/TabBar';
 import WishlistProduct from '@/components/product/WishlistProduct';
-import { useWishlistQuery } from '@/hooks/wish/useWishlistQuery';
+import { useInfiniteWishlistQuery } from '@/hooks/wish/useInfiniteWishlistQuery';
 import { useToggleWishMutation } from '@/hooks/wish/useToggleWishMutation';
 import { COLORS } from '@/constants/theme';
 import type { WishSummary } from '@/api/types';
 
 export default function Wishlist() {
   const router = useRouter();
-  const { data, isLoading, isError } = useWishlistQuery({ size: 50 });
+  const {
+    data: wishlistItems,
+    isLoading,
+    isError,
+    isRefetching,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteWishlistQuery();
   const { mutate: toggleWish } = useToggleWishMutation();
 
   const handleWishRemove = (productId: number) => {
@@ -21,8 +30,10 @@ export default function Wishlist() {
     <WishlistProduct
       productId={item.product_id}
       title={item.title}
+      startPrice={item.start_price}
       currentPrice={item.current_price}
-      category={item.category}
+      bidCount={item.bid_count}
+      status={item.status}
       endTime={item.end_time}
       image={item.media_url}
       onPress={() => router.push(`/product/${item.product_id}`)}
@@ -46,18 +57,31 @@ export default function Wishlist() {
         <View className="flex-1 items-center justify-center">
           <Text className="text-sm text-gray-500">관심목록을 불러올 수 없습니다.</Text>
         </View>
-      ) : !data?.content?.length ? (
+      ) : !wishlistItems?.length ? (
         <View className="flex-1 items-center justify-center">
           <Text className="text-sm text-gray-500">찜한 상품이 없습니다.</Text>
         </View>
       ) : (
         <FlatList
-          data={data.content}
+          data={wishlistItems}
           renderItem={renderItem}
           keyExtractor={(item) => String(item.wish_id)}
           className="flex-1 bg-gray-50 px-4"
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingVertical: 12 }}
+          refreshing={isRefetching}
+          onRefresh={() => void refetch()}
+          onEndReachedThreshold={0.5}
+          onEndReached={() => {
+            if (hasNextPage && !isFetchingNextPage) void fetchNextPage();
+          }}
+          ListFooterComponent={
+            isFetchingNextPage ? (
+              <View className="items-center py-4">
+                <ActivityIndicator size="small" color={COLORS.active} />
+              </View>
+            ) : null
+          }
         />
       )}
 
