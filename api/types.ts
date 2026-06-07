@@ -249,8 +249,7 @@ export type BidListResponse = ApiResponse<{
 export type ChatListItem = {
   chat_id: number;
   product_id: number;
-  // NestJS ChatListResponse DTO에는 현재 partner_id가 없음(백엔드 추가 권장). 차단/신고 연동에 필요.
-  partner_id?: number;
+  partner_id: number;
   partner_name: string;
   partner_fertility?: number;
   partner_profile_image_url?: string | null;

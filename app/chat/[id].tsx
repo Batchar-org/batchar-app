@@ -106,6 +106,11 @@ export default function ChatDetail() {
   const { mutate: blockUser, isPending: isBlocking } = useBlockUserMutation();
   const { mutate: unblockUser, isPending: isUnblocking } = useUnblockUserMutation();
   const chatInfo = chatList?.find((c) => c.chat_id === chatId);
+  const partnerId = chatInfo?.partner_id;
+  const reportTarget =
+    typeof partnerId === 'number' && partnerId > 0
+      ? ({ kind: 'user', id: partnerId } as const)
+      : null;
   const { dealCompleted, myConfirmed, markMyConfirmed } = useDealStatus(chatId);
   const partnerFertility = chatInfo?.partner_fertility;
   const productTitle = chatInfo?.product_title ?? '상품 정보';
@@ -199,6 +204,11 @@ export default function ChatDetail() {
   };
 
   const handleReport = () => {
+    if (!reportTarget) {
+      closeMenu();
+      Alert.alert('오류', '상대 사용자 정보를 불러올 수 없습니다.');
+      return;
+    }
     // 바텀시트 닫힘 애니메이션이 완전히 끝난 후 ReportModal을 띄워야
     // RN의 Modal 중첩 충돌(화면 멈춤) 방지됨
     Animated.timing(sheetAnim, {
@@ -213,10 +223,7 @@ export default function ChatDetail() {
 
   const handleBlock = () => {
     closeMenu();
-    if (!chatInfo) return;
-    const partnerId = chatInfo.partner_id;
-    // NestJS ChatListResponse에는 아직 partner_id가 없어 undefined일 수 있다(백엔드 추가 필요).
-    if (partnerId == null) {
+    if (!chatInfo || !reportTarget) {
       Alert.alert('오류', '상대 사용자 정보를 불러올 수 없습니다.');
       return;
     }
@@ -230,7 +237,7 @@ export default function ChatDetail() {
           text: '차단',
           style: 'destructive',
           onPress: () => {
-            blockUser(partnerId, {
+            blockUser(reportTarget.id, {
               onError: (error) => {
                 Alert.alert('오류', error.message);
               },
@@ -243,10 +250,7 @@ export default function ChatDetail() {
 
   const handleUnblock = () => {
     closeMenu();
-    if (!chatInfo) return;
-    const partnerId = chatInfo.partner_id;
-    // NestJS ChatListResponse에는 아직 partner_id가 없어 undefined일 수 있다(백엔드 추가 필요).
-    if (partnerId == null) {
+    if (!chatInfo || !reportTarget) {
       Alert.alert('오류', '상대 사용자 정보를 불러올 수 없습니다.');
       return;
     }
@@ -256,7 +260,7 @@ export default function ChatDetail() {
       {
         text: '해제',
         onPress: () => {
-          unblockUser(partnerId, {
+          unblockUser(reportTarget.id, {
             onError: (error) => {
               Alert.alert('오류', error.message);
             },
@@ -807,7 +811,14 @@ export default function ChatDetail() {
               onChangeText={setMessageText}
               editable={!(chatInfo?.i_blocked || chatInfo?.blocked_by_partner)}
               multiline
-              style={{ color: COLORS.text, maxHeight: 80 }}
+              style={{
+                color: COLORS.text,
+                lineHeight: 20,
+                maxHeight: 80,
+                minHeight: 22,
+                paddingVertical: 0,
+                textAlignVertical: 'center',
+              }}
               onSubmitEditing={handleSend}
               returnKeyType="send"
             />
@@ -833,11 +844,11 @@ export default function ChatDetail() {
         </View>
       </KeyboardAvoidingView>
 
-      {chatInfo && (
+      {reportTarget && (
         <ReportModal
           visible={reportVisible}
           onClose={() => setReportVisible(false)}
-          target={{ kind: 'user', id: chatInfo.partner_id ?? 0 }}
+          target={reportTarget}
         />
       )}
     </SafeAreaView>

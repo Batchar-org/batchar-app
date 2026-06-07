@@ -47,6 +47,8 @@ function formatEndDate(endTimeStr: string): string {
 }
 
 const MAX_BAR_HEIGHT = 120;
+const INITIAL_BID_HISTORY_SIZE = 3;
+const BID_TREND_SIZE = 5;
 
 function formatBidTime(createdAt: string): string {
   const date = new Date(createdAt);
@@ -66,13 +68,14 @@ export default function ProductDetail() {
   const [bidModalVisible, setBidModalVisible] = useState(false);
   const [bidPrice, setBidPrice] = useState('');
   const [reportVisible, setReportVisible] = useState(false);
+  const [bidHistorySize, setBidHistorySize] = useState(INITIAL_BID_HISTORY_SIZE);
   const scrollViewRef = useRef<ScrollView>(null);
 
   const productId = Number(id) || 0;
   const userId = useAuthStore((state) => state.userId);
   const { data: product, isLoading, isError } = useProductDetailQuery(productId);
-  const { data: bidHistory } = useBidHistoryQuery(productId, { size: 3 });
-  const { data: bidTrend } = useBidHistoryQuery(productId, { size: 10 });
+  const { data: bidHistory } = useBidHistoryQuery(productId, { size: bidHistorySize });
+  const { data: bidTrend } = useBidHistoryQuery(productId, { size: BID_TREND_SIZE });
   const { mutate: toggleWish } = useToggleWishMutation();
   const { mutate: placeBid, isPending: isBidding } = usePlaceBidMutation();
   const { mutate: closeProduct, isPending: isClosing } = useCloseProductMutation();
@@ -161,6 +164,9 @@ export default function ProductDetail() {
     product.status === 'ON_SALE' && !isProductClosedForDisplay(product.status, product.end_time);
   const imageStatus = getProductDisplayStatus(product.status);
   const bidRecords = bidHistory?.content ?? [];
+  const handleShowAllBidRecords = () => {
+    setBidHistorySize(Math.max(product.bid_count, bidHistorySize + INITIAL_BID_HISTORY_SIZE));
+  };
 
   const handleAwardAuction = () => {
     Alert.alert(
@@ -192,10 +198,9 @@ export default function ProductDetail() {
     );
   };
 
-  // 가격 추이: 입찰 기록을 시간순(오래된 순)으로 정렬하여 바 차트 생성
+  // 가격 추이: 최고가 5개를 낮은 가격부터 높은 가격 순으로 표시한다.
   const trendBids = [...(bidTrend?.content ?? [])].reverse();
   const maxPrice = trendBids.length > 0 ? Math.max(...trendBids.map((b) => b.price)) : 0;
-  const minPrice = trendBids.length > 0 ? Math.min(...trendBids.map((b) => b.price)) : 0;
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50" edges={['top', 'bottom']}>
@@ -315,36 +320,38 @@ export default function ProductDetail() {
           </View>
         </View>
 
-        {/* 입찰 상태 알림 */}
-        {bidRecords.length > 0 && !isOwner && isAuctionActive && (
-          <View className="mx-4 mb-2 flex-row items-center rounded-xl border border-gray-100 bg-white px-4 py-3">
-            <MaterialCommunityIcons
-              name={product.is_top_bidder ? 'check-circle' : 'alert-circle-outline'}
-              size={20}
-              color={product.is_top_bidder ? COLORS.active : '#FFA000'}
-            />
-            <Text className="ml-2 flex-1 text-sm font-medium" style={{ color: '#374151' }}>
-              {product.is_top_bidder
-                ? '안심하세요, 1등을 유지하고 있어요'
-                : '다른 사람이 더 높은 금액을 제시했어요'}
-            </Text>
-          </View>
-        )}
+        <View className="bg-white px-4 pb-5 pt-1">
+          {/* 입찰 상태 알림 */}
+          {bidRecords.length > 0 && !isOwner && isAuctionActive && (
+            <View className="mb-5 flex-row items-center">
+              <MaterialCommunityIcons
+                name={product.is_top_bidder ? 'check-circle' : 'alert-circle-outline'}
+                size={20}
+                color={product.is_top_bidder ? COLORS.active : '#FFA000'}
+              />
+              <Text className="ml-2 flex-1 text-sm font-medium" style={{ color: '#374151' }}>
+                {product.is_top_bidder
+                  ? '안심하세요, 1등을 유지하고 있어요'
+                  : '다른 사람이 더 높은 금액을 제시했어요'}
+              </Text>
+            </View>
+          )}
 
-        {/* 남은 시간 */}
-        <View className="flex-row items-center justify-between bg-white px-4 pb-4">
-          <View className="flex-row items-center">
-            <MaterialCommunityIcons name="clock-outline" size={16} color={COLORS.textSecondary} />
-            <Text className="ml-1 text-sm text-gray-500">남은 시간:</Text>
-            <Text className="ml-1 text-sm font-bold text-gray-900">
-              {isAuctionActive && product.end_time
-                ? formatRemainingTime(product.end_time)
-                : '입찰 종료'}
+          {/* 남은 시간 */}
+          <View className="flex-row items-center justify-between">
+            <View className="flex-row items-center">
+              <MaterialCommunityIcons name="clock-outline" size={16} color={COLORS.textSecondary} />
+              <Text className="ml-1 text-sm text-gray-500">남은 시간:</Text>
+              <Text className="ml-1 text-sm font-bold text-gray-900">
+                {isAuctionActive && product.end_time
+                  ? formatRemainingTime(product.end_time)
+                  : '입찰 종료'}
+              </Text>
+            </View>
+            <Text className="text-sm text-gray-500">
+              마감일: {product.end_time ? formatEndDate(product.end_time) : '-'}
             </Text>
           </View>
-          <Text className="text-sm text-gray-500">
-            마감일: {product.end_time ? formatEndDate(product.end_time) : '-'}
-          </Text>
         </View>
 
         {/* 구분선 */}
@@ -387,8 +394,7 @@ export default function ProductDetail() {
           ) : (
             <View className="flex-row items-end justify-around px-2">
               {trendBids.map((bid, index) => {
-                const ratio =
-                  maxPrice === minPrice ? 1 : (bid.price - minPrice) / (maxPrice - minPrice);
+                const ratio = maxPrice > 0 ? bid.price / maxPrice : 0;
                 const barHeight = Math.max(30, ratio * MAX_BAR_HEIGHT);
                 const date = new Date(bid.created_at);
                 const label = `${date.getMonth() + 1}/${date.getDate()}`;
@@ -458,6 +464,15 @@ export default function ProductDetail() {
                   </View>
                 );
               })}
+              {bidHistory?.has_next && (
+                <TouchableOpacity
+                  className="mt-2 items-center py-3"
+                  onPress={handleShowAllBidRecords}>
+                  <Text className="text-sm font-semibold" style={{ color: COLORS.active }}>
+                    더보기
+                  </Text>
+                </TouchableOpacity>
+              )}
             </View>
           )}
         </View>
