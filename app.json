@@ -2,7 +2,7 @@
   "expo": {
     "name": "밭찰",
     "slug": "batchar-app",
-    "version": "0.1.2",
+    "version": "0.2.0",
     "scheme": "batchar-app",
     "experiments": {
       "tsconfigPaths": true
@@ -28,7 +28,7 @@
     "ios": {
       "bundleIdentifier": "com.batchar.app",
       "buildNumber": "1",
-      "supportsTablet": true,
+      "supportsTablet": false,
       "infoPlist": {
         "NSPhotoLibraryUsageDescription": "상품 사진 등록과 채팅 이미지 전송을 위해 사진 라이브러리 접근이 필요합니다.",
         "NSCameraUsageDescription": "상품 사진 촬영과 채팅 이미지 전송을 위해 카메라 접근이 필요합니다.",

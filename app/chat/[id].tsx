@@ -108,8 +108,8 @@ export default function ChatDetail() {
   const chatInfo = chatList?.find((c) => c.chat_id === chatId);
   const partnerId = chatInfo?.partner_id;
   const reportTarget =
-    typeof partnerId === 'number' && partnerId > 0
-      ? ({ kind: 'user', id: partnerId } as const)
+    typeof partnerId === 'number' && partnerId > 0 && chatId > 0
+      ? ({ kind: 'user', id: partnerId, chatId } as const)
       : null;
   const { dealCompleted, myConfirmed, markMyConfirmed } = useDealStatus(chatId);
   const partnerFertility = chatInfo?.partner_fertility;

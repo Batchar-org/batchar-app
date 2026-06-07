@@ -46,6 +46,10 @@ function toApiError(body: any, status: number): ApiError {
   });
 }
 
+function isSuspendedError(body: any): boolean {
+  return body?.code === 'USER_SUSPENDED';
+}
+
 // 동시 401에 대해 refresh는 한 번만 수행 (single-flight)
 let refreshPromise: Promise<string> | null = null;
 
@@ -115,6 +119,9 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): 
         headers: buildHeaders(options, newToken),
       });
       const retryBody = await parseBody(retry);
+      if (isSuspendedError(retryBody)) {
+        await clearSessionHard();
+      }
       if (!retry.ok) {
         throw toApiError(retryBody, retry.status);
       }
@@ -131,6 +138,9 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): 
   }
 
   const body = await parseBody(response);
+  if (isSuspendedError(body)) {
+    await clearSessionHard();
+  }
   if (!response.ok) {
     throw toApiError(body, response.status);
   }

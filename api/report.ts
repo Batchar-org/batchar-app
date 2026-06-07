@@ -13,6 +13,7 @@ export function reportUserApi(req: ReportUserRequest): Promise<ReportResponse> {
     method: 'POST',
     body: JSON.stringify({
       targetUserId: Number(req.targetUserId),
+      ...(typeof req.chatId === 'number' ? { chatId: Number(req.chatId) } : {}),
       reason: req.reason,
       description: req.description,
     }),

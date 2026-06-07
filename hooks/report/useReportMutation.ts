@@ -4,7 +4,7 @@ import { reportMessageApi, reportProductApi, reportUserApi } from '@/api/report'
 import type { ReportReasonCode } from '@/api/types';
 
 export type ReportTarget =
-  | { kind: 'user'; id: number }
+  | { kind: 'user'; id: number; chatId?: number }
   | { kind: 'product'; id: number }
   | { kind: 'message'; id: number };
 
@@ -18,7 +18,12 @@ export function useReportMutation() {
   return useMutation({
     mutationFn: async ({ target, reason, description }: Variables) => {
       if (target.kind === 'user') {
-        return reportUserApi({ targetUserId: target.id, reason, description });
+        return reportUserApi({
+          targetUserId: target.id,
+          chatId: target.chatId,
+          reason,
+          description,
+        });
       }
       if (target.kind === 'product') {
         return reportProductApi({ targetProductId: target.id, reason, description });
