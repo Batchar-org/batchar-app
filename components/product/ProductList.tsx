@@ -24,6 +24,7 @@ export default function ProductList({
   refreshing,
   onRefresh,
 }: ProductListProps) {
+  'use memo';
   const router = useRouter();
   const queryParams = useMemo(
     () => ({ view: viewType, keyword, category }),

@@ -21,6 +21,7 @@ const TABS: Tab[] = [
 ];
 
 export default function TabBar() {
+  'use memo';
   const { activeTab, handleTabPress } = useTabNavigation();
   const insets = useSafeAreaInsets();
   const unreadCount = useUnreadCount();

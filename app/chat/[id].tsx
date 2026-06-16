@@ -67,7 +67,16 @@ function DefaultAvatar({ size = 36, color = COLORS.textMuted }: { size?: number;
   );
 }
 
+const getDateKey = (createdAt: string) => new Date(createdAt).toDateString();
+
+// S3 presigned URL은 끝에 ?X-Amz-...가 붙으므로 query string 허용
+const isMediaMessage = (content: string) =>
+  /\.(jpg|jpeg|png|gif|webp|mp4|mov|avi|webm)(\?.*)?$/i.test(content);
+
+const isVideoUrl = (url: string) => /\.(mp4|mov|avi|webm)(\?.*)?$/i.test(url);
+
 export default function ChatDetail() {
+  'use no memo';
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const [messageText, setMessageText] = useState('');
@@ -341,17 +350,6 @@ export default function ChatDetail() {
       </SafeAreaView>
     );
   }
-
-  const getDateKey = (createdAt: string) => new Date(createdAt).toDateString();
-
-  const isMediaMessage = (content: string) => {
-    // S3 presigned/서명 URL은 끝에 ?X-Amz-...가 붙으므로 query string 허용
-    return /\.(jpg|jpeg|png|gif|webp|mp4|mov|avi|webm)(\?.*)?$/i.test(content);
-  };
-
-  const isVideoUrl = (url: string) => {
-    return /\.(mp4|mov|avi|webm)(\?.*)?$/i.test(url);
-  };
 
   return (
     <SafeAreaView className="flex-1 bg-white" edges={['top', 'bottom']}>

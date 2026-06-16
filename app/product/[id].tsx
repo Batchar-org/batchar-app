@@ -61,6 +61,7 @@ function formatBidTime(createdAt: string): string {
 }
 
 export default function ProductDetail() {
+  'use memo';
   const { width: screenWidth } = useWindowDimensions();
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();

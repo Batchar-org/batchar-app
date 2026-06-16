@@ -24,6 +24,7 @@ function formatChatDate(updatedAt: string): string {
 }
 
 export default function Chat() {
+  'use memo';
   const router = useRouter();
   const { data: chatList, isLoading } = useChatListQuery();
   const { mutate: leaveChat } = useLeaveChatMutation();

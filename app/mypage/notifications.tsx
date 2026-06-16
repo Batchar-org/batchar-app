@@ -29,6 +29,7 @@ function formatTime(createdAt: string): string {
 }
 
 export default function NotificationsPage() {
+  'use memo';
   const router = useRouter();
   const {
     data: notifications,

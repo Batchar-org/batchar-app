@@ -29,6 +29,7 @@ const MAX_DESCRIPTION_LENGTH = 2000;
 const MAX_IMAGE_COUNT = 10;
 
 export default function Register() {
+  'use memo';
   const router = useRouter();
   const isLoggedIn = useIsLoggedIn();
   const { mutate: createProduct, isPending } = useCreateProductMutation();

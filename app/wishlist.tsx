@@ -9,6 +9,7 @@ import { COLORS } from '@/constants/theme';
 import type { WishSummary } from '@/api/types';
 
 export default function Wishlist() {
+  'use memo';
   const router = useRouter();
   const {
     data: wishlistItems,

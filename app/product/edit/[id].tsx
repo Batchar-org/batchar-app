@@ -33,6 +33,7 @@ const MAX_IMAGE_COUNT = 10;
 type ExistingMedia = ProductMediaInfo & { markedForDeletion?: boolean };
 
 export default function ProductEdit() {
+  'use memo';
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const productId = Number(id) || 0;
