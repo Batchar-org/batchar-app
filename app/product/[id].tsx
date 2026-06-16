@@ -17,7 +17,7 @@ import { Image } from 'expo-image';
 import { IMAGE_TRANSITION_MS, IMAGE_PLACEHOLDER } from '@/lib/expo-image-setup';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useProductDetailQuery } from '@/hooks/product/useProductDetailQuery';
 import { useBidHistoryQuery } from '@/hooks/bid/useBidHistoryQuery';
@@ -87,6 +87,13 @@ export default function ProductDetail() {
     productId,
     enabled: product?.status === 'ON_SALE',
   });
+
+  // 가격 추이: 최고가 5개를 낮은 가격부터 높은 가격 순으로 표시한다.
+  const trendBids = useMemo(() => [...(bidTrend?.content ?? [])].reverse(), [bidTrend]);
+  const maxPrice = useMemo(
+    () => (trendBids.length > 0 ? Math.max(...trendBids.map((b) => b.price)) : 0),
+    [trendBids]
+  );
 
   if (isLoading) {
     return (
@@ -198,10 +205,6 @@ export default function ProductDetail() {
       ]
     );
   };
-
-  // 가격 추이: 최고가 5개를 낮은 가격부터 높은 가격 순으로 표시한다.
-  const trendBids = [...(bidTrend?.content ?? [])].reverse();
-  const maxPrice = trendBids.length > 0 ? Math.max(...trendBids.map((b) => b.price)) : 0;
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50" edges={['top', 'bottom']}>

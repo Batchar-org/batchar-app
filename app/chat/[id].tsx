@@ -9,10 +9,15 @@ import {
   Platform,
   Alert,
   Modal,
-  Animated,
   StyleSheet,
   Pressable,
 } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  runOnJS,
+} from 'react-native-reanimated';
 import { Image } from 'expo-image';
 import { IMAGE_TRANSITION_MS, IMAGE_PLACEHOLDER } from '@/lib/expo-image-setup';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -69,38 +74,40 @@ function DefaultAvatar({ size = 36, color = COLORS.textMuted }: { size?: number;
 
 const getDateKey = (createdAt: string) => new Date(createdAt).toDateString();
 
+const VIDEO_EXT_RE = /\.(mp4|mov|avi|webm)(\?.*)?$/i;
+
 // S3 presigned URL은 끝에 ?X-Amz-...가 붙으므로 query string 허용
 const isMediaMessage = (content: string) =>
-  /\.(jpg|jpeg|png|gif|webp|mp4|mov|avi|webm)(\?.*)?$/i.test(content);
+  /\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i.test(content) || VIDEO_EXT_RE.test(content);
 
-const isVideoUrl = (url: string) => /\.(mp4|mov|avi|webm)(\?.*)?$/i.test(url);
+const isVideoUrl = (url: string) => VIDEO_EXT_RE.test(url);
 
 export default function ChatDetail() {
-  'use no memo';
+  'use memo';
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const [messageText, setMessageText] = useState('');
   const scrollViewRef = useRef<ScrollView>(null);
   const [showMenu, setShowMenu] = useState(false);
   const [reportVisible, setReportVisible] = useState(false);
-  const sheetAnim = useRef(new Animated.Value(0)).current;
+  const sheetAnim = useSharedValue(0);
   const SHEET_HEIGHT = 320;
+
+  const dimStyle = useAnimatedStyle(() => ({ opacity: sheetAnim.value }));
+  const sheetStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: (1 - sheetAnim.value) * SHEET_HEIGHT }],
+  }));
 
   const openMenu = () => {
     setShowMenu(true);
-    Animated.timing(sheetAnim, {
-      toValue: 1,
-      duration: 250,
-      useNativeDriver: true,
-    }).start();
+    sheetAnim.value = withTiming(1, { duration: 250 });
   };
 
   const closeMenu = () => {
-    Animated.timing(sheetAnim, {
-      toValue: 0,
-      duration: 200,
-      useNativeDriver: true,
-    }).start(() => setShowMenu(false));
+    sheetAnim.value = withTiming(0, { duration: 200 }, (finished) => {
+      'worklet';
+      if (finished) runOnJS(setShowMenu)(false);
+    });
   };
 
   const chatId = Number(id) || 0;
@@ -220,13 +227,12 @@ export default function ChatDetail() {
     }
     // 바텀시트 닫힘 애니메이션이 완전히 끝난 후 ReportModal을 띄워야
     // RN의 Modal 중첩 충돌(화면 멈춤) 방지됨
-    Animated.timing(sheetAnim, {
-      toValue: 0,
-      duration: 200,
-      useNativeDriver: true,
-    }).start(() => {
-      setShowMenu(false);
-      setReportVisible(true);
+    sheetAnim.value = withTiming(0, { duration: 200 }, (finished) => {
+      'worklet';
+      if (finished) {
+        runOnJS(setShowMenu)(false);
+        runOnJS(setReportVisible)(true);
+      }
     });
   };
 
@@ -388,25 +394,15 @@ export default function ChatDetail() {
         <View className="flex-1">
           {/* 딤 배경 (페이드) */}
           <Animated.View
-            style={{
-              ...StyleSheet.absoluteFillObject,
-              backgroundColor: 'rgba(0,0,0,0.4)',
-              opacity: sheetAnim,
-            }}
+            style={[
+              StyleSheet.absoluteFillObject,
+              { backgroundColor: 'rgba(0,0,0,0.4)' },
+              dimStyle,
+            ]}
           />
           <Pressable className="flex-1" onPress={closeMenu} />
           {/* 시트 (슬라이드) */}
-          <Animated.View
-            style={{
-              transform: [
-                {
-                  translateY: sheetAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [SHEET_HEIGHT, 0],
-                  }),
-                },
-              ],
-            }}>
+          <Animated.View style={sheetStyle}>
             <View className="rounded-t-2xl bg-white pb-8 pt-2">
               {/* 핸들 바 */}
               <View className="mb-2 items-center py-2">
