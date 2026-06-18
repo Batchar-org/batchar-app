@@ -26,7 +26,7 @@ import { useProductsQuery } from '@/hooks/product/useProductsQuery';
 import { useUserProfileQuery } from '@/hooks/user/useUserProfileQuery';
 import { useDeleteUserMutation } from '@/hooks/user/useDeleteUserMutation';
 import { unregisterPushNotifications } from '@/lib/pushNotifications';
-import type { ProductSummary } from '@/api/types';
+import type { ProductSummary } from '@/types';
 
 function countByStatus(products: ProductSummary[], view: 'MY_BIDS' | 'MY_PRODUCTS') {
   let bidding = 0;

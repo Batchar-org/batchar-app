@@ -10,7 +10,7 @@ import { useChatListQuery } from '@/hooks/chat/useChatListQuery';
 import { useLeaveChatMutation } from '@/hooks/chat/useLeaveChatMutation';
 import { COLORS } from '@/constants/theme';
 import { displayUserName } from '@/utils/displayUserName';
-import type { ChatListItem } from '@/api/types';
+import type { ChatListItem } from '@/types';
 
 function formatChatDate(updatedAt: string): string {
   const date = new Date(updatedAt);

@@ -24,7 +24,7 @@ import { CATEGORY_LABELS } from '@/constants/categories';
 import { useUpdateProductMutation } from '@/hooks/product/useUpdateProductMutation';
 import { useDeleteProductMutation } from '@/hooks/product/useDeleteProductMutation';
 import { useProductDetailQuery } from '@/hooks/product/useProductDetailQuery';
-import { ProductMediaInfo } from '@/api/types';
+import { ProductMediaInfo } from '@/types';
 import { compressImages } from '@/utils/compressImage';
 
 const MAX_DESCRIPTION_LENGTH = 2000;

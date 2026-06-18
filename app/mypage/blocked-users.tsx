@@ -9,7 +9,7 @@ import { COLORS } from '@/constants/theme';
 import { useBlockListQuery } from '@/hooks/block/useBlockListQuery';
 import { useUnblockUserMutation } from '@/hooks/block/useUnblockUserMutation';
 import { displayUserName } from '@/utils/displayUserName';
-import type { BlockSummary } from '@/api/types';
+import type { BlockSummary } from '@/types';
 
 function formatBlockedDate(createdAt: string): string {
   const d = new Date(createdAt);

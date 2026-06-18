@@ -29,8 +29,9 @@ focusManager.setEventListener((handleFocus) => {
 //   "Attempted to navigate before mounting" 에러를 방지합니다.
 // ──────────────────────────────────────────────────────────────────
 
-// 인증 없이 접근 가능한 퍼블릭 라우트 목록
-const PUBLIC_ROUTES = ['login', 'register'];
+// 인증 없이 접근 가능한 퍼블릭 라우트 목록.
+// login/register는 (auth) 라우트 그룹에 있으므로 segments[0]이 '(auth)'가 된다.
+const PUBLIC_ROUTES = ['(auth)'];
 // 앱 전역에서 같은 QueryClient를 재사용합니다.
 const queryClient = new QueryClient({
   defaultOptions: {
