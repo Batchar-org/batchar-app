@@ -20,8 +20,6 @@
     "icon": "./assets/public/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/public/splash.png",
-      "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
     "assetBundlePatterns": ["**/*"],
