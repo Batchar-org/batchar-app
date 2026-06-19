@@ -19,6 +19,7 @@ import * as ImagePicker from 'expo-image-picker';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import TabBar from '@/components/layout/TabBar';
+import { useTabBarInset } from '@/hooks/useTabBarInset';
 import { COLORS, INPUT_STYLE, LAYOUT } from '@/constants/theme';
 import { CATEGORY_LABELS } from '@/constants/categories';
 import { useUpdateProductMutation } from '@/hooks/product/useUpdateProductMutation';
@@ -35,6 +36,7 @@ type ExistingMedia = ProductMediaInfo & { markedForDeletion?: boolean };
 export default function ProductEdit() {
   'use memo';
   const router = useRouter();
+  const tabBarInset = useTabBarInset();
   const { id } = useLocalSearchParams<{ id: string }>();
   const productId = Number(id) || 0;
 
@@ -303,7 +305,7 @@ export default function ProductEdit() {
       <ScrollView
         className="flex-1 px-5"
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 20 }}>
+        contentContainerStyle={{ paddingBottom: tabBarInset }}>
         {/* 상세정보 섹션 */}
         <View className="py-4">
           <Text className="mb-4 text-base font-bold">상세정보</Text>

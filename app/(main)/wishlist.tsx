@@ -5,12 +5,14 @@ import TabBar from '@/components/layout/TabBar';
 import WishlistProduct from '@/components/product/WishlistProduct';
 import { useInfiniteWishlistQuery } from '@/hooks/wish/useInfiniteWishlistQuery';
 import { useToggleWishMutation } from '@/hooks/wish/useToggleWishMutation';
+import { useTabBarInset } from '@/hooks/useTabBarInset';
 import { COLORS } from '@/constants/theme';
 import type { WishSummary } from '@/types';
 
 export default function Wishlist() {
   'use memo';
   const router = useRouter();
+  const tabBarInset = useTabBarInset();
   const {
     data: wishlistItems,
     isLoading,
@@ -69,7 +71,7 @@ export default function Wishlist() {
           keyExtractor={(item) => String(item.wish_id)}
           className="flex-1 bg-gray-50 px-4"
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingVertical: 12 }}
+          contentContainerStyle={{ paddingTop: 12, paddingBottom: tabBarInset }}
           refreshing={isRefetching}
           onRefresh={() => void refetch()}
           onEndReachedThreshold={0.5}

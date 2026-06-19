@@ -8,6 +8,7 @@ import TabBar from '@/components/layout/TabBar';
 import { useRouter } from 'expo-router';
 import { useChatListQuery } from '@/hooks/chat/useChatListQuery';
 import { useLeaveChatMutation } from '@/hooks/chat/useLeaveChatMutation';
+import { useTabBarInset } from '@/hooks/useTabBarInset';
 import { COLORS } from '@/constants/theme';
 import { displayUserName } from '@/utils/displayUserName';
 import type { ChatListItem } from '@/types';
@@ -26,6 +27,7 @@ function formatChatDate(updatedAt: string): string {
 export default function Chat() {
   'use memo';
   const router = useRouter();
+  const tabBarInset = useTabBarInset();
   const { data: chatList, isLoading } = useChatListQuery();
   const { mutate: leaveChat } = useLeaveChatMutation();
 
@@ -66,7 +68,10 @@ export default function Chat() {
           <Text className="text-sm text-gray-400">참여 중인 채팅이 없습니다.</Text>
         </View>
       ) : (
-        <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+        <ScrollView
+          className="flex-1"
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: tabBarInset }}>
           {chatList.map((chat) => (
             <Swipeable
               key={chat.chat_id}

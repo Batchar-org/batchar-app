@@ -5,6 +5,7 @@ import Product from './Product';
 import { useInfiniteProductsQuery } from '@/hooks/product/useInfiniteProductsQuery';
 import { useWishlistQuery } from '@/hooks/wish/useWishlistQuery';
 import { useToggleWishMutation } from '@/hooks/wish/useToggleWishMutation';
+import { useTabBarInset } from '@/hooks/useTabBarInset';
 import { COLORS } from '@/constants/theme';
 import { ProductViewType } from '@/types';
 import type { ProductSummary } from '@/types';
@@ -26,6 +27,7 @@ export default function ProductList({
 }: ProductListProps) {
   'use memo';
   const router = useRouter();
+  const tabBarInset = useTabBarInset();
   const queryParams = useMemo(
     () => ({ view: viewType, keyword, category }),
     [viewType, keyword, category]
@@ -91,7 +93,8 @@ export default function ProductList({
       className="flex-1 bg-gray-50 px-5"
       contentContainerStyle={{
         flexGrow: products.length === 0 ? 1 : undefined,
-        paddingVertical: 8,
+        paddingTop: 8,
+        paddingBottom: tabBarInset,
       }}
       showsVerticalScrollIndicator={false}
       refreshing={refreshing ?? isRefetching}

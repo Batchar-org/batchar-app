@@ -17,6 +17,7 @@ import { useRouter } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
 import * as Notifications from 'expo-notifications';
 import TabBar from '@/components/layout/TabBar';
+import { useTabBarInset } from '@/hooks/useTabBarInset';
 import FertilityCard from '@/components/fertility/FertilityCard';
 import { COLORS, SHADOWS } from '@/constants/theme';
 import { FERTILITY_BASE } from '@/constants/fertility';
@@ -57,6 +58,7 @@ export default function MyPage() {
   const { logout } = useAuthActions();
   const { data: profile } = useUserProfileQuery();
   const router = useRouter();
+  const tabBarInset = useTabBarInset();
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [selectedReason, setSelectedReason] = useState<string | null>(null);
@@ -121,7 +123,10 @@ export default function MyPage() {
         <Text className="text-lg font-bold text-gray-900">마이페이지</Text>
       </View>
 
-      <ScrollView className="flex-1 bg-white" showsVerticalScrollIndicator={false}>
+      <ScrollView
+        className="flex-1 bg-white"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: tabBarInset }}>
         {/* 프로필 섹션 */}
         <View className="items-center pb-6 pt-4">
           <View

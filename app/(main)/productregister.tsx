@@ -19,6 +19,7 @@ import * as ImagePicker from 'expo-image-picker';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { useRouter } from 'expo-router';
 import TabBar from '@/components/layout/TabBar';
+import { useTabBarInset } from '@/hooks/useTabBarInset';
 import { COLORS, INPUT_STYLE, LAYOUT } from '@/constants/theme';
 import { CATEGORY_LABELS } from '@/constants/categories';
 import { useCreateProductMutation } from '@/hooks/product/useCreateProductMutation';
@@ -31,6 +32,7 @@ const MAX_IMAGE_COUNT = 10;
 export default function Register() {
   'use memo';
   const router = useRouter();
+  const tabBarInset = useTabBarInset();
   const isLoggedIn = useIsLoggedIn();
   const { mutate: createProduct, isPending } = useCreateProductMutation();
 
@@ -214,7 +216,7 @@ export default function Register() {
       <ScrollView
         className="flex-1 px-5"
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 20 }}>
+        contentContainerStyle={{ paddingBottom: tabBarInset }}>
         {/* 상세정보 섹션 */}
         <View className="py-4">
           <Text className="mb-4 text-base font-bold">상세정보</Text>
