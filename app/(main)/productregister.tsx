@@ -5,7 +5,6 @@ import {
   TouchableOpacity,
   TextInput,
   Alert,
-  Platform,
   Modal,
   FlatList,
   ActivityIndicator,
@@ -16,7 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState } from 'react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
+import AuctionPeriodPicker from '@/components/product/AuctionPeriodPicker';
 import { useRouter } from 'expo-router';
 import TabBar from '@/components/layout/TabBar';
 import { useTabBarInset } from '@/hooks/useTabBarInset';
@@ -44,9 +43,6 @@ export default function Register() {
 
   // 경매 종료 시간
   const [endTime, setEndTime] = useState<Date | null>(null);
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [showTimePicker, setShowTimePicker] = useState(false);
-  const [tempDate, setTempDate] = useState(new Date());
 
   // 카테고리 모달
   const [showCategoryModal, setShowCategoryModal] = useState(false);
@@ -74,61 +70,6 @@ export default function Register() {
 
   const handleRemoveImage = (index: number) => {
     setImages((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const handleDateChange = (_: DateTimePickerEvent, selectedDate?: Date) => {
-    if (Platform.OS === 'android') {
-      setShowDatePicker(false);
-      if (selectedDate) {
-        setTempDate(selectedDate);
-        setShowTimePicker(true);
-      }
-      return;
-    }
-    if (selectedDate) {
-      setTempDate(selectedDate);
-    }
-  };
-
-  const handleTimeChange = (_: DateTimePickerEvent, selectedTime?: Date) => {
-    if (Platform.OS === 'android') {
-      setShowTimePicker(false);
-      if (selectedTime) {
-        setEndTime(selectedTime);
-      }
-      return;
-    }
-    if (selectedTime) {
-      setTempDate(selectedTime);
-    }
-  };
-
-  const handleConfirmDateTime = () => {
-    setEndTime(tempDate);
-    setShowDatePicker(false);
-    setShowTimePicker(false);
-  };
-
-  const handleOpenDatePicker = () => {
-    setTempDate(endTime ?? new Date());
-    if (Platform.OS === 'ios') {
-      setShowDatePicker(true);
-    } else {
-      setShowDatePicker(true);
-    }
-  };
-
-  const formatDate = (date: Date) => {
-    const y = date.getFullYear();
-    const m = String(date.getMonth() + 1).padStart(2, '0');
-    const d = String(date.getDate()).padStart(2, '0');
-    return `${y}-${m}-${d}`;
-  };
-
-  const formatTime = (date: Date) => {
-    const h = String(date.getHours()).padStart(2, '0');
-    const min = String(date.getMinutes()).padStart(2, '0');
-    return `${h}:${min}`;
   };
 
   const handleDescriptionChange = (text: string) => {
@@ -283,7 +224,7 @@ export default function Register() {
         {/* 설명 섹션 */}
         <View className="py-4">
           <Text className="mb-4 text-base font-bold">설명</Text>
-          <View className="rounded-lg bg-gray-50 p-4">
+          <View className="rounded-lg bg-gray-50 px-4 pb-6 pt-4">
             <TextInput
               className="h-32 text-base"
               placeholder={`• 브랜드, 모델명, 구매 시기, 하자 유무 등 상품 설명을 최대한 자세히 적어주세요.\n\n• 전화번호, SNS 계정 등 개인정보 입력은 제한될 수 있어요.`}
@@ -296,6 +237,7 @@ export default function Register() {
                 ...INPUT_STYLE,
                 minHeight: 128,
                 paddingTop: 12,
+                backgroundColor: 'transparent',
               }}
             />
             <Text className="mt-2 text-right text-sm text-gray-400">
@@ -322,28 +264,15 @@ export default function Register() {
 
         {/* 경매 기간 섹션 */}
         <View className="py-4">
-          <Text className="mb-4 text-base font-bold">경매 기간</Text>
-          <TouchableOpacity
-            onPress={handleOpenDatePicker}
-            className="flex-row items-center justify-between rounded-lg border border-gray-200 px-4 py-3">
-            <View className="flex-row items-center">
-              <Text className={endTime ? 'text-base text-black' : 'text-base text-gray-400'}>
-                {endTime ? formatDate(endTime) : 'YYYY-MM-DD'}
-              </Text>
-              <Text className="mx-3 text-gray-300">|</Text>
-              <Text className={endTime ? 'text-base text-black' : 'text-base text-gray-400'}>
-                {endTime ? formatTime(endTime) : '00:00'}
-              </Text>
-            </View>
-            <MaterialCommunityIcons name="calendar-outline" size={24} color={COLORS.active} />
-          </TouchableOpacity>
+          <Text className="mb-4 text-base font-bold">경매기간</Text>
+          <AuctionPeriodPicker value={endTime} onChange={setEndTime} />
         </View>
 
         {/* 등록 완료 버튼 */}
         <View className="py-4">
           <TouchableOpacity
             onPress={handleSubmit}
-            disabled={!isFormValid}
+            disabled={isPending}
             style={{
               minHeight: LAYOUT.inputMinHeight,
               backgroundColor: isFormValid ? COLORS.active : COLORS.inactive,
@@ -394,63 +323,6 @@ export default function Register() {
           </View>
         </TouchableOpacity>
       </Modal>
-
-      {/* iOS DateTimePicker 모달 */}
-      {Platform.OS === 'ios' && showDatePicker && (
-        <Modal transparent animationType="slide">
-          <TouchableOpacity
-            activeOpacity={1}
-            onPress={() => setShowDatePicker(false)}
-            className="flex-1 justify-end"
-            style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}>
-            <View className="rounded-t-2xl bg-white pb-8 pt-4">
-              <View className="mb-2 flex-row items-center justify-between px-5">
-                <TouchableOpacity onPress={() => setShowDatePicker(false)}>
-                  <Text className="text-base" style={{ color: COLORS.textSecondary }}>
-                    취소
-                  </Text>
-                </TouchableOpacity>
-                <Text className="text-base font-bold">경매 종료 시간</Text>
-                <TouchableOpacity onPress={handleConfirmDateTime}>
-                  <Text className="text-base font-bold" style={{ color: COLORS.active }}>
-                    확인
-                  </Text>
-                </TouchableOpacity>
-              </View>
-              <DateTimePicker
-                value={tempDate}
-                mode="datetime"
-                display="spinner"
-                minimumDate={new Date()}
-                onChange={(event, date) => {
-                  if (date) setTempDate(date);
-                }}
-              />
-            </View>
-          </TouchableOpacity>
-        </Modal>
-      )}
-
-      {/* Android DatePicker */}
-      {Platform.OS === 'android' && showDatePicker && (
-        <DateTimePicker
-          value={tempDate}
-          mode="date"
-          display="default"
-          minimumDate={new Date()}
-          onChange={handleDateChange}
-        />
-      )}
-
-      {/* Android TimePicker */}
-      {Platform.OS === 'android' && showTimePicker && (
-        <DateTimePicker
-          value={tempDate}
-          mode="time"
-          display="default"
-          onChange={handleTimeChange}
-        />
-      )}
     </SafeAreaView>
   );
 }

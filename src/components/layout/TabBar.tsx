@@ -27,28 +27,28 @@ const ROW_PADDING = 8;
 const TABS: Tab[] = [
   {
     id: 'home',
-    icon: require('../../../assets/public/home.png'),
-    activeIcon: require('../../../assets/public/filedHome.png'),
+    icon: require('../../../assets/public/bar/home.png'),
+    activeIcon: require('../../../assets/public/bar/filedHome.png'),
   },
   {
     id: 'heart',
-    icon: require('../../../assets/public/wish.png'),
-    activeIcon: require('../../../assets/public/filedVector.png'),
+    icon: require('../../../assets/public/bar/wish.png'),
+    activeIcon: require('../../../assets/public/bar/filedVector.png'),
   },
   {
     id: 'plus',
-    icon: require('../../../assets/public/product.png'),
-    activeIcon: require('../../../assets/public/filedProduct.png'),
+    icon: require('../../../assets/public/bar/product.png'),
+    activeIcon: require('../../../assets/public/bar/filedProduct.png'),
   },
   {
     id: 'message',
-    icon: require('../../../assets/public/chat.png'),
-    activeIcon: require('../../../assets/public/filedChat.png'),
+    icon: require('../../../assets/public/bar/chat.png'),
+    activeIcon: require('../../../assets/public/bar/filedChat.png'),
   },
   {
     id: 'profile',
-    icon: require('../../../assets/public/user.png'),
-    activeIcon: require('../../../assets/public/filedUser.png'),
+    icon: require('../../../assets/public/bar/user.png'),
+    activeIcon: require('../../../assets/public/bar/filedUser.png'),
   },
 ];
 

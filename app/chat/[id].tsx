@@ -773,7 +773,7 @@ export default function ChatDetail() {
 
         {/* 메시지 입력 영역 */}
         <View
-          className="flex-row items-center px-3 pb-2 pt-2"
+          className="flex-row items-end px-3 pb-1 pt-2"
           style={{ borderTopWidth: 1, borderTopColor: COLORS.border }}>
           {/* 미디어 첨부 버튼 */}
           <TouchableOpacity
@@ -791,10 +791,10 @@ export default function ChatDetail() {
             />
           </TouchableOpacity>
           <View
-            className="flex-1 flex-row items-center rounded-full px-4 py-2"
+            className="flex-1 flex-row items-center rounded-2xl px-4 py-2"
             style={{ backgroundColor: COLORS.backgroundSecondary }}>
             <TextInput
-              className="flex-1 text-sm"
+              className="flex-1 text-base"
               placeholder={
                 chatInfo?.i_blocked || chatInfo?.blocked_by_partner
                   ? '채팅을 하려면 차단을 해제해 주세요.'
@@ -809,7 +809,7 @@ export default function ChatDetail() {
                 color: COLORS.text,
                 lineHeight: 20,
                 maxHeight: 80,
-                minHeight: 22,
+                minHeight: 20,
                 paddingVertical: 0,
                 textAlignVertical: 'center',
               }}

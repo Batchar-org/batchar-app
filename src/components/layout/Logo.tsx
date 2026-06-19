@@ -7,7 +7,7 @@ const LOGO_ASPECT_RATIO = 128 / 47;
 export default function Logo({ height = 32 }: { height?: number }) {
   return (
     <Image
-      source={require('../../../assets/public/batchar-icon.png')}
+      source={require('../../../assets/public/main-icon.png')}
       style={{ height, width: height * LOGO_ASPECT_RATIO }}
       contentFit="contain"
     />
