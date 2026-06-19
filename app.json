@@ -17,7 +17,7 @@
       "expo-notifications"
     ],
     "orientation": "portrait",
-    "icon": "./assets/public/icon.png",
+    "icon": "./assets/public/app-icon.png",
     "userInterfaceStyle": "light",
     "splash": {
       "backgroundColor": "#ffffff"
