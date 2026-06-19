@@ -4,7 +4,7 @@ export type FertilityAction = 'water' | 'acid-rain';
 // 밭비옥도 성장 단계의 형태. 상수는 constants/fertility.ts에 있다.
 export type FertilityStage = {
   minPercent: number;
-  emoji: string;
+  image: ReturnType<typeof require>;
   label: string;
   message: string;
 };

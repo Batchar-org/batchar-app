@@ -9,34 +9,34 @@ export const FERTILITY_MAX = 100;
 // 구간별 성장 단계 (오름차순). 단일 출처로 카드/뱃지가 공유한다.
 export const FERTILITY_STAGES: FertilityStage[] = [
   {
-    minPercent: 0,
-    emoji: '🌰',
+    minPercent: 10,
+    image: require('../../assets/public/level/10level.png'),
     label: '씨앗',
     message: '아직 씨앗이에요. 거래로 밭을 일궈보세요!',
   },
   {
-    minPercent: 30,
-    emoji: '🌱',
+    minPercent: 25,
+    image: require('../../assets/public/level/25level.png'),
+    label: '떡잎',
+    message: '작은 싹이 고개를 내밀었어요. 좋은 거래로 키워봐요!',
+  },
+  {
+    minPercent: 35,
+    image: require('../../assets/public/level/35level.png'),
     label: '새싹',
-    message: '새싹이 돋았어요. 좋은 거래로 키워봐요!',
+    message: '건강하게 자라나고 있어요.',
   },
   {
     minPercent: 50,
-    emoji: '🌿',
-    label: '잎새',
-    message: '잎이 무성하게 자라고 있어요!',
+    image: require('../../assets/public/level/50level.png'),
+    label: '어린 묘목',
+    message: '믿음이 쌓이며 튼튼하게 성장하고 있어요.',
   },
   {
-    minPercent: 70,
-    emoji: '🪴',
-    label: '묘목',
-    message: '제법 자란 묘목이 됐어요!',
-  },
-  {
-    minPercent: 85,
-    emoji: '🌳',
-    label: '울창한 나무',
-    message: '울창한 나무로 자랐어요! 🎉',
+    minPercent: 65,
+    image: require('../../assets/public/level/65level.png'),
+    label: '무럭무럭 묘목',
+    message: '정성껏 가꾼 묘목이 풍성하게 자랐어요.',
   },
 ];
 

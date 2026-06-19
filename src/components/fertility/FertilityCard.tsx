@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text, TouchableOpacity, Modal, Pressable } from 'react-native';
+import { View, Text, Image, TouchableOpacity, Modal, Pressable } from 'react-native';
 import type { DimensionValue } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { COLORS, SHADOWS } from '@/constants/theme';
@@ -44,7 +44,7 @@ export default function FertilityCard({ percent }: FertilityCardProps) {
             {stage.label}
           </Text>
         </View>
-        <Text style={{ fontSize: 44 }}>{stage.emoji}</Text>
+        <Image source={stage.image} style={{ width: 80, height: 80 }} resizeMode="contain" />
       </View>
 
       {/* 진행 바 */}
@@ -84,7 +84,11 @@ export default function FertilityCard({ percent }: FertilityCardProps) {
               <View className="rounded-xl bg-gray-50 p-4">
                 {STAGE_RANGES.map((s) => (
                   <View key={s.label} className="flex-row items-center py-1.5">
-                    <Text style={{ fontSize: 20 }}>{s.emoji}</Text>
+                    <Image
+                      source={s.image}
+                      style={{ width: 24, height: 24 }}
+                      resizeMode="contain"
+                    />
                     <Text className="ml-3 flex-1 text-sm font-semibold text-gray-800">
                       {s.label}
                     </Text>

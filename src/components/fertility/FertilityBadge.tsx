@@ -1,4 +1,4 @@
-import { View, Text } from 'react-native';
+import { View, Text, Image } from 'react-native';
 import { COLORS } from '@/constants/theme';
 import { getFertilityStage } from '@/constants/fertility';
 
@@ -15,7 +15,7 @@ export default function FertilityBadge({ percent }: FertilityBadgeProps) {
     <View
       className="flex-row items-center rounded-full px-2 py-0.5"
       style={{ backgroundColor: COLORS.primaryLight }}>
-      <Text style={{ fontSize: 12 }}>{stage.emoji}</Text>
+      <Image source={stage.image} style={{ width: 16, height: 16 }} resizeMode="contain" />
       <Text className="ml-1 text-xs font-bold" style={{ color: COLORS.primary }}>
         {value}%
       </Text>
