@@ -1,4 +1,5 @@
-import { View, Text, FlatList, ActivityIndicator } from 'react-native';
+import { View, Text, ActivityIndicator } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import TabBar from '@/components/layout/TabBar';
@@ -6,6 +7,7 @@ import WishlistProduct from '@/components/product/WishlistProduct';
 import { useInfiniteWishlistQuery } from '@/hooks/wish/useInfiniteWishlistQuery';
 import { useToggleWishMutation } from '@/hooks/wish/useToggleWishMutation';
 import { useTabBarInset } from '@/hooks/useTabBarInset';
+import { useTabBarScroll } from '@/contexts/TabBarScrollContext';
 import { COLORS } from '@/constants/theme';
 import type { WishSummary } from '@/types';
 
@@ -13,6 +15,7 @@ export default function Wishlist() {
   'use memo';
   const router = useRouter();
   const tabBarInset = useTabBarInset();
+  const { scrollHandler } = useTabBarScroll();
   const {
     data: wishlistItems,
     isLoading,
@@ -65,7 +68,7 @@ export default function Wishlist() {
           <Text className="text-sm text-gray-500">찜한 상품이 없습니다.</Text>
         </View>
       ) : (
-        <FlatList
+        <Animated.FlatList
           data={wishlistItems}
           renderItem={renderItem}
           keyExtractor={(item) => String(item.wish_id)}
@@ -78,6 +81,8 @@ export default function Wishlist() {
           onEndReached={() => {
             if (hasNextPage && !isFetchingNextPage) void fetchNextPage();
           }}
+          onScroll={scrollHandler}
+          scrollEventThrottle={16}
           ListFooterComponent={
             isFetchingNextPage ? (
               <View className="items-center py-4">

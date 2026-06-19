@@ -56,7 +56,7 @@ export default function Product({
       style={SHADOWS.card}>
       <View className="flex-row">
         {/* 상품 이미지 */}
-        <View className="relative mr-3 h-24 w-24 overflow-hidden rounded-xl bg-gray-100">
+        <View className="relative mr-3 h-28 w-28 overflow-hidden rounded-xl bg-gray-100">
           {badge && (
             <View
               pointerEvents="none"
@@ -111,15 +111,15 @@ export default function Product({
             {/* 시작가 */}
             <TouchableOpacity
               activeOpacity={0.7}
-              className="flex-1 items-center rounded-lg bg-gray-100 px-2.5 py-1.5"
+              className="flex-1 items-center rounded-lg bg-gray-100 px-2.5 py-2"
               style={{
                 marginRight: 8,
                 ...(Platform.OS === 'web' && {
                   cursor: 'pointer',
                 }),
               }}>
-              <Text className="text-xs text-gray-500">시작가</Text>
-              <Text className="text-xs font-bold text-gray-700">
+              <Text className="text-sm text-gray-500">시작가</Text>
+              <Text className="text-sm font-bold text-gray-700">
                 {formatPrice(originalPrice ?? currentPrice)}원
               </Text>
             </TouchableOpacity>
@@ -127,15 +127,15 @@ export default function Product({
             {/* 현재가 */}
             <TouchableOpacity
               activeOpacity={0.7}
-              className="flex-1 items-center rounded-lg px-2.5 py-1.5"
+              className="flex-1 items-center rounded-lg px-2.5 py-2"
               style={{
                 backgroundColor: isEnded ? '#6B7280' : COLORS.primary,
                 ...(Platform.OS === 'web' && {
                   cursor: 'pointer',
                 }),
               }}>
-              <Text className="text-xs text-white">{priceLabel}</Text>
-              <Text className="text-xs font-bold text-white">{formatPrice(currentPrice)}원</Text>
+              <Text className="text-sm text-white">{priceLabel}</Text>
+              <Text className="text-sm font-bold text-white">{formatPrice(currentPrice)}원</Text>
             </TouchableOpacity>
           </View>
         </View>

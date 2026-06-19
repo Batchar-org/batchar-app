@@ -2,6 +2,7 @@ import '../global.css';
 import '@/lib/expo-image-setup';
 import { Stack, useRouter, useSegments, useRootNavigationState } from 'expo-router';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { TabBarScrollProvider } from '@/contexts/TabBarScrollContext';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useEffect } from 'react';
 import { ActivityIndicator, AppState, Platform, View } from 'react-native';
@@ -105,13 +106,13 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <QueryClientProvider client={queryClient}>
         <SafeAreaProvider>
-          <StatusBar style="dark" backgroundColor={COLORS.background} />
-          {/* Stack을 먼저 렌더링하여 네비게이터를 마운트한 뒤 RouteGuard 실행 */}
-          {/* 옆으로 미는 슬라이드 대신 빠른 페이드로 전환 */}
-          <Stack
-            screenOptions={{ headerShown: false, animation: 'fade', animationDuration: 200 }}
-          />
-          <RouteGuard />
+          <TabBarScrollProvider>
+            <StatusBar style="dark" backgroundColor={COLORS.background} />
+            <Stack
+              screenOptions={{ headerShown: false, animation: 'fade', animationDuration: 200 }}
+            />
+            <RouteGuard />
+          </TabBarScrollProvider>
         </SafeAreaProvider>
       </QueryClientProvider>
     </GestureHandlerRootView>

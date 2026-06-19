@@ -1,14 +1,17 @@
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { Image } from 'expo-image';
 import { IMAGE_TRANSITION_MS, IMAGE_PLACEHOLDER } from '@/lib/expo-image-setup';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Swipeable } from 'react-native-gesture-handler';
+import { Swipeable, NativeViewGestureHandler } from 'react-native-gesture-handler';
+import { useRef } from 'react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import TabBar from '@/components/layout/TabBar';
 import { useRouter } from 'expo-router';
 import { useChatListQuery } from '@/hooks/chat/useChatListQuery';
 import { useLeaveChatMutation } from '@/hooks/chat/useLeaveChatMutation';
 import { useTabBarInset } from '@/hooks/useTabBarInset';
+import { useTabBarScroll } from '@/contexts/TabBarScrollContext';
 import { COLORS } from '@/constants/theme';
 import { displayUserName } from '@/utils/displayUserName';
 import type { ChatListItem } from '@/types';
@@ -28,6 +31,8 @@ export default function Chat() {
   'use memo';
   const router = useRouter();
   const tabBarInset = useTabBarInset();
+  const { scrollHandler } = useTabBarScroll();
+  const scrollRef = useRef(null);
   const { data: chatList, isLoading } = useChatListQuery();
   const { mutate: leaveChat } = useLeaveChatMutation();
 
@@ -68,63 +73,68 @@ export default function Chat() {
           <Text className="text-sm text-gray-400">참여 중인 채팅이 없습니다.</Text>
         </View>
       ) : (
-        <ScrollView
-          className="flex-1"
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: tabBarInset }}>
-          {chatList.map((chat) => (
-            <Swipeable
-              key={chat.chat_id}
-              renderRightActions={() => (
+        <NativeViewGestureHandler ref={scrollRef}>
+          <Animated.ScrollView
+            className="flex-1"
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: tabBarInset }}
+            onScroll={scrollHandler}
+            scrollEventThrottle={16}>
+            {chatList.map((chat) => (
+              <Swipeable
+                key={chat.chat_id}
+                simultaneousHandlers={scrollRef}
+                renderRightActions={() => (
+                  <TouchableOpacity
+                    onPress={() => handleLeave(chat)}
+                    className="items-center justify-center"
+                    style={{ width: 80, backgroundColor: COLORS.error }}>
+                    <Text className="text-sm font-semibold text-white">나가기</Text>
+                  </TouchableOpacity>
+                )}>
                 <TouchableOpacity
-                  onPress={() => handleLeave(chat)}
-                  className="items-center justify-center"
-                  style={{ width: 80, backgroundColor: COLORS.error }}>
-                  <Text className="text-sm font-semibold text-white">나가기</Text>
-                </TouchableOpacity>
-              )}>
-              <TouchableOpacity
-                className="flex-row items-center bg-white px-4 py-4"
-                activeOpacity={0.7}
-                onPress={() => router.push(`/chat/${chat.chat_id}`)}>
-                {/* 프로필 아바타 */}
-                <View className="h-12 w-12 items-center justify-center rounded-full bg-gray-200">
-                  <MaterialCommunityIcons name="account" size={28} color={COLORS.textMuted} />
-                </View>
+                  className="flex-row items-center bg-white px-4 py-4"
+                  activeOpacity={0.7}
+                  onPress={() => router.push(`/chat/${chat.chat_id}`)}>
+                  {/* 프로필 아바타 */}
+                  <View className="h-12 w-12 items-center justify-center rounded-full bg-gray-200">
+                    <MaterialCommunityIcons name="account" size={28} color={COLORS.textMuted} />
+                  </View>
 
-                {/* 채팅 정보 */}
-                <View className="ml-3 flex-1">
-                  <Text className="text-base font-semibold">
-                    {displayUserName(chat.partner_name)}
-                  </Text>
-                  <Text className="mt-1 text-sm text-gray-500" numberOfLines={1}>
-                    {chat.last_message || '대화를 시작해 보세요.'}
-                  </Text>
-                </View>
+                  {/* 채팅 정보 */}
+                  <View className="ml-3 flex-1">
+                    <Text className="text-base font-semibold">
+                      {displayUserName(chat.partner_name)}
+                    </Text>
+                    <Text className="mt-1 text-sm text-gray-500" numberOfLines={1}>
+                      {chat.last_message || '대화를 시작해 보세요.'}
+                    </Text>
+                  </View>
 
-                {/* 날짜 및 뱃지 */}
-                <View className="items-end">
-                  <Text className="text-xs text-gray-400">{formatChatDate(chat.updated_at)}</Text>
-                  {chat.unread_count > 0 && (
-                    <View className="mt-1 h-5 min-w-[20px] items-center justify-center rounded-full bg-red-500 px-1">
-                      <Text className="text-xs font-bold text-white">{chat.unread_count}</Text>
-                    </View>
+                  {/* 날짜 및 뱃지 */}
+                  <View className="items-end">
+                    <Text className="text-xs text-gray-400">{formatChatDate(chat.updated_at)}</Text>
+                    {chat.unread_count > 0 && (
+                      <View className="mt-1 h-5 min-w-[20px] items-center justify-center rounded-full bg-red-500 px-1">
+                        <Text className="text-xs font-bold text-white">{chat.unread_count}</Text>
+                      </View>
+                    )}
+                  </View>
+
+                  {/* 상품 썸네일 */}
+                  {chat.product_image_url && (
+                    <Image
+                      source={{ uri: chat.product_image_url }}
+                      className="ml-3 h-12 w-12 rounded-lg"
+                      transition={IMAGE_TRANSITION_MS}
+                      placeholder={IMAGE_PLACEHOLDER}
+                    />
                   )}
-                </View>
-
-                {/* 상품 썸네일 */}
-                {chat.product_image_url && (
-                  <Image
-                    source={{ uri: chat.product_image_url }}
-                    className="ml-3 h-12 w-12 rounded-lg"
-                    transition={IMAGE_TRANSITION_MS}
-                    placeholder={IMAGE_PLACEHOLDER}
-                  />
-                )}
-              </TouchableOpacity>
-            </Swipeable>
-          ))}
-        </ScrollView>
+                </TouchableOpacity>
+              </Swipeable>
+            ))}
+          </Animated.ScrollView>
+        </NativeViewGestureHandler>
       )}
 
       {/* 하단 탭바 */}

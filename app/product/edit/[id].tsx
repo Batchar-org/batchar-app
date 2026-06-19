@@ -9,6 +9,7 @@ import {
   FlatList,
   ActivityIndicator,
 } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { Image } from 'expo-image';
 import { IMAGE_TRANSITION_MS, IMAGE_PLACEHOLDER } from '@/lib/expo-image-setup';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -19,6 +20,7 @@ import AuctionPeriodPicker from '@/components/product/AuctionPeriodPicker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import TabBar from '@/components/layout/TabBar';
 import { useTabBarInset } from '@/hooks/useTabBarInset';
+import { useTabBarScroll } from '@/contexts/TabBarScrollContext';
 import { COLORS, INPUT_STYLE, LAYOUT } from '@/constants/theme';
 import { CATEGORY_LABELS } from '@/constants/categories';
 import { useUpdateProductMutation } from '@/hooks/product/useUpdateProductMutation';
@@ -36,6 +38,7 @@ export default function ProductEdit() {
   'use memo';
   const router = useRouter();
   const tabBarInset = useTabBarInset();
+  const { scrollHandler } = useTabBarScroll();
   const { id } = useLocalSearchParams<{ id: string }>();
   const productId = Number(id) || 0;
 
@@ -247,10 +250,12 @@ export default function ProductEdit() {
       </View>
 
       {/* 스크롤 콘텐츠 영역 */}
-      <ScrollView
+      <Animated.ScrollView
         className="flex-1 px-5"
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: tabBarInset }}>
+        contentContainerStyle={{ paddingBottom: tabBarInset }}
+        onScroll={scrollHandler}
+        scrollEventThrottle={16}>
         {/* 상세정보 섹션 */}
         <View className="py-4">
           <Text className="mb-4 text-base font-bold">상세정보</Text>
@@ -409,7 +414,7 @@ export default function ProductEdit() {
             )}
           </TouchableOpacity>
         </View>
-      </ScrollView>
+      </Animated.ScrollView>
 
       {/* 하단 탭바 */}
       <TabBar />

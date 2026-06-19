@@ -1,4 +1,5 @@
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { Image } from 'expo-image';
 import { IMAGE_TRANSITION_MS, IMAGE_PLACEHOLDER } from '@/lib/expo-image-setup';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -8,6 +9,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { COLORS } from '@/constants/theme';
 import TabBar from '@/components/layout/TabBar';
 import { useTabBarInset } from '@/hooks/useTabBarInset';
+import { useTabBarScroll } from '@/contexts/TabBarScrollContext';
 import { useUserProfileQuery } from '@/hooks/user/useUserProfileQuery';
 import { useUpdateProfileImageMutation } from '@/hooks/user/useUpdateProfileImageMutation';
 import { useDeleteProfileImageMutation } from '@/hooks/user/useDeleteProfileImageMutation';
@@ -22,6 +24,7 @@ type ProfileField = {
 export default function EditProfile() {
   const router = useRouter();
   const tabBarInset = useTabBarInset();
+  const { scrollHandler } = useTabBarScroll();
   const { data: profile, isLoading } = useUserProfileQuery();
   const updateImageMutation = useUpdateProfileImageMutation();
   const deleteImageMutation = useDeleteProfileImageMutation();
@@ -90,10 +93,12 @@ export default function EditProfile() {
           <ActivityIndicator size="large" color={COLORS.primary} />
         </View>
       ) : (
-        <ScrollView
+        <Animated.ScrollView
           className="flex-1"
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: tabBarInset }}>
+          contentContainerStyle={{ paddingBottom: tabBarInset }}
+          onScroll={scrollHandler}
+          scrollEventThrottle={16}>
           {/* 프로필 이미지 */}
           <View className="items-center pb-6 pt-4">
             <TouchableOpacity
@@ -163,7 +168,7 @@ export default function EditProfile() {
               </View>
             ))}
           </View>
-        </ScrollView>
+        </Animated.ScrollView>
       )}
 
       <TabBar />

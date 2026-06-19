@@ -7,6 +7,7 @@ import Animated, {
   withSequence,
   Easing,
 } from 'react-native-reanimated';
+import { useTabBarScroll } from '@/contexts/TabBarScrollContext';
 import { BlurView } from 'expo-blur';
 import { Image } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -108,6 +109,8 @@ export default function TabBar() {
   const insets = useSafeAreaInsets();
   const unreadCount = useUnreadCount();
 
+  const { tabBarScale, resetTabBar } = useTabBarScroll();
+  const containerHeight = useSharedValue(100);
   const tabRowWidthRef = useRef(0);
   const [tabRowWidth, setTabRowWidth] = useState(0);
   const pillScale = useSharedValue(1);
@@ -138,6 +141,14 @@ export default function TabBar() {
     transform: [{ scale: pillScale.value }],
   }));
 
+  const tabBarAnimStyle = useAnimatedStyle(() => {
+    const s = tabBarScale.value;
+    const compensation = (containerHeight.value * (1 - s)) / 2;
+    return {
+      transform: [{ translateY: compensation }, { scale: s }],
+    };
+  });
+
   const indicatorAnimStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: indicatorX.value }],
   }));
@@ -147,6 +158,7 @@ export default function TabBar() {
       withTiming(0.972, { duration: 90, easing: Easing.out(Easing.ease) }),
       withSpring(1, { damping: 14, stiffness: 320, mass: 0.9 })
     );
+    resetTabBar();
     handleTabPress(tabId);
   };
 
@@ -155,17 +167,23 @@ export default function TabBar() {
   const tabWidth = tabRowWidth > 0 ? (tabRowWidth - ROW_PADDING * 2) / TABS.length : 0;
 
   return (
-    <View
+    <Animated.View
       pointerEvents="box-none"
-      style={{
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        paddingHorizontal: 16,
-        paddingTop: 8,
-        paddingBottom: bottomPadding,
-      }}>
+      onLayout={(e) => {
+        containerHeight.value = e.nativeEvent.layout.height;
+      }}
+      style={[
+        {
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          paddingHorizontal: 16,
+          paddingTop: 8,
+          paddingBottom: bottomPadding,
+        },
+        tabBarAnimStyle,
+      ]}>
       <View
         style={{
           borderRadius: 40,
@@ -224,6 +242,6 @@ export default function TabBar() {
           </Animated.View>
         </View>
       </View>
-    </View>
+    </Animated.View>
   );
 }

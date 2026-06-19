@@ -1,14 +1,6 @@
 import { useState, useMemo } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-  Modal,
-  Pressable,
-  Linking,
-} from 'react-native';
+import { View, Text, TouchableOpacity, Alert, Modal, Pressable, Linking } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { Image } from 'expo-image';
 import { IMAGE_TRANSITION_MS, IMAGE_PLACEHOLDER } from '@/lib/expo-image-setup';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -18,6 +10,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import * as Notifications from 'expo-notifications';
 import TabBar from '@/components/layout/TabBar';
 import { useTabBarInset } from '@/hooks/useTabBarInset';
+import { useTabBarScroll } from '@/contexts/TabBarScrollContext';
 import FertilityCard from '@/components/fertility/FertilityCard';
 import { COLORS, SHADOWS } from '@/constants/theme';
 import { FERTILITY_BASE } from '@/constants/fertility';
@@ -59,6 +52,7 @@ export default function MyPage() {
   const { data: profile } = useUserProfileQuery();
   const router = useRouter();
   const tabBarInset = useTabBarInset();
+  const { scrollHandler } = useTabBarScroll();
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [selectedReason, setSelectedReason] = useState<string | null>(null);
@@ -123,10 +117,12 @@ export default function MyPage() {
         <Text className="text-lg font-bold text-gray-900">마이페이지</Text>
       </View>
 
-      <ScrollView
+      <Animated.ScrollView
         className="flex-1 bg-white"
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: tabBarInset }}>
+        contentContainerStyle={{ paddingBottom: tabBarInset }}
+        onScroll={scrollHandler}
+        scrollEventThrottle={16}>
         {/* 프로필 섹션 */}
         <View className="items-center pb-6 pt-4">
           <View
@@ -248,7 +244,7 @@ export default function MyPage() {
         </View>
 
         <View className="h-8" />
-      </ScrollView>
+      </Animated.ScrollView>
 
       <TabBar />
 

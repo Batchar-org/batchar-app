@@ -1,4 +1,5 @@
-import { View, Text, ActivityIndicator, FlatList } from 'react-native';
+import { View, Text, ActivityIndicator } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { useMemo } from 'react';
 import { useRouter } from 'expo-router';
 import Product from './Product';
@@ -6,6 +7,7 @@ import { useInfiniteProductsQuery } from '@/hooks/product/useInfiniteProductsQue
 import { useWishlistQuery } from '@/hooks/wish/useWishlistQuery';
 import { useToggleWishMutation } from '@/hooks/wish/useToggleWishMutation';
 import { useTabBarInset } from '@/hooks/useTabBarInset';
+import { useTabBarScroll } from '@/contexts/TabBarScrollContext';
 import { COLORS } from '@/constants/theme';
 import { ProductViewType } from '@/types';
 import type { ProductSummary } from '@/types';
@@ -28,6 +30,7 @@ export default function ProductList({
   'use memo';
   const router = useRouter();
   const tabBarInset = useTabBarInset();
+  const { scrollHandler } = useTabBarScroll();
   const queryParams = useMemo(
     () => ({ view: viewType, keyword, category }),
     [viewType, keyword, category]
@@ -87,7 +90,7 @@ export default function ProductList({
   };
 
   return (
-    <FlatList
+    <Animated.FlatList
       data={products}
       keyExtractor={(product) => String(product.product_id)}
       className="flex-1 bg-gray-50 px-5"
@@ -101,6 +104,8 @@ export default function ProductList({
       onRefresh={handleRefresh}
       onEndReachedThreshold={0.5}
       onEndReached={handleEndReached}
+      onScroll={scrollHandler}
+      scrollEventThrottle={16}
       ListEmptyComponent={
         <View className="flex-1 items-center justify-center py-20">
           <Text className="text-sm text-gray-500">등록된 상품이 없습니다.</Text>
