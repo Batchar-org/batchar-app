@@ -92,16 +92,19 @@ export default function Product({
             ellipsizeMode="tail">
             {title.length > 10 ? `${title.substring(0, 10)}...` : title}
           </Text>
-          {endTime ? (
-            <View className="mb-3 flex-row items-center">
-              <MaterialCommunityIcons name="clock-outline" size={12} color={COLORS.textMuted} />
-              <Text className="ml-1 text-xs text-gray-500">
-                {isEnded ? '입찰 종료' : formatRemainingTime(endTime)}
-              </Text>
-            </View>
-          ) : (
-            <View className="mb-3" style={{ height: 16 }} />
-          )}
+          {/* 참여자 수 + 남은 시간 */}
+          <View className="mb-3 flex-row items-center">
+            <MaterialCommunityIcons name="account-outline" size={12} color={COLORS.textMuted} />
+            <Text className="ml-1 text-xs text-gray-500">{participants}명 참여</Text>
+            {endTime && (
+              <View className="ml-3 flex-row items-center">
+                <MaterialCommunityIcons name="clock-outline" size={12} color={COLORS.textMuted} />
+                <Text className="ml-1 text-xs text-gray-500">
+                  {isEnded ? '입찰 종료' : `${formatRemainingTime(endTime)} 남음`}
+                </Text>
+              </View>
+            )}
+          </View>
 
           {/* 가격 정보 */}
           <View className="flex-row items-center">
@@ -147,14 +150,6 @@ export default function Product({
             />
           </TouchableOpacity>
         )}
-      </View>
-
-      {/* 참여자 수 */}
-      <View className="mt-2 flex-row items-center pl-1">
-        <MaterialCommunityIcons name="account-outline" size={14} color={COLORS.textMuted} />
-        <Text className="ml-1 text-xs text-gray-500">
-          {participants}명 {isEnded ? '참여' : '참여중'}
-        </Text>
       </View>
     </TouchableOpacity>
   );
