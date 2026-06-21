@@ -72,6 +72,25 @@ function DefaultAvatar({ size = 36, color = COLORS.textMuted }: { size?: number;
   );
 }
 
+function ProfileAvatar({ uri, size = 36 }: { uri?: string | null; size?: number }) {
+  if (uri) {
+    return (
+      <View
+        className="items-center justify-center overflow-hidden rounded-full"
+        style={{ width: size, height: size, backgroundColor: COLORS.border }}>
+        <Image
+          source={{ uri }}
+          className="h-full w-full"
+          contentFit="cover"
+          transition={IMAGE_TRANSITION_MS}
+          placeholder={IMAGE_PLACEHOLDER}
+        />
+      </View>
+    );
+  }
+  return <DefaultAvatar size={size} />;
+}
+
 const getDateKey = (createdAt: string) => new Date(createdAt).toDateString();
 
 const VIDEO_EXT_RE = /\.(mp4|mov|avi|webm)(\?.*)?$/i;
@@ -691,7 +710,9 @@ export default function ChatDetail() {
                     {/* 상대방 아바타 */}
                     {!isMe && (
                       <View className="mr-2 self-start" style={{ width: 40 }}>
-                        {showPartnerAvatar ? <DefaultAvatar size={40} /> : null}
+                        {showPartnerAvatar ? (
+                          <ProfileAvatar uri={msg.sender_profile_image_url} size={40} />
+                        ) : null}
                       </View>
                     )}
 

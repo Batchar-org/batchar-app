@@ -64,6 +64,8 @@ export function useStompClient({ chatId, onMessageReceived }: UseStompClientOpti
           const newMessage: ChatMessage = {
             message_id: Number(serverMsg.message_id ?? serverMsg.messageId),
             sender_id: Number(serverMsg.sender_id ?? serverMsg.senderId),
+            sender_profile_image_url:
+              serverMsg.sender_profile_image_url ?? serverMsg.senderProfileImageUrl ?? null,
             content: serverMsg.content,
             is_read: serverMsg.is_read ?? serverMsg.isRead ?? false,
             created_at: serverMsg.created_at ?? serverMsg.createdAt,

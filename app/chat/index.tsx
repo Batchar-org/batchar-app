@@ -97,8 +97,18 @@ export default function Chat() {
                   activeOpacity={0.7}
                   onPress={() => router.push(`/chat/${chat.chat_id}`)}>
                   {/* 프로필 아바타 */}
-                  <View className="h-12 w-12 items-center justify-center rounded-full bg-gray-200">
-                    <MaterialCommunityIcons name="account" size={28} color={COLORS.textMuted} />
+                  <View className="h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-gray-200">
+                    {chat.partner_profile_image_url ? (
+                      <Image
+                        source={{ uri: chat.partner_profile_image_url }}
+                        className="h-full w-full"
+                        contentFit="cover"
+                        transition={IMAGE_TRANSITION_MS}
+                        placeholder={IMAGE_PLACEHOLDER}
+                      />
+                    ) : (
+                      <MaterialCommunityIcons name="account" size={28} color={COLORS.textMuted} />
+                    )}
                   </View>
 
                   {/* 채팅 정보 */}
