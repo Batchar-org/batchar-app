@@ -1,10 +1,7 @@
 import { useState, useMemo } from 'react';
 import { View, Text, TouchableOpacity, Alert, Modal, Pressable, Linking } from 'react-native';
 import Animated from 'react-native-reanimated';
-import { Image } from 'expo-image';
-import { IMAGE_TRANSITION_MS, IMAGE_PLACEHOLDER } from '@/lib/expo-image-setup';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
 import * as Notifications from 'expo-notifications';
@@ -20,6 +17,7 @@ import { useProductsQuery } from '@/hooks/product/useProductsQuery';
 import { useUserProfileQuery } from '@/hooks/user/useUserProfileQuery';
 import { useDeleteUserMutation } from '@/hooks/user/useDeleteUserMutation';
 import { unregisterPushNotifications } from '@/lib/pushNotifications';
+import ProfileAvatar from '@/components/ui/ProfileAvatar';
 import type { ProductSummary } from '@/types';
 
 function countByStatus(products: ProductSummary[], view: 'MY_BIDS' | 'MY_PRODUCTS') {
@@ -125,20 +123,8 @@ export default function MyPage() {
         scrollEventThrottle={16}>
         {/* 프로필 섹션 */}
         <View className="items-center pb-6 pt-4">
-          <View
-            className="mb-3 h-24 w-24 items-center justify-center overflow-hidden rounded-full"
-            style={{ backgroundColor: COLORS.primary }}>
-            {profile?.profile_image_url ? (
-              <Image
-                source={{ uri: profile.profile_image_url }}
-                className="h-full w-full"
-                contentFit="cover"
-                transition={IMAGE_TRANSITION_MS}
-                placeholder={IMAGE_PLACEHOLDER}
-              />
-            ) : (
-              <MaterialCommunityIcons name="account" size={48} color="white" />
-            )}
+          <View className="mb-3">
+            <ProfileAvatar uri={profile?.profile_image_url} size={96} />
           </View>
           <Text className="mb-2 text-xl font-bold text-gray-900">{profile?.name ?? '사용자'}</Text>
           <TouchableOpacity

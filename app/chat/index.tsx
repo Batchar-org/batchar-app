@@ -2,10 +2,10 @@ import { View, Text, TouchableOpacity, ActivityIndicator, Alert } from 'react-na
 import Animated from 'react-native-reanimated';
 import { Image } from 'expo-image';
 import { IMAGE_TRANSITION_MS, IMAGE_PLACEHOLDER } from '@/lib/expo-image-setup';
+import ProfileAvatar from '@/components/ui/ProfileAvatar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Swipeable, NativeViewGestureHandler } from 'react-native-gesture-handler';
 import { useRef } from 'react';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import TabBar from '@/components/layout/TabBar';
 import { useRouter } from 'expo-router';
 import { useChatListQuery } from '@/hooks/chat/useChatListQuery';
@@ -97,19 +97,7 @@ export default function Chat() {
                   activeOpacity={0.7}
                   onPress={() => router.push(`/chat/${chat.chat_id}`)}>
                   {/* 프로필 아바타 */}
-                  <View className="h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-gray-200">
-                    {chat.partner_profile_image_url ? (
-                      <Image
-                        source={{ uri: chat.partner_profile_image_url }}
-                        className="h-full w-full"
-                        contentFit="cover"
-                        transition={IMAGE_TRANSITION_MS}
-                        placeholder={IMAGE_PLACEHOLDER}
-                      />
-                    ) : (
-                      <MaterialCommunityIcons name="account" size={28} color={COLORS.textMuted} />
-                    )}
-                  </View>
+                  <ProfileAvatar uri={chat.partner_profile_image_url} size={48} />
 
                   {/* 채팅 정보 */}
                   <View className="ml-3 flex-1">

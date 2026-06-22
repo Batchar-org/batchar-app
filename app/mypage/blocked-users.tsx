@@ -1,11 +1,10 @@
 import { ActivityIndicator, Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
-import { Image } from 'expo-image';
-import { IMAGE_TRANSITION_MS, IMAGE_PLACEHOLDER } from '@/lib/expo-image-setup';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 import { COLORS } from '@/constants/theme';
+import ProfileAvatar from '@/components/ui/ProfileAvatar';
 import { useBlockListQuery } from '@/hooks/block/useBlockListQuery';
 import { useUnblockUserMutation } from '@/hooks/block/useUnblockUserMutation';
 import { displayUserName } from '@/utils/displayUserName';
@@ -64,23 +63,7 @@ export default function BlockedUsersPage() {
           {blockList.map((item) => (
             <View key={item.block_id} className="flex-row items-center px-4 py-4">
               {/* 프로필 아바타 */}
-              {item.blocked_profile_image_url ? (
-                <Image
-                  source={{ uri: item.blocked_profile_image_url }}
-                  style={{
-                    width: 48,
-                    height: 48,
-                    borderRadius: 24,
-                    backgroundColor: COLORS.border,
-                  }}
-                  transition={IMAGE_TRANSITION_MS}
-                  placeholder={IMAGE_PLACEHOLDER}
-                />
-              ) : (
-                <View className="h-12 w-12 items-center justify-center rounded-full bg-gray-200">
-                  <MaterialCommunityIcons name="account" size={28} color={COLORS.textMuted} />
-                </View>
-              )}
+              <ProfileAvatar uri={item.blocked_profile_image_url} size={48} />
 
               {/* 정보 */}
               <View className="ml-3 flex-1">

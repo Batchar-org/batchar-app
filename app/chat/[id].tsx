@@ -21,6 +21,7 @@ import Animated, {
 import { Image } from 'expo-image';
 import { IMAGE_TRANSITION_MS, IMAGE_PLACEHOLDER } from '@/lib/expo-image-setup';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import ProfileAvatar from '@/components/ui/ProfileAvatar';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -56,39 +57,6 @@ function formatMessageTime(createdAt: string): string {
 function formatDateSeparator(createdAt: string): string {
   const date = new Date(createdAt);
   return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
-}
-
-function DefaultAvatar({ size = 36, color = COLORS.textMuted }: { size?: number; color?: string }) {
-  return (
-    <View
-      className="items-center justify-center rounded-full"
-      style={{
-        width: size,
-        height: size,
-        backgroundColor: COLORS.border,
-      }}>
-      <MaterialCommunityIcons name="account" size={size * 0.6} color={color} />
-    </View>
-  );
-}
-
-function ProfileAvatar({ uri, size = 36 }: { uri?: string | null; size?: number }) {
-  if (uri) {
-    return (
-      <View
-        className="items-center justify-center overflow-hidden rounded-full"
-        style={{ width: size, height: size, backgroundColor: COLORS.border }}>
-        <Image
-          source={{ uri }}
-          className="h-full w-full"
-          contentFit="cover"
-          transition={IMAGE_TRANSITION_MS}
-          placeholder={IMAGE_PLACEHOLDER}
-        />
-      </View>
-    );
-  }
-  return <DefaultAvatar size={size} />;
 }
 
 const getDateKey = (createdAt: string) => new Date(createdAt).toDateString();

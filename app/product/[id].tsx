@@ -34,6 +34,7 @@ import ReportModal from '@/components/modals/ReportModal';
 import { useOpenProductChatRoom } from '@/hooks/chat/useOpenProductChatRoom';
 import FertilityBadge from '@/components/fertility/FertilityBadge';
 import ProductStatusOverlay from '@/components/product/ProductStatusOverlay';
+import ProfileAvatar from '@/components/ui/ProfileAvatar';
 
 function formatEndDate(endTimeStr: string): string {
   const date = new Date(endTimeStr);
@@ -267,18 +268,8 @@ export default function ProductDetail() {
 
         {/* 판매자 정보 */}
         <View className="flex-row items-center bg-white px-4 pb-2 pt-4">
-          <View className="mr-3 h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-gray-100">
-            {product.seller_profile_image_url ? (
-              <Image
-                source={{ uri: product.seller_profile_image_url }}
-                className="h-full w-full"
-                contentFit="cover"
-                transition={IMAGE_TRANSITION_MS}
-                placeholder={IMAGE_PLACEHOLDER}
-              />
-            ) : (
-              <MaterialCommunityIcons name="account" size={24} color={COLORS.textMuted} />
-            )}
+          <View className="mr-3">
+            <ProfileAvatar uri={product.seller_profile_image_url} size={40} />
           </View>
           <Text className="text-base font-medium text-gray-900">
             {displayUserName(product.seller_name) || '판매자'}

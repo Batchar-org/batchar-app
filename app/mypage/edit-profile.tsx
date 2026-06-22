@@ -1,7 +1,5 @@
 import { View, Text, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import Animated from 'react-native-reanimated';
-import { Image } from 'expo-image';
-import { IMAGE_TRANSITION_MS, IMAGE_PLACEHOLDER } from '@/lib/expo-image-setup';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -14,6 +12,7 @@ import { useUserProfileQuery } from '@/hooks/user/useUserProfileQuery';
 import { useUpdateProfileImageMutation } from '@/hooks/user/useUpdateProfileImageMutation';
 import { useDeleteProfileImageMutation } from '@/hooks/user/useDeleteProfileImageMutation';
 import { compressImage } from '@/utils/compressImage';
+import ProfileAvatar from '@/components/ui/ProfileAvatar';
 
 type ProfileField = {
   label: string;
@@ -105,33 +104,22 @@ export default function EditProfile() {
               style={{ width: 96, height: 96 }}
               onPress={handleProfileImagePress}
               disabled={isImageLoading}>
-              <View
-                className="h-24 w-24 items-center justify-center overflow-hidden rounded-full"
-                style={{ backgroundColor: COLORS.primary }}>
-                {isImageLoading ? (
-                  <ActivityIndicator size="small" color="white" />
-                ) : profile?.profile_image_url ? (
-                  <Image
-                    source={{ uri: profile.profile_image_url }}
-                    className="h-full w-full"
-                    contentFit="cover"
-                    transition={IMAGE_TRANSITION_MS}
-                    placeholder={IMAGE_PLACEHOLDER}
-                  />
-                ) : (
-                  <MaterialCommunityIcons
-                    name="account"
-                    size={48}
-                    color="white"
-                    style={{ marginTop: -8 }}
-                  />
-                )}
+              {isImageLoading ? (
                 <View
-                  className="absolute bottom-0 left-0 right-0 items-center py-1.5"
-                  style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                  <Text className="text-xs font-semibold text-white">편집</Text>
+                  className="h-24 w-24 items-center justify-center rounded-full"
+                  style={{ backgroundColor: COLORS.primary }}>
+                  <ActivityIndicator size="small" color="white" />
                 </View>
-              </View>
+              ) : (
+                <View style={{ width: 96, height: 96, borderRadius: 48, overflow: 'hidden' }}>
+                  <ProfileAvatar uri={profile?.profile_image_url} size={96} />
+                  <View
+                    className="absolute bottom-0 left-0 right-0 items-center py-1.5"
+                    style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                    <Text className="text-xs font-semibold text-white">편집</Text>
+                  </View>
+                </View>
+              )}
             </TouchableOpacity>
           </View>
 
