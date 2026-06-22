@@ -7,7 +7,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
@@ -16,66 +15,12 @@ import { COLORS, INPUT_STYLE, LAYOUT } from '@/constants/theme';
 import PasswordResetModal from '@/components/modals/PasswordResetModal';
 import Logo from '@/components/layout/Logo';
 import { useLoginMutation } from '@/hooks/auth/useLoginMutation';
-import { ApiError } from '@/services/errors';
-
-type SuspensionDetails = {
-  suspended_until?: string;
-  remaining_seconds?: number;
-};
-
-function formatRemainingSeconds(totalSeconds: number): string {
-  const seconds = Math.max(0, Math.ceil(totalSeconds));
-  const days = Math.floor(seconds / 86400);
-  const hours = Math.floor((seconds % 86400) / 3600);
-  const minutes = Math.ceil((seconds % 3600) / 60);
-
-  if (days > 0) return `${days}일 ${hours}시간`;
-  if (hours > 0) return `${hours}시간 ${minutes}분`;
-  return `${minutes}분`;
-}
-
-function getSuspensionDetails(details: unknown): SuspensionDetails | null {
-  if (!details || typeof details !== 'object') return null;
-  return details as SuspensionDetails;
-}
-
-function getSuspensionRemainingSeconds(error: unknown): number | null {
-  if (error instanceof ApiError && error.code === 'USER_SUSPENDED') {
-    const details = getSuspensionDetails(error.details);
-    if (typeof details?.remaining_seconds === 'number') return details.remaining_seconds;
-    if (details?.suspended_until) {
-      return Math.ceil((new Date(details.suspended_until).getTime() - Date.now()) / 1000);
-    }
-  }
-  return null;
-}
-
-function isSuspendedLoginError(error: unknown): boolean {
-  return error instanceof ApiError && error.code === 'USER_SUSPENDED';
-}
-
-function getLoginErrorMessage(error: unknown): string | null {
-  if (isSuspendedLoginError(error)) return null;
-  if (!(error instanceof Error)) return '로그인에 실패했습니다.';
-  return error.message;
-}
-
-function showSuspensionAlert(error: unknown): void {
-  const remainingSeconds = getSuspensionRemainingSeconds(error);
-  if (remainingSeconds === null) {
-    Alert.alert('정지된 계정입니다', '정지 기간 동안 로그인할 수 없습니다.');
-    return;
-  }
-
-  Alert.alert(
-    '정지된 계정입니다',
-    `정지 기간 동안 로그인할 수 없습니다.\n남은 시간: ${formatRemainingSeconds(remainingSeconds)}`
-  );
-}
+import { useLoginErrorHandler } from '@/hooks/auth/useLoginErrorHandler';
 
 export default function LoginPage() {
   const router = useRouter();
   const loginMutation = useLoginMutation();
+  const { getErrorMessage, handleError } = useLoginErrorHandler();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -86,19 +31,7 @@ export default function LoginPage() {
       return;
     }
 
-    loginMutation.mutate(
-      {
-        email: email.trim(),
-        password,
-      },
-      {
-        onError: (error) => {
-          if (isSuspendedLoginError(error)) {
-            showSuspensionAlert(error);
-          }
-        },
-      }
-    );
+    loginMutation.mutate({ email: email.trim(), password }, { onError: handleError });
   };
 
   // 회원가입 버튼 클릭 시 회원가입 페이지로 이동
@@ -178,9 +111,9 @@ export default function LoginPage() {
               <Text className="text-sm text-gray-400">비밀번호를 잃어버리셨나요?</Text>
             </TouchableOpacity>
 
-            {loginMutation.isError && getLoginErrorMessage(loginMutation.error) && (
+            {loginMutation.isError && getErrorMessage(loginMutation.error) && (
               <Text className="mb-4 text-sm text-red-500">
-                {getLoginErrorMessage(loginMutation.error)}
+                {getErrorMessage(loginMutation.error)}
               </Text>
             )}
 
