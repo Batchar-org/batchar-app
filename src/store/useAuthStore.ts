@@ -23,6 +23,7 @@ type AuthStoreState = {
   status: AuthStatus;
   isInitialized: boolean;
   isInitializing: boolean;
+  isGuest: boolean;
 };
 
 const initialState: AuthStoreState = {
@@ -33,6 +34,7 @@ const initialState: AuthStoreState = {
   // 초기 세션 복원이 끝나기 전에는 라우팅을 보류합니다.
   isInitialized: false,
   isInitializing: false,
+  isGuest: false,
 };
 
 const useAuthStore = create(
@@ -40,6 +42,11 @@ const useAuthStore = create(
     immer(
       combine(initialState, (set, get) => ({
         actions: {
+          enterGuestMode: () =>
+            set((state) => {
+              state.isGuest = true;
+            }),
+
           setSession: ({
             userId,
             accessToken,
@@ -53,6 +60,7 @@ const useAuthStore = create(
               state.userId = userId;
               state.accessToken = accessToken;
               state.status = 'authenticated';
+              state.isGuest = false;
               if (userName !== undefined) state.userName = userName;
             }),
 
@@ -69,6 +77,7 @@ const useAuthStore = create(
               state.userName = null;
               state.accessToken = null;
               state.status = 'unauthenticated';
+              state.isGuest = false;
             }),
 
           initializeAuth: async () => {
@@ -147,6 +156,7 @@ const useAuthStore = create(
                 state.userName = null;
                 state.accessToken = null;
                 state.status = 'unauthenticated';
+                state.isGuest = false;
               });
             }
           },
@@ -165,6 +175,10 @@ export const useAccessToken = () => useAuthStore((state) => state.accessToken);
 export const useUserName = () => useAuthStore((state) => state.userName);
 export const useIsInitialized = () => useAuthStore((state) => state.isInitialized);
 export const useIsLoggedIn = () => useAuthStore((state) => state.status === 'authenticated');
+export const useIsGuest = () => useAuthStore((state) => state.isGuest);
+// 비회원 둘러보기 포함, 콘텐츠 열람이 허용된 상태인지 여부
+export const useCanBrowse = () =>
+  useAuthStore((state) => state.status === 'authenticated' || state.isGuest);
 export const useAuthActions = () => useAuthStore((state) => state.actions);
 
 export { setStoredUserId, setStoredUserName };

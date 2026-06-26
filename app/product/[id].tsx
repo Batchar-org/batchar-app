@@ -25,7 +25,8 @@ import { usePlaceBidMutation } from '@/hooks/bid/usePlaceBidMutation';
 import { COLORS } from '@/constants/theme';
 import { formatPrice, formatRemainingTime } from '@/utils/format';
 import { getProductDisplayStatus, isProductClosedForDisplay } from '@/utils/productStatus';
-import useAuthStore from '@/store/useAuthStore';
+import useAuthStore, { useIsGuest } from '@/store/useAuthStore';
+import { promptLogin } from '@/lib/promptLogin';
 import { useToggleWishMutation } from '@/hooks/wish/useToggleWishMutation';
 import { useCloseProductMutation } from '@/hooks/product/useCloseProductMutation';
 import { useProductSSE } from '@/hooks/product/useProductSSE';
@@ -75,6 +76,7 @@ export default function ProductDetail() {
 
   const productId = Number(id) || 0;
   const userId = useAuthStore((state) => state.userId);
+  const isGuest = useIsGuest();
   const { data: product, isLoading, isError } = useProductDetailQuery(productId);
   const { data: bidHistory } = useBidHistoryQuery(productId, { size: bidHistorySize });
   const { data: bidTrend } = useBidHistoryQuery(productId, { size: BID_TREND_SIZE });
@@ -137,6 +139,10 @@ export default function ProductDetail() {
   };
 
   const handleOpenBidModal = () => {
+    if (isGuest) {
+      promptLogin('입찰은 한밭대학교 구성원만 이용할 수 있어요.');
+      return;
+    }
     setBidPrice('');
     setBidModalVisible(true);
   };
@@ -284,7 +290,13 @@ export default function ProductDetail() {
           <Text className="flex-1 text-xl font-bold text-gray-900">{product.title}</Text>
           <TouchableOpacity
             className="ml-2 pt-1"
-            onPress={() => toggleWish({ productId, isWished: !!product.is_wished })}>
+            onPress={() => {
+              if (isGuest) {
+                promptLogin('찜은 한밭대학교 구성원만 이용할 수 있어요.');
+                return;
+              }
+              toggleWish({ productId, isWished: !!product.is_wished });
+            }}>
             <MaterialCommunityIcons
               name={product.is_wished ? 'heart' : 'heart-outline'}
               size={24}
@@ -490,7 +502,13 @@ export default function ProductDetail() {
       <View className="flex-row items-center border-t border-gray-100 bg-white px-4 py-3">
         <TouchableOpacity
           className="mr-4 p-1"
-          onPress={() => toggleWish({ productId, isWished: !!product.is_wished })}>
+          onPress={() => {
+            if (isGuest) {
+              promptLogin('찜은 한밭대학교 구성원만 이용할 수 있어요.');
+              return;
+            }
+            toggleWish({ productId, isWished: !!product.is_wished });
+          }}>
           <MaterialCommunityIcons
             name={product.is_wished ? 'heart' : 'heart-outline'}
             size={28}

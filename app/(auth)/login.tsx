@@ -16,11 +16,13 @@ import PasswordResetModal from '@/components/modals/PasswordResetModal';
 import Logo from '@/components/layout/Logo';
 import { useLoginMutation } from '@/hooks/auth/useLoginMutation';
 import { useLoginErrorHandler } from '@/hooks/auth/useLoginErrorHandler';
+import { useAuthActions } from '@/store/useAuthStore';
 
 export default function LoginPage() {
   const router = useRouter();
   const loginMutation = useLoginMutation();
   const { getErrorMessage, handleError } = useLoginErrorHandler();
+  const { enterGuestMode } = useAuthActions();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -121,7 +123,7 @@ export default function LoginPage() {
             <TouchableOpacity
               onPress={handleLogin}
               disabled={loginMutation.isPending}
-              className="mb-6 items-center rounded-full py-4"
+              className="mb-3 items-center rounded-full py-4"
               style={{
                 backgroundColor: loginMutation.isPending ? COLORS.disabled : COLORS.primary,
               }}>
@@ -130,9 +132,24 @@ export default function LoginPage() {
               </Text>
             </TouchableOpacity>
 
-            {/* 회원가입 링크 */}
-            <TouchableOpacity onPress={handleRegister} className="items-center">
-              <Text className="text-sm text-gray-500">회원가입</Text>
+            {/* 회원가입 버튼 */}
+            <TouchableOpacity
+              onPress={handleRegister}
+              className="mb-3 items-center rounded-full border py-4"
+              style={{ borderColor: COLORS.primary }}>
+              <Text className="text-base font-semibold" style={{ color: COLORS.primary }}>
+                회원가입
+              </Text>
+            </TouchableOpacity>
+
+            {/* 비회원 둘러보기 버튼 */}
+            <TouchableOpacity
+              onPress={() => {
+                enterGuestMode();
+                router.replace('/');
+              }}
+              className="items-center rounded-full border border-gray-300 py-4">
+              <Text className="text-base font-semibold text-gray-400">비회원으로 둘러보기</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>

@@ -127,7 +127,8 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): 
       }
       return retryBody as T;
     } catch (error) {
-      await clearSessionHard();
+      // 게스트(비회원) 상태에서 보호 엔드포인트에 접근한 경우, 세션을 초기화하지 않고 에러만 던진다.
+      if (!useAuthStore.getState().isGuest) await clearSessionHard();
       throw error instanceof ApiError
         ? error
         : new ApiError('세션이 만료되었습니다. 다시 로그인해 주세요.', {

@@ -2,10 +2,10 @@ import { useQuery } from '@tanstack/react-query';
 
 import { getBidHistoryApi } from '@/services/bid';
 import { BidListParams } from '@/types';
-import useAuthStore, { useIsLoggedIn } from '@/store/useAuthStore';
+import useAuthStore, { useCanBrowse } from '@/store/useAuthStore';
 
 export function useBidHistoryQuery(productId: number, params: BidListParams = {}) {
-  const isLoggedIn = useIsLoggedIn();
+  const canBrowse = useCanBrowse();
 
   return useQuery({
     queryKey: ['bidHistory', productId, params],
@@ -14,6 +14,6 @@ export function useBidHistoryQuery(productId: number, params: BidListParams = {}
       return getBidHistoryApi(productId, params, token);
     },
     select: (response) => response.data,
-    enabled: productId > 0 && isLoggedIn,
+    enabled: productId > 0 && canBrowse,
   });
 }

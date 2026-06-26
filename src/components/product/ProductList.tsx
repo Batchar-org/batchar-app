@@ -11,6 +11,8 @@ import { useTabBarScroll } from '@/contexts/TabBarScrollContext';
 import { COLORS } from '@/constants/theme';
 import { ProductViewType } from '@/types';
 import type { ProductSummary } from '@/types';
+import { useIsGuest } from '@/store/useAuthStore';
+import { promptLogin } from '@/lib/promptLogin';
 
 interface ProductListProps {
   viewType?: ProductViewType;
@@ -47,6 +49,7 @@ export default function ProductList({
   } = useInfiniteProductsQuery(queryParams);
   const { data: wishlistData } = useWishlistQuery({ size: 100 });
   const { mutate: toggleWish } = useToggleWishMutation();
+  const isGuest = useIsGuest();
 
   // 찜한 상품 ID Set으로 변환하여 O(1) 조회
   const wishedProductIds = useMemo(() => {
@@ -139,7 +142,13 @@ export default function ProductList({
             endTime={product.end_time}
             isFavorite={isWished}
             onPress={() => router.push(`/product/${product.product_id}`)}
-            onFavoritePress={() => toggleWish({ productId: product.product_id, isWished })}
+            onFavoritePress={() => {
+              if (isGuest) {
+                promptLogin('찜은 한밭대학교 구성원만 이용할 수 있어요.');
+                return;
+              }
+              toggleWish({ productId: product.product_id, isWished });
+            }}
           />
         );
       }}

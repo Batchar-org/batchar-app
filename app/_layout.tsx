@@ -8,7 +8,12 @@ import { useEffect } from 'react';
 import { ActivityIndicator, AppState, Platform, View } from 'react-native';
 import { focusManager, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { StatusBar } from 'expo-status-bar';
-import { useAuthActions, useIsInitialized, useIsLoggedIn } from '@/store/useAuthStore';
+import {
+  useAuthActions,
+  useCanBrowse,
+  useIsInitialized,
+  useIsLoggedIn,
+} from '@/store/useAuthStore';
 import { COLORS } from '@/constants/theme';
 import { registerForPushNotifications, syncBadgeCount } from '@/lib/pushNotifications';
 import { useNotificationListeners } from '@/hooks/notification/useNotificationListeners';
@@ -50,6 +55,7 @@ function RouteGuard() {
   const router = useRouter();
   const segments = useSegments();
   const isLoggedIn = useIsLoggedIn();
+  const canBrowse = useCanBrowse();
   const isInitialized = useIsInitialized();
   const { initializeAuth } = useAuthActions();
 
@@ -81,13 +87,13 @@ function RouteGuard() {
 
     const isPublicRoute = PUBLIC_ROUTES.includes(currentSegment ?? '');
 
-    if (!isLoggedIn && !isPublicRoute) {
+    if (!canBrowse && !isPublicRoute) {
       router.replace('/login');
     } else if (isLoggedIn && isPublicRoute) {
       // 로그인 상태에서 /login 또는 /register 접근 → 홈으로 리다이렉트
       router.replace('/');
     }
-  }, [isInitialized, isLoggedIn, router, currentSegment, navigationState?.key]);
+  }, [isInitialized, canBrowse, isLoggedIn, router, currentSegment, navigationState?.key]);
 
   if (!isInitialized) {
     return (

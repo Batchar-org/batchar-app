@@ -1,6 +1,10 @@
 // 공통 포맷팅 유틸리티
 
 export const formatPrice = (price: number): string => {
+  if (price >= 1000000) {
+    const man = (price / 10000).toFixed(1).replace(/\.0$/, '');
+    return `${man}만`;
+  }
   return price.toLocaleString();
 };
 
