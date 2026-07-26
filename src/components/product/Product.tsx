@@ -68,8 +68,7 @@ export default function Product({
           {deadline && (
             <View
               pointerEvents="none"
-              className="absolute bottom-2 left-2 z-10 flex-row items-center rounded px-1.5 py-0.5"
-              style={{ backgroundColor: 'rgba(0,0,0,0.7)' }}>
+              className="absolute bottom-2 left-2 z-10 flex-row items-center rounded bg-black/70 px-1.5 py-0.5">
               <MaterialCommunityIcons name="clock-outline" size={10} color="white" />
               <Text className="ml-1 text-xs font-semibold text-white">{deadline}</Text>
             </View>

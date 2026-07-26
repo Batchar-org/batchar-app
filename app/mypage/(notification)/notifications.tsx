@@ -70,20 +70,16 @@ export default function NotificationsPage() {
         <View className="flex-1 items-center">
           <Text className="text-lg font-bold text-gray-900">알림</Text>
         </View>
-        <View style={{ width: 28 }} />
+        <View className="w-7" />
       </View>
 
       {/* 액션 바 — 모두 읽음 / 전체 삭제 (별도 줄) */}
       <View className="flex-row items-center justify-end px-4 pb-2">
         <TouchableOpacity onPress={() => markAllRead()}>
-          <Text className="text-sm" style={{ color: COLORS.textSecondary }}>
-            모두 읽음
-          </Text>
+          <Text className="text-sm text-content-secondary">모두 읽음</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={handleDeleteAll} className="ml-4">
-          <Text className="text-sm" style={{ color: COLORS.error }}>
-            전체 삭제
-          </Text>
+          <Text className="text-sm text-error">전체 삭제</Text>
         </TouchableOpacity>
       </View>
 
@@ -110,8 +106,7 @@ export default function NotificationsPage() {
               renderRightActions={() => (
                 <TouchableOpacity
                   onPress={() => deleteNotification(item.id)}
-                  className="items-center justify-center"
-                  style={{ width: 80, backgroundColor: COLORS.error }}>
+                  className="w-20 items-center justify-center bg-error">
                   <Text className="text-sm font-semibold text-white">삭제</Text>
                 </TouchableOpacity>
               )}>
@@ -119,9 +114,7 @@ export default function NotificationsPage() {
                 onPress={() => handlePress(item)}
                 className="flex-row items-start px-4 py-4"
                 style={{ backgroundColor: item.is_read ? COLORS.background : COLORS.primaryLight }}>
-                <View
-                  className="mr-3 h-10 w-10 items-center justify-center rounded-full"
-                  style={{ backgroundColor: COLORS.backgroundSecondary }}>
+                <View className="mr-3 h-10 w-10 items-center justify-center rounded-full bg-background-secondary">
                   <MaterialCommunityIcons
                     name={item.data ? ICON_BY_CATEGORY[item.data.category] : 'bell-outline'}
                     size={22}
@@ -135,12 +128,7 @@ export default function NotificationsPage() {
                   </Text>
                   <Text className="mt-1 text-xs text-gray-400">{formatTime(item.created_at)}</Text>
                 </View>
-                {!item.is_read && (
-                  <View
-                    className="ml-2 mt-1.5 h-2 w-2 rounded-full"
-                    style={{ backgroundColor: COLORS.error }}
-                  />
-                )}
+                {!item.is_read && <View className="ml-2 mt-1.5 h-2 w-2 rounded-full bg-error" />}
               </TouchableOpacity>
             </Swipeable>
           )}

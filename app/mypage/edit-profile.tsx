@@ -84,7 +84,7 @@ export default function EditProfile() {
         <View className="flex-1 items-center">
           <Text className="text-lg font-bold text-gray-900">마이페이지</Text>
         </View>
-        <View style={{ width: 28 }} />
+        <View className="w-7" />
       </View>
 
       {isLoading ? (
@@ -101,21 +101,17 @@ export default function EditProfile() {
           {/* 프로필 이미지 */}
           <View className="items-center pb-6 pt-4">
             <TouchableOpacity
-              style={{ width: 96, height: 96 }}
+              className="h-24 w-24"
               onPress={handleProfileImagePress}
               disabled={isImageLoading}>
               {isImageLoading ? (
-                <View
-                  className="h-24 w-24 items-center justify-center rounded-full"
-                  style={{ backgroundColor: COLORS.primary }}>
+                <View className="h-24 w-24 items-center justify-center rounded-full bg-primary">
                   <ActivityIndicator size="small" color="white" />
                 </View>
               ) : (
-                <View style={{ width: 96, height: 96, borderRadius: 48, overflow: 'hidden' }}>
+                <View className="h-24 w-24 overflow-hidden rounded-full">
                   <ProfileAvatar uri={profile?.profile_image_url} size={96} />
-                  <View
-                    className="absolute bottom-0 left-0 right-0 items-center py-1.5"
-                    style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                  <View className="absolute bottom-0 left-0 right-0 items-center bg-black/50 py-1.5">
                     <Text className="text-xs font-semibold text-white">편집</Text>
                   </View>
                 </View>
@@ -140,16 +136,13 @@ export default function EditProfile() {
                   </Text>
                   {field.editable && (
                     <TouchableOpacity
-                      className="rounded-lg border px-4 py-1.5"
-                      style={{ borderColor: COLORS.primary }}
+                      className="rounded-lg border border-primary px-4 py-1.5"
                       onPress={() => {
                         if (field.label === '닉네임') router.push('/mypage/change-nickname');
                         if (field.label === '주소') router.push('/mypage/change-address');
                         if (field.label === '비밀번호') router.push('/mypage/change-password');
                       }}>
-                      <Text className="text-sm font-medium" style={{ color: COLORS.primary }}>
-                        변경
-                      </Text>
+                      <Text className="text-sm font-medium text-primary">변경</Text>
                     </TouchableOpacity>
                   )}
                 </View>

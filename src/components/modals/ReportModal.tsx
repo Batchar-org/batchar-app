@@ -58,35 +58,13 @@ export default function ReportModal({ visible, onClose, target }: ReportModalPro
       animationType="fade"
       statusBarTranslucent
       onRequestClose={handleClose}>
-      <Pressable
-        style={{
-          flex: 1,
-          backgroundColor: 'rgba(0,0,0,0.45)',
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-        onPress={handleClose}>
+      <Pressable className="flex-1 items-center justify-center bg-black/45" onPress={handleClose}>
         <Pressable
           onPress={(e) => e.stopPropagation()}
-          style={{
-            width: '88%',
-            maxWidth: 400,
-            maxHeight: '85%',
-            backgroundColor: 'white',
-            borderRadius: 20,
-            paddingHorizontal: 24,
-            paddingTop: 24,
-            paddingBottom: 24,
-          }}>
+          className="max-h-[85%] w-[88%] max-w-[400px] rounded-[20px] bg-white p-6">
           {/* 헤더 */}
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: 16,
-            }}>
-            <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#111827' }}>신고하기</Text>
+          <View className="mb-4 flex-row items-center justify-between">
+            <Text className="text-[18px] font-bold text-gray-900">신고하기</Text>
             <TouchableOpacity onPress={handleClose} hitSlop={8}>
               <MaterialCommunityIcons name="close" size={22} color={COLORS.textMuted} />
             </TouchableOpacity>
@@ -94,82 +72,43 @@ export default function ReportModal({ visible, onClose, target }: ReportModalPro
 
           {isSuccess ? (
             <>
-              <Text
-                style={{
-                  fontSize: 14,
-                  color: COLORS.textSecondary,
-                  lineHeight: 22,
-                  marginBottom: 24,
-                }}>
+              <Text className="mb-6 text-[14px] leading-[22px] text-content-secondary">
                 신고가 접수되었습니다.{'\n'}24시간 이내에 검토합니다.
               </Text>
               <TouchableOpacity
                 onPress={handleClose}
-                style={{
-                  backgroundColor: COLORS.primary,
-                  borderRadius: 999,
-                  paddingVertical: 14,
-                  alignItems: 'center',
-                }}>
-                <Text style={{ color: 'white', fontSize: 14, fontWeight: '600' }}>확인</Text>
+                className="items-center rounded-full bg-primary py-3.5">
+                <Text className="text-[14px] font-semibold text-white">확인</Text>
               </TouchableOpacity>
             </>
           ) : (
             <ScrollView showsVerticalScrollIndicator={false}>
-              <Text
-                style={{
-                  fontSize: 14,
-                  color: COLORS.textSecondary,
-                  marginBottom: 16,
-                }}>
+              <Text className="mb-4 text-[14px] text-content-secondary">
                 신고 사유를 선택해주세요.
               </Text>
 
               {/* 사유 라디오 */}
-              <View style={{ marginBottom: 20 }}>
+              <View className="mb-5">
                 {REPORT_REASONS.map((r) => {
                   const checked = selectedReason === r.code;
                   return (
                     <TouchableOpacity
                       key={r.code}
                       onPress={() => setSelectedReason(r.code)}
-                      style={{
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        paddingVertical: 10,
-                      }}>
+                      className="flex-row items-center py-2.5">
                       <View
-                        style={{
-                          width: 20,
-                          height: 20,
-                          borderRadius: 10,
-                          borderWidth: 2,
-                          borderColor: checked ? COLORS.primary : COLORS.inactive,
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          marginRight: 12,
-                        }}>
-                        {checked && (
-                          <View
-                            style={{
-                              width: 10,
-                              height: 10,
-                              borderRadius: 5,
-                              backgroundColor: COLORS.primary,
-                            }}
-                          />
-                        )}
+                        className="mr-3 h-5 w-5 items-center justify-center rounded-full border-2"
+                        style={{ borderColor: checked ? COLORS.primary : COLORS.inactive }}>
+                        {checked && <View className="h-2.5 w-2.5 rounded-full bg-primary" />}
                       </View>
-                      <Text style={{ fontSize: 15, color: '#111827' }}>{r.label}</Text>
+                      <Text className="text-[15px] text-gray-900">{r.label}</Text>
                     </TouchableOpacity>
                   );
                 })}
               </View>
 
               {/* 상세 설명 */}
-              <Text style={{ fontSize: 14, color: COLORS.textSecondary, marginBottom: 8 }}>
-                상세 설명 (선택)
-              </Text>
+              <Text className="mb-2 text-[14px] text-content-secondary">상세 설명 (선택)</Text>
               <TextInput
                 value={description}
                 onChangeText={setDescription}
@@ -177,32 +116,16 @@ export default function ReportModal({ visible, onClose, target }: ReportModalPro
                 maxLength={REPORT_DESCRIPTION_MAX_LENGTH}
                 placeholder="구체적인 내용을 적어주시면 검토에 도움이 됩니다."
                 placeholderTextColor={COLORS.textMuted}
-                style={{
-                  borderWidth: 1,
-                  borderColor: COLORS.inactive,
-                  borderRadius: 8,
-                  paddingHorizontal: 12,
-                  paddingVertical: 10,
-                  fontSize: 14,
-                  color: '#111827',
-                  minHeight: 100,
-                  textAlignVertical: 'top',
-                }}
+                className="min-h-[100px] rounded-lg border border-inactive px-3 py-2.5 text-[14px] text-gray-900"
+                style={{ textAlignVertical: 'top' }}
               />
-              <Text
-                style={{
-                  fontSize: 12,
-                  color: COLORS.textMuted,
-                  textAlign: 'right',
-                  marginTop: 4,
-                  marginBottom: 16,
-                }}>
+              <Text className="mb-4 mt-1 text-right text-[12px] text-content-muted">
                 {description.length} / {REPORT_DESCRIPTION_MAX_LENGTH}
               </Text>
 
               {/* 에러 메시지 */}
               {reportMutation.isError && (
-                <Text style={{ fontSize: 14, color: COLORS.error, marginBottom: 12 }}>
+                <Text className="mb-3 text-[14px] text-error">
                   {reportMutation.error instanceof Error
                     ? reportMutation.error.message
                     : '신고 접수에 실패했습니다.'}
@@ -213,13 +136,9 @@ export default function ReportModal({ visible, onClose, target }: ReportModalPro
               <TouchableOpacity
                 onPress={handleSubmit}
                 disabled={submitDisabled}
-                style={{
-                  backgroundColor: submitDisabled ? COLORS.disabled : COLORS.primary,
-                  borderRadius: 999,
-                  paddingVertical: 14,
-                  alignItems: 'center',
-                }}>
-                <Text style={{ color: 'white', fontSize: 14, fontWeight: '600' }}>
+                className="items-center rounded-full py-3.5"
+                style={{ backgroundColor: submitDisabled ? COLORS.disabled : COLORS.primary }}>
+                <Text className="text-[14px] font-semibold text-white">
                   {reportMutation.isPending ? '제출 중...' : '신고 제출'}
                 </Text>
               </TouchableOpacity>

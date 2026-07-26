@@ -72,7 +72,7 @@ export default function ChangePassword() {
         <View className="flex-1 items-center">
           <Text className="text-lg font-bold text-gray-900">비밀번호 변경</Text>
         </View>
-        <View style={{ width: 28 }} />
+        <View className="w-7" />
       </View>
 
       <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
@@ -123,9 +123,7 @@ export default function ChangePassword() {
             </TouchableOpacity>
           </View>
           {!isNewPasswordValid && (
-            <Text className="mt-1 text-xs" style={{ color: COLORS.error }}>
-              8~30자 이내 영문자 주세요
-            </Text>
+            <Text className="mt-1 text-xs text-error">8~30자 이내 영문자 주세요</Text>
           )}
         </View>
 
@@ -154,9 +152,7 @@ export default function ChangePassword() {
             </TouchableOpacity>
           </View>
           {!isConfirmMatch && (
-            <Text className="mt-1 text-xs" style={{ color: COLORS.error }}>
-              비밀번호가 일치하지 않습니다
-            </Text>
+            <Text className="mt-1 text-xs text-error">비밀번호가 일치하지 않습니다</Text>
           )}
         </View>
       </ScrollView>
@@ -164,8 +160,8 @@ export default function ChangePassword() {
       {/* 하단 버튼 */}
       <View className="px-5 pb-10 pt-3">
         <TouchableOpacity
-          className="items-center rounded-xl py-4"
-          style={{ backgroundColor: COLORS.primary, opacity: canSubmit ? 1 : 0.5 }}
+          className="items-center rounded-xl bg-primary py-4"
+          style={{ opacity: canSubmit ? 1 : 0.5 }}
           disabled={!canSubmit}
           onPress={handleSubmit}>
           <Text className="text-base font-bold text-white">

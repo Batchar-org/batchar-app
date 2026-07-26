@@ -89,7 +89,7 @@ export default function ProductHistoryList({ title, biddingLabel, view }: Produc
         <View className="flex-1 items-center">
           <Text className="text-lg font-bold text-gray-900">{title}</Text>
         </View>
-        <View style={{ width: 28 }} />
+        <View className="w-7" />
       </View>
 
       {/* 탭 */}

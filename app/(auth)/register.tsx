@@ -382,18 +382,16 @@ export default function RegisterPage() {
             </TouchableOpacity>
 
             {/* 약관 동의 안내 */}
-            <Text
-              className="mt-6 text-center text-sm leading-5"
-              style={{ color: COLORS.textMuted }}>
+            <Text className="mt-6 text-center text-sm leading-5 text-content-muted">
               회원가입 시{' '}
               <Text
-                style={{ color: COLORS.primary, textDecorationLine: 'underline' }}
+                className="text-primary underline"
                 onPress={() => Linking.openURL(POLICY_URLS.termsOfService)}>
                 이용약관
               </Text>
               {'  및 '}
               <Text
-                style={{ color: COLORS.primary, textDecorationLine: 'underline' }}
+                className="text-primary underline"
                 onPress={() => Linking.openURL(POLICY_URLS.privacyPolicy)}>
                 개인정보처리방침
               </Text>

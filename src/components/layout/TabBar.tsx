@@ -66,13 +66,9 @@ function TabItem({ tab, isActive, onPress, badge }: TabItemProps) {
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={1}
-      style={{
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: LAYOUT.touchTargetMinHeight,
-      }}>
-      <View style={{ position: 'relative' }}>
+      className="flex-1 items-center justify-center"
+      style={{ minHeight: LAYOUT.touchTargetMinHeight }}>
+      <View className="relative">
         <Image
           source={isActive ? tab.activeIcon : tab.icon}
           style={{ width: 26, height: 26 }}

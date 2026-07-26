@@ -26,15 +26,12 @@ export default function CategoryGrid() {
           {PRODUCT_CATEGORIES.map((category) => (
             <TouchableOpacity
               key={category.label}
-              className="mb-6 items-center"
-              style={{ width: '25%' }}
+              className="mb-6 w-1/4 items-center"
               activeOpacity={0.7}
               onPress={() =>
                 router.push({ pathname: '/category/list', params: { category: category.label } })
               }>
-              <View
-                className="mb-2 h-16 w-16 items-center justify-center rounded-2xl"
-                style={{ backgroundColor: COLORS.primaryLight }}>
+              <View className="mb-2 h-16 w-16 items-center justify-center rounded-2xl bg-primary-light">
                 <MaterialCommunityIcons name={category.icon} size={30} color={COLORS.active} />
               </View>
               <Text className="px-1 text-center text-[11px] text-gray-700" numberOfLines={2}>

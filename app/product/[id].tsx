@@ -253,7 +253,8 @@ export default function ProductDetail() {
               <Image
                 key={index}
                 source={{ uri: img }}
-                style={{ width: screenWidth, height: 280 }}
+                className="h-[280px]"
+                style={{ width: screenWidth }}
                 contentFit="cover"
                 transition={IMAGE_TRANSITION_MS}
                 placeholder={IMAGE_PLACEHOLDER}
@@ -264,8 +265,7 @@ export default function ProductDetail() {
           {/* 페이지 인디케이터 */}
           <View
             pointerEvents="none"
-            className="absolute bottom-4 right-4 rounded-full px-3 py-1"
-            style={{ backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 20 }}>
+            className="absolute bottom-4 right-4 z-20 rounded-full bg-black/60 px-3 py-1">
             <Text className="text-sm font-medium text-white">
               {currentImageIndex + 1} / {images.length}
             </Text>
@@ -327,9 +327,7 @@ export default function ProductDetail() {
               {formatPrice(product.start_price)}원
             </Text>
           </View>
-          <View
-            className="flex-1 items-center rounded-xl py-3"
-            style={{ backgroundColor: COLORS.active }}>
+          <View className="flex-1 items-center rounded-xl bg-active py-3">
             <Text className="text-xs text-white/80">현재가</Text>
             <Text className="mt-1 text-lg font-bold text-white">
               {formatPrice(product.current_price)}원
@@ -346,7 +344,7 @@ export default function ProductDetail() {
                 size={20}
                 color={product.is_top_bidder ? COLORS.active : '#FFA000'}
               />
-              <Text className="ml-2 flex-1 text-sm font-medium" style={{ color: '#374151' }}>
+              <Text className="ml-2 flex-1 text-sm font-medium text-gray-700">
                 {product.is_top_bidder
                   ? '안심하세요, 1등을 유지하고 있어요'
                   : '다른 사람이 더 높은 금액을 제시했어요'}
@@ -416,13 +414,12 @@ export default function ProductDetail() {
                 const date = new Date(bid.created_at);
                 const label = `${date.getMonth() + 1}/${date.getDate()}`;
                 return (
-                  <View key={index} className="items-center" style={{ flex: 1 }}>
+                  <View key={index} className="flex-1 items-center">
                     <Text className="mb-1 text-xs text-gray-500">{formatPrice(bid.price)}</Text>
                     <View
-                      className="w-10 rounded-t-md"
+                      className="w-10 rounded-t-md bg-active"
                       style={{
                         height: barHeight,
-                        backgroundColor: COLORS.active,
                         opacity: 0.5 + (index / Math.max(trendBids.length - 1, 1)) * 0.5,
                       }}
                     />
@@ -459,19 +456,15 @@ export default function ProductDetail() {
                     <View className="flex-row items-center justify-between">
                       <View className="flex-row items-center">
                         {isHighest && (
-                          <View
-                            className="mr-2 rounded-md px-1.5 py-0.5"
-                            style={{ backgroundColor: COLORS.primaryLight }}>
-                            <Text className="text-xs font-bold" style={{ color: COLORS.active }}>
-                              최고가
-                            </Text>
+                          <View className="mr-2 rounded-md bg-primary-light px-1.5 py-0.5">
+                            <Text className="text-xs font-bold text-active">최고가</Text>
                           </View>
                         )}
                         <Text className="text-base font-medium text-gray-900">
                           {displayUserName(bid.bidder_name)}
                         </Text>
                       </View>
-                      <Text className="text-base font-bold" style={{ color: COLORS.active }}>
+                      <Text className="text-base font-bold text-active">
                         {formatPrice(bid.price)}원
                       </Text>
                     </View>
@@ -485,9 +478,7 @@ export default function ProductDetail() {
                 <TouchableOpacity
                   className="mt-2 items-center py-3"
                   onPress={handleShowAllBidRecords}>
-                  <Text className="text-sm font-semibold" style={{ color: COLORS.active }}>
-                    더보기
-                  </Text>
+                  <Text className="text-sm font-semibold text-active">더보기</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -520,11 +511,8 @@ export default function ProductDetail() {
           <View className="flex-1 flex-row">
             {isAuctionActive && bidRecords.length > 0 && (
               <TouchableOpacity
-                className="mr-2 flex-1 items-center rounded-full py-4"
-                style={{
-                  backgroundColor: COLORS.error,
-                  opacity: isClosing ? 0.6 : 1,
-                }}
+                className="mr-2 flex-1 items-center rounded-full bg-error py-4"
+                style={{ opacity: isClosing ? 0.6 : 1 }}
                 onPress={handleAwardAuction}
                 disabled={isClosing}>
                 <Text className="text-base font-semibold text-white">
@@ -534,32 +522,26 @@ export default function ProductDetail() {
             )}
             {isAuctionActive ? (
               <TouchableOpacity
-                className="flex-1 items-center rounded-full py-4"
-                style={{ backgroundColor: COLORS.active }}
+                className="flex-1 items-center rounded-full bg-active py-4"
                 onPress={() => router.push(`/product/edit/${productId}`)}>
                 <Text className="text-base font-semibold text-white">수정하기</Text>
               </TouchableOpacity>
             ) : (
-              <View
-                className="flex-1 items-center rounded-full py-4"
-                style={{ backgroundColor: '#9CA3AF' }}>
+              <View className="flex-1 items-center rounded-full bg-gray-400 py-4">
                 <Text className="text-base font-semibold text-white">입찰 종료</Text>
               </View>
             )}
           </View>
         ) : isAuctionActive ? (
           <TouchableOpacity
-            className="flex-1 items-center rounded-full py-4"
-            style={{ backgroundColor: COLORS.active }}
+            className="flex-1 items-center rounded-full bg-active py-4"
             onPress={handleOpenBidModal}>
             <Text className="text-base font-semibold text-white">
               {product.is_top_bidder ? '추가 입찰하기' : '입찰하기'}
             </Text>
           </TouchableOpacity>
         ) : (
-          <View
-            className="flex-1 items-center rounded-full py-4"
-            style={{ backgroundColor: '#9CA3AF' }}>
+          <View className="flex-1 items-center rounded-full bg-gray-400 py-4">
             <Text className="text-base font-semibold text-white">입찰 종료</Text>
           </View>
         )}
@@ -571,8 +553,7 @@ export default function ProductDetail() {
           className="flex-1"
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <Pressable
-            className="flex-1 justify-end"
-            style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+            className="flex-1 justify-end bg-black/50"
             onPress={() => {
               Keyboard.dismiss();
               setBidModalVisible(false);
@@ -592,7 +573,7 @@ export default function ProductDetail() {
 
                 <View className="mb-2 flex-row items-center justify-between">
                   <Text className="text-sm text-gray-500">현재가</Text>
-                  <Text className="text-base font-bold" style={{ color: COLORS.active }}>
+                  <Text className="text-base font-bold text-active">
                     {formatPrice(product.current_price)}원
                   </Text>
                 </View>
@@ -614,11 +595,8 @@ export default function ProductDetail() {
                 </View>
 
                 <TouchableOpacity
-                  className="items-center rounded-full py-4"
-                  style={{
-                    backgroundColor: COLORS.active,
-                    opacity: isBidding ? 0.6 : 1,
-                  }}
+                  className="items-center rounded-full bg-active py-4"
+                  style={{ opacity: isBidding ? 0.6 : 1 }}
                   onPress={handlePlaceBid}
                   disabled={isBidding}>
                   <Text className="text-base font-semibold text-white">

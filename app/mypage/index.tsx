@@ -128,12 +128,9 @@ export default function MyPage() {
           </View>
           <Text className="mb-2 text-xl font-bold text-gray-900">{profile?.name ?? '사용자'}</Text>
           <TouchableOpacity
-            className="rounded-full border px-4 py-1.5"
-            style={{ borderColor: COLORS.primary }}
+            className="rounded-full border border-primary px-4 py-1.5"
             onPress={() => router.push('/mypage/edit-profile')}>
-            <Text className="text-sm font-medium" style={{ color: COLORS.primary }}>
-              내 정보 수정
-            </Text>
+            <Text className="text-sm font-medium text-primary">내 정보 수정</Text>
           </TouchableOpacity>
         </View>
 
@@ -223,9 +220,7 @@ export default function MyPage() {
           </TouchableOpacity>
           <View className="my-2 h-px bg-gray-100" />
           <TouchableOpacity onPress={handleWithdrawPress} className="py-2">
-            <Text className="text-base font-medium" style={{ color: COLORS.error }}>
-              회원 탈퇴
-            </Text>
+            <Text className="text-base font-medium text-error">회원 탈퇴</Text>
           </TouchableOpacity>
         </View>
 
@@ -241,8 +236,7 @@ export default function MyPage() {
         animationType="fade"
         onRequestClose={() => setShowWithdrawModal(false)}>
         <Pressable
-          className="flex-1 items-center justify-center px-8"
-          style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+          className="flex-1 items-center justify-center bg-black/50 px-8"
           onPress={() => setShowWithdrawModal(false)}>
           <Pressable onPress={(e) => e.stopPropagation()}>
             <View className="w-full rounded-2xl bg-white px-12 pb-10 pt-12">
@@ -278,8 +272,7 @@ export default function MyPage() {
                   <Text className="text-sm font-semibold text-gray-600">취소</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  className="flex-1 items-center rounded-xl py-3.5"
-                  style={{ backgroundColor: COLORS.error }}
+                  className="flex-1 items-center rounded-xl bg-error py-3.5"
                   onPress={handleWithdrawSubmit}>
                   <Text className="text-sm font-semibold text-white">탈퇴 하기</Text>
                 </TouchableOpacity>
@@ -296,8 +289,7 @@ export default function MyPage() {
         animationType="fade"
         onRequestClose={() => setShowConfirmModal(false)}>
         <Pressable
-          className="flex-1 items-center justify-center px-10"
-          style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+          className="flex-1 items-center justify-center bg-black/50 px-10"
           onPress={() => setShowConfirmModal(false)}>
           <Pressable onPress={(e) => e.stopPropagation()}>
             <View className="w-full rounded-2xl bg-white px-12 py-6">
@@ -313,8 +305,7 @@ export default function MyPage() {
                   <Text className="text-sm font-semibold text-gray-600">취소</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  className="flex-1 items-center rounded-xl py-3.5"
-                  style={{ backgroundColor: COLORS.error }}
+                  className="flex-1 items-center rounded-xl bg-error py-3.5"
                   onPress={handleConfirmWithdraw}>
                   <Text className="text-sm font-semibold text-white">탈퇴</Text>
                 </TouchableOpacity>

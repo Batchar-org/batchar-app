@@ -22,7 +22,7 @@ export default function NotificationSettingsPage() {
         <View className="flex-1 items-center">
           <Text className="text-lg font-bold text-gray-900">알림 설정</Text>
         </View>
-        <View style={{ width: 28 }} />
+        <View className="w-7" />
       </View>
 
       {isLoading ? (
