@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 
 import { getChatListApi } from '@/services/chat';
 import type { ChatListResponse } from '@/types';
+import { chatKeys } from '@/queries/keys';
 
 /**
  * 특정 상품의 채팅방을 찾아 이동한다. (예: 낙찰 직후 생성된 채팅방으로 이동)
@@ -14,7 +15,7 @@ export function useOpenProductChatRoom() {
 
   return async (productId: number): Promise<boolean> => {
     const chatList = await queryClient.fetchQuery<ChatListResponse>({
-      queryKey: ['chatList'],
+      queryKey: chatKeys.list,
       queryFn: () => getChatListApi(),
     });
     const room = chatList.data.find((c) => c.product_id === productId);

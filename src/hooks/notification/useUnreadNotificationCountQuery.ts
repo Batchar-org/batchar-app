@@ -2,12 +2,13 @@ import { useQuery } from '@tanstack/react-query';
 
 import { getUnreadNotificationCountApi } from '@/services/notification';
 import useAuthStore, { useIsLoggedIn } from '@/store/useAuthStore';
+import { notificationKeys } from '@/queries/keys';
 
 export function useUnreadNotificationCountQuery() {
   const isLoggedIn = useIsLoggedIn();
 
   return useQuery({
-    queryKey: ['notifications', 'unread-count'],
+    queryKey: notificationKeys.unreadCount,
     queryFn: () => {
       const token = useAuthStore.getState().accessToken;
       if (!token) throw new Error('로그인이 필요합니다.');

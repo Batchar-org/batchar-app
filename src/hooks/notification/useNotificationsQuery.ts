@@ -2,6 +2,7 @@ import { useInfiniteQuery } from '@tanstack/react-query';
 
 import { getNotificationsApi } from '@/services/notification';
 import useAuthStore, { useIsLoggedIn } from '@/store/useAuthStore';
+import { notificationKeys } from '@/queries/keys';
 
 const PAGE_SIZE = 20;
 
@@ -9,7 +10,7 @@ export function useNotificationsQuery() {
   const isLoggedIn = useIsLoggedIn();
 
   return useInfiniteQuery({
-    queryKey: ['notifications'],
+    queryKey: notificationKeys.all,
     queryFn: ({ pageParam }) => {
       const token = useAuthStore.getState().accessToken;
       if (!token) throw new Error('로그인이 필요합니다.');

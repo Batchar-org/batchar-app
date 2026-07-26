@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { completeDealApi } from '@/services/chat';
 import { ChatCompleteDealResponse } from '@/types';
 import { useAccessToken } from '@/store/useAuthStore';
+import { chatKeys, productKeys } from '@/queries/keys';
 
 export function useCompleteDealMutation() {
   const accessToken = useAccessToken();
@@ -17,10 +18,10 @@ export function useCompleteDealMutation() {
     },
 
     onSuccess: (_data, chatId) => {
-      queryClient.invalidateQueries({ queryKey: ['chatMessages', chatId] });
-      queryClient.invalidateQueries({ queryKey: ['chatList'] });
-      queryClient.invalidateQueries({ queryKey: ['product'] });
-      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: chatKeys.messages(chatId) });
+      queryClient.invalidateQueries({ queryKey: chatKeys.list });
+      queryClient.invalidateQueries({ queryKey: productKeys.detailAll });
+      queryClient.invalidateQueries({ queryKey: productKeys.listAll });
     },
   });
 }

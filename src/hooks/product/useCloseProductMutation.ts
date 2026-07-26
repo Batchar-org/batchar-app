@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { closeProductApi } from '@/services/product';
 import { useAccessToken } from '@/store/useAuthStore';
+import { productKeys, bidKeys } from '@/queries/keys';
 
 export function useCloseProductMutation() {
   const accessToken = useAccessToken();
@@ -15,9 +16,9 @@ export function useCloseProductMutation() {
       return closeProductApi(productId, accessToken);
     },
     onSuccess: (_data, productId) => {
-      queryClient.invalidateQueries({ queryKey: ['product', productId] });
-      queryClient.invalidateQueries({ queryKey: ['products'] });
-      queryClient.invalidateQueries({ queryKey: ['bidHistory', productId] });
+      queryClient.invalidateQueries({ queryKey: productKeys.detail(productId) });
+      queryClient.invalidateQueries({ queryKey: productKeys.listAll });
+      queryClient.invalidateQueries({ queryKey: bidKeys.byProduct(productId) });
     },
   });
 }

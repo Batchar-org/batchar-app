@@ -5,6 +5,7 @@ import { useQueryClient } from '@tanstack/react-query';
 
 import { ChatMessage } from '@/types';
 import { useAccessToken } from '@/store/useAuthStore';
+import { chatKeys } from '@/queries/keys';
 
 const BASE_URL = (process.env.EXPO_PUBLIC_API_BASE_URL ?? '').trim();
 
@@ -71,7 +72,7 @@ export function useStompClient({ chatId, onMessageReceived }: UseStompClientOpti
             created_at: serverMsg.created_at ?? serverMsg.createdAt,
           };
 
-          queryClient.setQueryData(['chatMessages', chatId], (old: any) => {
+          queryClient.setQueryData(chatKeys.messages(chatId), (old: any) => {
             if (!old) return old;
             const existingData: ChatMessage[] = old.data ?? old;
             if (existingData.some((m) => m.message_id === newMessage.message_id)) return old;
@@ -79,7 +80,7 @@ export function useStompClient({ chatId, onMessageReceived }: UseStompClientOpti
             return [...existingData, newMessage];
           });
 
-          queryClient.invalidateQueries({ queryKey: ['chatList'] });
+          queryClient.invalidateQueries({ queryKey: chatKeys.list });
           onMessageReceivedRef.current?.(newMessage);
         } catch (e) {
           console.warn('[STOMP] 메시지 파싱 실패:', e);
@@ -107,8 +108,8 @@ export function useStompClient({ chatId, onMessageReceived }: UseStompClientOpti
     if (connected || chatId <= 0) return;
 
     const interval = setInterval(() => {
-      queryClient.invalidateQueries({ queryKey: ['chatMessages', chatId] });
-      queryClient.invalidateQueries({ queryKey: ['chatList'] });
+      queryClient.invalidateQueries({ queryKey: chatKeys.messages(chatId) });
+      queryClient.invalidateQueries({ queryKey: chatKeys.list });
     }, 2000);
 
     return () => clearInterval(interval);

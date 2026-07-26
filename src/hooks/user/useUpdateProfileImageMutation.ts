@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { updateProfileImageApi } from '@/services/user';
 import useAuthStore from '@/store/useAuthStore';
+import { userKeys } from '@/queries/keys';
 
 export function useUpdateProfileImageMutation() {
   const queryClient = useQueryClient();
@@ -13,7 +14,7 @@ export function useUpdateProfileImageMutation() {
       return updateProfileImageApi(imageUri, token);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['userProfile'] });
+      queryClient.invalidateQueries({ queryKey: userKeys.profile });
     },
   });
 }

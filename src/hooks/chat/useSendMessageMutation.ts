@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { sendMessageApi } from '@/services/chat';
 import { ChatMessageSendResponse } from '@/types';
 import { useAccessToken } from '@/store/useAuthStore';
+import { chatKeys } from '@/queries/keys';
 
 type SendMessageParams = {
   chatId: number;
@@ -22,8 +23,8 @@ export function useSendMessageMutation() {
     },
 
     onSuccess: (_data, { chatId }) => {
-      queryClient.invalidateQueries({ queryKey: ['chatMessages', chatId] });
-      queryClient.invalidateQueries({ queryKey: ['chatList'] });
+      queryClient.invalidateQueries({ queryKey: chatKeys.messages(chatId) });
+      queryClient.invalidateQueries({ queryKey: chatKeys.list });
     },
   });
 }

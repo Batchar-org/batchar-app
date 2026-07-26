@@ -8,6 +8,7 @@ import useAuthStore, { useIsInitialized, useIsLoggedIn } from '@/store/useAuthSt
 import { syncBadgeCount } from '@/lib/pushNotifications';
 import { buildNotificationRoute } from '@/lib/notificationRoute';
 import type { NotificationData } from '@/types';
+import { notificationKeys } from '@/queries/keys';
 
 // 푸시 수신/탭/콜드스타트 처리 + 포그라운드 배지 동기화. 루트(RouteGuard)에서 1회 호출한다.
 export function useNotificationListeners() {
@@ -45,7 +46,7 @@ export function useNotificationListeners() {
 
     // 포그라운드 수신 → 알림함/미읽음 갱신 + 배지 동기화
     const receivedSub = Notifications.addNotificationReceivedListener(() => {
-      void queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      void queryClient.invalidateQueries({ queryKey: notificationKeys.all });
       void syncBadgeCount();
     });
 

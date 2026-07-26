@@ -4,6 +4,7 @@ import { ImagePickerAsset } from 'expo-image-picker';
 import { sendChatMediaApi } from '@/services/chat';
 import { ChatMessageSendResponse } from '@/types';
 import { useAccessToken } from '@/store/useAuthStore';
+import { chatKeys } from '@/queries/keys';
 
 type SendChatMediaParams = {
   chatId: number;
@@ -23,8 +24,8 @@ export function useSendChatMediaMutation() {
     },
 
     onSuccess: (_data, { chatId }) => {
-      queryClient.invalidateQueries({ queryKey: ['chatMessages', chatId] });
-      queryClient.invalidateQueries({ queryKey: ['chatList'] });
+      queryClient.invalidateQueries({ queryKey: chatKeys.messages(chatId) });
+      queryClient.invalidateQueries({ queryKey: chatKeys.list });
     },
   });
 }

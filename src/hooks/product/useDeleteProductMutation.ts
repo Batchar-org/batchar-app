@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { deleteProductApi } from '@/services/product';
 import { useAccessToken } from '@/store/useAuthStore';
+import { productKeys } from '@/queries/keys';
 
 export function useDeleteProductMutation() {
   const accessToken = useAccessToken();
@@ -15,7 +16,7 @@ export function useDeleteProductMutation() {
       return deleteProductApi(productId, accessToken);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: productKeys.listAll });
     },
   });
 }
