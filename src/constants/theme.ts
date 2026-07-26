@@ -1,33 +1,12 @@
 import { Platform } from 'react-native';
 
+import palette from './palette.json';
+
 // 앱 전역 테마 색상 상수
 // 브랜드 메인 컬러: #0DDA8A — 버튼, 아이콘, 강조 요소 등 모든 주요 색상에 통일 적용
+// 색상 값은 palette.json(단일 소스)에서 가져온다. tailwind.config.js도 동일 소스를 참조.
 
-export const COLORS = {
-  // 브랜드 색상
-  primary: '#0DDA8A',
-  primaryLight: '#0DDA8A18',
-
-  // 상태 색상
-  active: '#0DDA8A',
-  inactive: '#D1D5DB',
-
-  // 텍스트 색상
-  text: '#1F2937',
-  textSecondary: '#6B7280',
-  textMuted: '#9CA3AF',
-
-  // 배경 색상
-  background: '#FFFFFF',
-  backgroundSecondary: '#F9FAFB',
-
-  // 기타 UI 색상
-  border: '#E5E7EB',
-  disabled: '#A3A3A3',
-  error: '#EF4444',
-  warning: '#F59E0B',
-  success: '#22C55E',
-} as const;
+export const COLORS = palette;
 
 // 아이콘 크기
 export const ICON_SIZES = {
