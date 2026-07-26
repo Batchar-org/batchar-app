@@ -1,7 +1,6 @@
 import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useCallback, useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
 import TopBar from '@/components/layout/TopBar';
 import SearchBar from '@/components/layout/SearchBar';
 import CategoryBar from '@/components/layout/CategoryBar';
@@ -9,6 +8,7 @@ import ProductList from '@/components/product/ProductList';
 import TabBar from '@/components/layout/TabBar';
 import { ProductViewType } from '@/types';
 import { useIsGuest } from '@/store/useAuthStore';
+import { useRefreshHome } from '@/hooks/useRefreshHome';
 import { promptLogin } from '@/lib/promptLogin';
 
 // 로그인이 필요한 뷰 타입 (서버의 requiresAuth와 동기화)
@@ -18,7 +18,7 @@ export default function Home() {
   const [activeCategory, setActiveCategory] = useState<ProductViewType>('ALL');
   const [keyword, setKeyword] = useState('');
   const [refreshing, setRefreshing] = useState(false);
-  const queryClient = useQueryClient();
+  const refreshHome = useRefreshHome();
   const isGuest = useIsGuest();
 
   const handleCategoryPress = useCallback(
@@ -34,10 +34,9 @@ export default function Home() {
 
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
-    await queryClient.invalidateQueries({ queryKey: ['products'] });
-    await queryClient.invalidateQueries({ queryKey: ['wishlist'] });
+    await refreshHome();
     setRefreshing(false);
-  }, [queryClient]);
+  }, [refreshHome]);
 
   return (
     <SafeAreaView className="flex-1 bg-white" edges={['top']}>
