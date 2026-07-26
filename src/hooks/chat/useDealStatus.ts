@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 
 import { ChatListResponse } from '@/types';
 import { useChatListQuery } from '@/hooks/chat/useChatListQuery';
+import { chatKeys } from '@/queries/keys';
 
 /**
  * 거래 완료 상태를 서버 응답 기반으로 관리하는 훅
@@ -24,7 +25,7 @@ export function useDealStatus(chatId: number) {
 
   // 거래 완료 API 성공 후 캐시 낙관적 업데이트
   const markMyConfirmed = useCallback(() => {
-    queryClient.setQueryData<ChatListResponse>(['chatList'], (old) => {
+    queryClient.setQueryData<ChatListResponse>(chatKeys.list, (old) => {
       if (!old) return old;
       return {
         ...old,

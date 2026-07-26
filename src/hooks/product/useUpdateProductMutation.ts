@@ -4,6 +4,7 @@ import { ImagePickerAsset } from 'expo-image-picker';
 import { updateProductApi } from '@/services/product';
 import { ProductUpdateRequest } from '@/types';
 import { useAccessToken } from '@/store/useAuthStore';
+import { productKeys } from '@/queries/keys';
 
 type UpdateProductParams = {
   productId: number;
@@ -23,8 +24,8 @@ export function useUpdateProductMutation() {
       return updateProductApi(productId, request, files, accessToken);
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['product', variables.productId] });
-      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: productKeys.detail(variables.productId) });
+      queryClient.invalidateQueries({ queryKey: productKeys.listAll });
     },
   });
 }

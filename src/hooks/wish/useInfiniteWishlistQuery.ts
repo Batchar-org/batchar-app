@@ -2,6 +2,7 @@ import { useInfiniteQuery } from '@tanstack/react-query';
 
 import { getWishlistApi } from '@/services/wish';
 import { useAccessToken, useIsLoggedIn } from '@/store/useAuthStore';
+import { wishKeys } from '@/queries/keys';
 
 const WISHLIST_PAGE_SIZE = 10;
 
@@ -10,7 +11,7 @@ export function useInfiniteWishlistQuery() {
   const isLoggedIn = useIsLoggedIn();
 
   return useInfiniteQuery({
-    queryKey: ['wishlist', 'infinite'],
+    queryKey: wishKeys.infinite,
     queryFn: ({ pageParam }) => {
       if (!accessToken) throw new Error('로그인이 필요합니다.');
       return getWishlistApi({ page: pageParam, size: WISHLIST_PAGE_SIZE }, accessToken);

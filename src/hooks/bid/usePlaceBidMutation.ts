@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { placeBidApi } from '@/services/bid';
 import { ProductDetailResponse } from '@/types';
 import { useAccessToken } from '@/store/useAuthStore';
+import { productKeys, bidKeys } from '@/queries/keys';
 
 type PlaceBidParams = {
   productId: number;
@@ -26,15 +27,14 @@ export function usePlaceBidMutation() {
     },
 
     onMutate: async ({ productId, price }) => {
-      await queryClient.cancelQueries({ queryKey: ['product', productId] });
+      await queryClient.cancelQueries({ queryKey: productKeys.detail(productId) });
 
-      const previousDetail = queryClient.getQueryData<ProductDetailResponse>([
-        'product',
-        productId,
-      ]);
+      const previousDetail = queryClient.getQueryData<ProductDetailResponse>(
+        productKeys.detail(productId)
+      );
 
       if (previousDetail) {
-        queryClient.setQueryData<ProductDetailResponse>(['product', productId], {
+        queryClient.setQueryData<ProductDetailResponse>(productKeys.detail(productId), {
           ...previousDetail,
           data: {
             ...previousDetail.data,
@@ -50,14 +50,14 @@ export function usePlaceBidMutation() {
 
     onError: (_error, { productId }, context) => {
       if (context?.previousDetail) {
-        queryClient.setQueryData(['product', productId], context.previousDetail);
+        queryClient.setQueryData(productKeys.detail(productId), context.previousDetail);
       }
     },
 
     onSettled: (_data, _error, { productId }) => {
-      queryClient.invalidateQueries({ queryKey: ['product', productId] });
-      queryClient.invalidateQueries({ queryKey: ['bidHistory', productId] });
-      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: productKeys.detail(productId) });
+      queryClient.invalidateQueries({ queryKey: bidKeys.byProduct(productId) });
+      queryClient.invalidateQueries({ queryKey: productKeys.listAll });
     },
   });
 }

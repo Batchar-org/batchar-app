@@ -3,6 +3,7 @@ import { Alert } from 'react-native';
 
 import { deleteAllNotificationsApi } from '@/services/notification';
 import { syncBadgeCount } from '@/lib/pushNotifications';
+import { notificationKeys } from '@/queries/keys';
 
 export function useDeleteAllNotificationsMutation() {
   const queryClient = useQueryClient();
@@ -10,7 +11,7 @@ export function useDeleteAllNotificationsMutation() {
   return useMutation({
     mutationFn: deleteAllNotificationsApi,
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      void queryClient.invalidateQueries({ queryKey: notificationKeys.all });
       void syncBadgeCount();
     },
     onError: () => {

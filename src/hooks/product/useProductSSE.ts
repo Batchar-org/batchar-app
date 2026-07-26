@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import EventSource from 'react-native-sse';
 
 import { ProductDetailResponse } from '@/types';
+import { productKeys, bidKeys } from '@/queries/keys';
 
 const BASE_URL = (process.env.EXPO_PUBLIC_API_BASE_URL ?? '').trim().replace(/\/+$/, '');
 
@@ -31,7 +32,7 @@ export function useProductSSE({ productId, enabled = true }: UseProductSSEOption
         if (currentPrice === undefined || currentPrice === null) return;
 
         // 상품 상세 캐시 갱신 (현재가, 입찰 수)
-        queryClient.setQueryData<ProductDetailResponse>(['product', productId], (old) => {
+        queryClient.setQueryData<ProductDetailResponse>(productKeys.detail(productId), (old) => {
           if (!old) return old;
           return {
             ...old,
@@ -44,7 +45,7 @@ export function useProductSSE({ productId, enabled = true }: UseProductSSEOption
         });
 
         // 입찰 내역 갱신
-        queryClient.invalidateQueries({ queryKey: ['bidHistory', productId] });
+        queryClient.invalidateQueries({ queryKey: bidKeys.byProduct(productId) });
       } catch (e) {
         console.warn('[SSE] 메시지 파싱 실패:', e);
       }

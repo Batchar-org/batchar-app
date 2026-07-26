@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { updateUserProfileApi } from '@/services/user';
 import type { UpdateUserProfileRequest } from '@/types';
 import useAuthStore from '@/store/useAuthStore';
+import { userKeys } from '@/queries/keys';
 
 export function useUpdateUserProfileMutation() {
   const queryClient = useQueryClient();
@@ -14,7 +15,7 @@ export function useUpdateUserProfileMutation() {
       return updateUserProfileApi(body, token);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['userProfile'] });
+      queryClient.invalidateQueries({ queryKey: userKeys.profile });
     },
   });
 }

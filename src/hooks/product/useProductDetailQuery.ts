@@ -2,12 +2,13 @@ import { useQuery } from '@tanstack/react-query';
 
 import { getProductDetailApi } from '@/services/product';
 import useAuthStore, { useCanBrowse } from '@/store/useAuthStore';
+import { productKeys } from '@/queries/keys';
 
 export function useProductDetailQuery(productId: number) {
   const canBrowse = useCanBrowse();
 
   return useQuery({
-    queryKey: ['product', productId],
+    queryKey: productKeys.detail(productId),
     queryFn: () => {
       const token = useAuthStore.getState().accessToken;
       return getProductDetailApi(productId, token);

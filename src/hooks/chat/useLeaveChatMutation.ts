@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { leaveChatApi } from '@/services/chat';
 import { ChatLeaveResponse } from '@/types';
 import { useAccessToken } from '@/store/useAuthStore';
+import { chatKeys } from '@/queries/keys';
 
 export function useLeaveChatMutation() {
   const accessToken = useAccessToken();
@@ -17,7 +18,7 @@ export function useLeaveChatMutation() {
     },
 
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['chatList'] });
+      queryClient.invalidateQueries({ queryKey: chatKeys.list });
     },
   });
 }
