@@ -21,9 +21,7 @@ export default function TopBar() {
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
           <MaterialCommunityIcons name="bell-outline" size={26} color={COLORS.active} />
           {hasUnread && (
-            <View
-              className="absolute -right-1.5 -top-1.5 h-[17px] min-w-[17px] items-center justify-center rounded-full px-1"
-              style={{ backgroundColor: COLORS.error }}>
+            <View className="absolute -right-1.5 -top-1.5 h-[17px] min-w-[17px] items-center justify-center rounded-full bg-error px-1">
               <Text className="text-[10px] font-bold text-white">
                 {unreadCount != null && unreadCount > 99 ? '99+' : unreadCount}
               </Text>

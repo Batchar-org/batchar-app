@@ -59,7 +59,7 @@ export default function ChangeNickname() {
         <View className="flex-1 items-center">
           <Text className="text-lg font-bold text-gray-900">닉네임 변경</Text>
         </View>
-        <View style={{ width: 28 }} />
+        <View className="w-7" />
       </View>
 
       <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
@@ -110,8 +110,8 @@ export default function ChangeNickname() {
       {/* 하단 버튼 */}
       <View className="px-5 pb-10 pt-3">
         <TouchableOpacity
-          className="items-center rounded-xl py-4"
-          style={{ backgroundColor: COLORS.primary, opacity: canSubmit ? 1 : 0.5 }}
+          className="items-center rounded-xl bg-primary py-4"
+          style={{ opacity: canSubmit ? 1 : 0.5 }}
           disabled={!canSubmit || updateProfileMutation.isPending}
           onPress={handleSubmit}>
           <Text className="text-base font-bold text-white">

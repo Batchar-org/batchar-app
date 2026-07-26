@@ -135,11 +135,8 @@ export default function LoginPage() {
             {/* 회원가입 버튼 */}
             <TouchableOpacity
               onPress={handleRegister}
-              className="mb-3 items-center rounded-full border py-4"
-              style={{ borderColor: COLORS.primary }}>
-              <Text className="text-base font-semibold" style={{ color: COLORS.primary }}>
-                회원가입
-              </Text>
+              className="mb-3 items-center rounded-full border border-primary py-4">
+              <Text className="text-base font-semibold text-primary">회원가입</Text>
             </TouchableOpacity>
 
             {/* 비회원 둘러보기 버튼 */}

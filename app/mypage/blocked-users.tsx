@@ -47,7 +47,7 @@ export default function BlockedUsersPage() {
         <View className="flex-1 items-center">
           <Text className="text-lg font-bold text-gray-900">차단 목록</Text>
         </View>
-        <View style={{ width: 28 }} />
+        <View className="w-7" />
       </View>
 
       {isLoading ? (
@@ -79,9 +79,8 @@ export default function BlockedUsersPage() {
               <TouchableOpacity
                 onPress={() => handleUnblock(item)}
                 disabled={isUnblocking}
-                className="rounded-full border px-3 py-1.5"
-                style={{ borderColor: COLORS.primary }}>
-                <Text className="text-sm font-medium" style={{ color: COLORS.primary }}>
+                className="rounded-full border border-primary px-3 py-1.5">
+                <Text className="text-sm font-medium text-primary">
                   {isUnblocking ? '해제 중' : '차단 해제'}
                 </Text>
               </TouchableOpacity>

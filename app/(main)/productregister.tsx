@@ -168,18 +168,13 @@ export default function Register() {
           <Text className="mb-4 text-base font-bold">상세정보</Text>
 
           {/* 사진/동영상 업로드 */}
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            className="mb-4"
-            style={{ paddingTop: 10 }}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-4 pt-2.5">
             <View className="flex-row items-center gap-3">
               <TouchableOpacity
                 onPress={handlePickImages}
-                className="h-20 w-20 items-center justify-center rounded-lg border-2"
-                style={{ borderColor: COLORS.active }}>
+                className="h-20 w-20 items-center justify-center rounded-lg border-2 border-active">
                 <MaterialCommunityIcons name="camera-outline" size={28} color={COLORS.active} />
-                <Text className="mt-1 text-xs" style={{ color: COLORS.active }}>
+                <Text className="mt-1 text-xs text-active">
                   {images.length}/{MAX_IMAGE_COUNT}
                 </Text>
               </TouchableOpacity>
@@ -195,8 +190,7 @@ export default function Register() {
                   <TouchableOpacity
                     onPress={() => handleRemoveImage(index)}
                     hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                    className="absolute -right-2 -top-2 h-5 w-5 items-center justify-center rounded-full"
-                    style={{ backgroundColor: 'rgba(0,0,0,0.7)' }}>
+                    className="absolute -right-2 -top-2 h-5 w-5 items-center justify-center rounded-full bg-black/70">
                     <MaterialCommunityIcons name="close" size={14} color="#FFFFFF" />
                   </TouchableOpacity>
                 </View>
@@ -300,9 +294,8 @@ export default function Register() {
         <TouchableOpacity
           activeOpacity={1}
           onPress={() => setShowCategoryModal(false)}
-          className="flex-1 justify-end"
-          style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}>
-          <View className="rounded-t-2xl bg-white pb-8 pt-4" style={{ maxHeight: '50%' }}>
+          className="flex-1 justify-end bg-black/40">
+          <View className="max-h-[50%] rounded-t-2xl bg-white pb-8 pt-4">
             <Text className="mb-4 px-5 text-lg font-bold">카테고리 선택</Text>
             <FlatList
               data={CATEGORY_LABELS}

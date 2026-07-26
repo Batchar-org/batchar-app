@@ -37,7 +37,7 @@ export default function ProfileAvatar({
       {uri ? (
         <Image
           source={{ uri }}
-          style={{ width: '100%', height: '100%' }}
+          className="h-full w-full"
           contentFit="cover"
           transition={IMAGE_TRANSITION_MS}
           placeholder={IMAGE_PLACEHOLDER}

@@ -87,8 +87,7 @@ export default function Chat() {
                 renderRightActions={() => (
                   <TouchableOpacity
                     onPress={() => handleLeave(chat)}
-                    className="items-center justify-center"
-                    style={{ width: 80, backgroundColor: COLORS.error }}>
+                    className="w-20 items-center justify-center bg-error">
                     <Text className="text-sm font-semibold text-white">나가기</Text>
                   </TouchableOpacity>
                 )}>

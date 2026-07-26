@@ -29,7 +29,7 @@ export default function FertilityCard({ percent }: FertilityCardProps) {
         <TouchableOpacity
           onPress={() => setShowInfo(true)}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-          style={{ marginLeft: 4 }}>
+          className="ml-1">
           <MaterialCommunityIcons name="information-outline" size={15} color={COLORS.textMuted} />
         </TouchableOpacity>
       </View>
@@ -37,21 +37,17 @@ export default function FertilityCard({ percent }: FertilityCardProps) {
       {/* 퍼센트 + 식물 */}
       <View className="flex-row items-center justify-between">
         <View>
-          <Text className="text-3xl font-extrabold" style={{ color: COLORS.primary }}>
-            {value}%
-          </Text>
-          <Text className="mt-0.5 text-sm font-semibold" style={{ color: COLORS.primary }}>
-            {stage.label}
-          </Text>
+          <Text className="text-3xl font-extrabold text-primary">{value}%</Text>
+          <Text className="mt-0.5 text-sm font-semibold text-primary">{stage.label}</Text>
         </View>
-        <Image source={stage.image} style={{ width: 80, height: 80 }} resizeMode="contain" />
+        <Image source={stage.image} className="h-20 w-20" resizeMode="contain" />
       </View>
 
       {/* 진행 바 */}
       <View className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-gray-100">
         <View
-          className="h-full rounded-full"
-          style={{ width: `${value}%` as DimensionValue, backgroundColor: COLORS.primary }}
+          className="h-full rounded-full bg-primary"
+          style={{ width: `${value}%` as DimensionValue }}
         />
       </View>
 
@@ -64,10 +60,7 @@ export default function FertilityCard({ percent }: FertilityCardProps) {
         transparent
         animationType="slide"
         onRequestClose={() => setShowInfo(false)}>
-        <Pressable
-          className="flex-1 justify-end"
-          style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
-          onPress={() => setShowInfo(false)}>
+        <Pressable className="flex-1 justify-end bg-black/40" onPress={() => setShowInfo(false)}>
           <Pressable onPress={(e) => e.stopPropagation()}>
             <View className="rounded-t-2xl bg-white px-5 pb-8 pt-5">
               <View className="mb-3 flex-row items-center justify-between">
@@ -84,11 +77,7 @@ export default function FertilityCard({ percent }: FertilityCardProps) {
               <View className="rounded-xl bg-gray-50 p-4">
                 {STAGE_RANGES.map((s) => (
                   <View key={s.label} className="flex-row items-center py-1.5">
-                    <Image
-                      source={s.image}
-                      style={{ width: 24, height: 24 }}
-                      resizeMode="contain"
-                    />
+                    <Image source={s.image} className="h-6 w-6" resizeMode="contain" />
                     <Text className="ml-3 flex-1 text-sm font-semibold text-gray-800">
                       {s.label}
                     </Text>

@@ -347,9 +347,7 @@ export default function ChatDetail() {
   return (
     <SafeAreaView className="flex-1 bg-white" edges={['top', 'bottom']}>
       {/* 헤더 */}
-      <View
-        className="flex-row items-center justify-between px-4 py-3"
-        style={{ borderBottomWidth: 1, borderBottomColor: COLORS.border }}>
+      <View className="flex-row items-center justify-between border-b border-line px-4 py-3">
         <View className="flex-row items-center">
           <TouchableOpacity onPress={() => router.back()}>
             <MaterialCommunityIcons
@@ -360,7 +358,7 @@ export default function ChatDetail() {
           </TouchableOpacity>
           <View className="ml-2">
             <View className="flex-row items-center">
-              <Text className="text-lg font-bold" style={{ color: COLORS.text }}>
+              <Text className="text-lg font-bold text-content">
                 {chatInfo ? displayUserName(chatInfo.partner_name) : '채팅'}
               </Text>
               {typeof partnerFertility === 'number' && (
@@ -393,20 +391,11 @@ export default function ChatDetail() {
             <View className="rounded-t-2xl bg-white pb-8 pt-2">
               {/* 핸들 바 */}
               <View className="mb-2 items-center py-2">
-                <View
-                  style={{
-                    width: 36,
-                    height: 4,
-                    borderRadius: 2,
-                    backgroundColor: COLORS.border,
-                  }}
-                />
+                <View className="h-1 w-9 rounded-sm bg-line" />
               </View>
               <TouchableOpacity className="flex-row items-center px-5 py-4" onPress={handleReport}>
                 <MaterialCommunityIcons name="flag-outline" size={22} color={COLORS.error} />
-                <Text className="ml-4 text-base font-medium" style={{ color: COLORS.error }}>
-                  신고하기
-                </Text>
+                <Text className="ml-4 text-base font-medium text-error">신고하기</Text>
               </TouchableOpacity>
               {chatInfo?.i_blocked ? (
                 <TouchableOpacity
@@ -418,7 +407,7 @@ export default function ChatDetail() {
                     size={22}
                     color={COLORS.primary}
                   />
-                  <Text className="ml-4 text-base font-medium" style={{ color: COLORS.primary }}>
+                  <Text className="ml-4 text-base font-medium text-primary">
                     {isUnblocking ? '해제 중...' : '차단 해제하기'}
                   </Text>
                 </TouchableOpacity>
@@ -428,7 +417,7 @@ export default function ChatDetail() {
                   disabled={isBlocking}
                   onPress={handleBlock}>
                   <MaterialCommunityIcons name="block-helper" size={22} color={COLORS.error} />
-                  <Text className="ml-4 text-base font-medium" style={{ color: COLORS.error }}>
+                  <Text className="ml-4 text-base font-medium text-error">
                     {isBlocking ? '차단 중...' : '차단하기'}
                   </Text>
                 </TouchableOpacity>
@@ -448,9 +437,7 @@ export default function ChatDetail() {
                   채팅방 나가기
                 </Text>
                 {!dealCompleted && (
-                  <Text className="ml-auto text-xs" style={{ color: COLORS.textMuted }}>
-                    양쪽 완료 후 가능
-                  </Text>
+                  <Text className="ml-auto text-xs text-content-muted">양쪽 완료 후 가능</Text>
                 )}
               </TouchableOpacity>
             </View>
@@ -460,17 +447,17 @@ export default function ChatDetail() {
 
       {/* 차단 상태 배너 */}
       {chatInfo?.i_blocked && (
-        <View className="flex-row items-center px-4 py-3.5" style={{ backgroundColor: '#FEF2F2' }}>
+        <View className="flex-row items-center bg-red-50 px-4 py-3.5">
           <MaterialCommunityIcons name="block-helper" size={20} color={COLORS.error} />
-          <Text className="ml-2.5 text-sm font-medium" style={{ color: COLORS.error }}>
+          <Text className="ml-2.5 text-sm font-medium text-error">
             차단한 사용자입니다. 메시지를 보낼 수 없습니다.
           </Text>
         </View>
       )}
       {!chatInfo?.i_blocked && chatInfo?.blocked_by_partner && (
-        <View className="flex-row items-center px-4 py-3.5" style={{ backgroundColor: '#FEF2F2' }}>
+        <View className="flex-row items-center bg-red-50 px-4 py-3.5">
           <MaterialCommunityIcons name="account-cancel" size={20} color={COLORS.error} />
-          <Text className="ml-2.5 text-sm font-medium" style={{ color: COLORS.error }}>
+          <Text className="ml-2.5 text-sm font-medium text-error">
             상대방이 회원님을 차단했습니다. 메시지를 보낼 수 없습니다.
           </Text>
         </View>
@@ -478,15 +465,13 @@ export default function ChatDetail() {
 
       {/* 상대방 퇴장 안내 */}
       {chatInfo?.partner_left && (
-        <View
-          className="flex-row items-center px-4 py-3.5"
-          style={{ backgroundColor: COLORS.backgroundSecondary }}>
+        <View className="flex-row items-center bg-background-secondary px-4 py-3.5">
           <MaterialCommunityIcons
             name="account-arrow-left-outline"
             size={20}
             color={COLORS.textMuted}
           />
-          <Text className="ml-2.5 text-sm font-medium" style={{ color: COLORS.textSecondary }}>
+          <Text className="ml-2.5 text-sm font-medium text-content-secondary">
             상대방이 채팅방을 나갔어요.
           </Text>
         </View>
@@ -494,35 +479,30 @@ export default function ChatDetail() {
 
       {/* 거래 상품 바 (헤더 아래 고정) + 물 주기·거래 완료 */}
       {chatInfo && (
-        <View style={{ borderBottomWidth: 1, borderBottomColor: COLORS.border }}>
+        <View className="border-b border-line">
           <TouchableOpacity
             className="flex-row items-center px-4 pt-4"
             onPress={() => router.push(`/product/${chatInfo.product_id}`)}>
             {chatInfo.product_image_url ? (
               <Image
                 source={{ uri: chatInfo.product_image_url }}
-                style={{ width: 72, height: 72, borderRadius: 10 }}
+                className="h-[72px] w-[72px] rounded-[10px]"
                 contentFit="cover"
                 transition={IMAGE_TRANSITION_MS}
                 placeholder={IMAGE_PLACEHOLDER}
               />
             ) : (
-              <View
-                className="items-center justify-center rounded-lg"
-                style={{ width: 72, height: 72, backgroundColor: COLORS.backgroundSecondary }}>
+              <View className="h-[72px] w-[72px] items-center justify-center rounded-lg bg-background-secondary">
                 <MaterialCommunityIcons name="image-outline" size={28} color={COLORS.textMuted} />
               </View>
             )}
             <View className="ml-4 flex-1">
-              <Text
-                className="text-base font-bold"
-                style={{ color: COLORS.text }}
-                numberOfLines={1}>
+              <Text className="text-base font-bold text-content" numberOfLines={1}>
                 {productTitle}
               </Text>
               <View className="mt-2 flex-row items-center">
                 {productPrice != null && (
-                  <Text className="text-[15px] font-bold" style={{ color: COLORS.text }}>
+                  <Text className="text-[15px] font-bold text-content">
                     {formatPrice(productPrice)}원
                   </Text>
                 )}
@@ -549,16 +529,13 @@ export default function ChatDetail() {
               myConfirmed ? (
                 <View className="flex-row items-center rounded-full px-1 py-1">
                   <MaterialCommunityIcons name="clock-outline" size={20} color={COLORS.textMuted} />
-                  <Text
-                    className="ml-1.5 text-sm font-bold"
-                    style={{ color: COLORS.textSecondary }}>
+                  <Text className="ml-1.5 text-sm font-bold text-content-secondary">
                     상대방 확인 대기중
                   </Text>
                 </View>
               ) : (
                 <TouchableOpacity
-                  className="flex-row items-center rounded-full px-4 py-2.5"
-                  style={{ backgroundColor: COLORS.primaryLight }}
+                  className="flex-row items-center rounded-full bg-primary-light px-4 py-2.5"
                   disabled={isCompleting}
                   onPress={handleCompleteDeal}>
                   <MaterialCommunityIcons
@@ -566,50 +543,34 @@ export default function ChatDetail() {
                     size={16}
                     color={COLORS.primary}
                   />
-                  <Text className="ml-1.5 text-sm font-bold" style={{ color: COLORS.primary }}>
+                  <Text className="ml-1.5 text-sm font-bold text-primary">
                     {chatInfo.is_seller ? '판매 완료' : '구매 완료'}
                   </Text>
                 </TouchableOpacity>
               )
             ) : reactionBlocked ? (
-              <Text className="text-xs" style={{ color: COLORS.textMuted }}>
-                차단 상태에서는 평가할 수 없어요.
-              </Text>
+              <Text className="text-xs text-content-muted">차단 상태에서는 평가할 수 없어요.</Text>
             ) : (
               <>
                 <TouchableOpacity
                   onPress={() => handleReact('water')}
                   disabled={isReacting}
-                  className="mr-2 flex-row items-center rounded-full border px-4 py-2.5"
-                  style={{
-                    backgroundColor: COLORS.primaryLight,
-                    borderColor: COLORS.primaryLight,
-                    opacity: isReacting ? 0.6 : 1,
-                  }}>
+                  className="mr-2 flex-row items-center rounded-full border border-primary-light bg-primary-light px-4 py-2.5"
+                  style={{ opacity: isReacting ? 0.6 : 1 }}>
                   <MaterialCommunityIcons name="water-outline" size={18} color={COLORS.primary} />
-                  <Text className="ml-1.5 text-sm font-bold" style={{ color: COLORS.primary }}>
-                    물 주기
-                  </Text>
+                  <Text className="ml-1.5 text-sm font-bold text-primary">물 주기</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => handleReact('acid-rain')}
                   disabled={isReacting}
-                  className="flex-row items-center rounded-full border px-4 py-2.5"
-                  style={{
-                    backgroundColor: COLORS.backgroundSecondary,
-                    borderColor: COLORS.border,
-                    opacity: isReacting ? 0.6 : 1,
-                  }}>
+                  className="flex-row items-center rounded-full border border-line bg-background-secondary px-4 py-2.5"
+                  style={{ opacity: isReacting ? 0.6 : 1 }}>
                   <MaterialCommunityIcons
                     name="weather-pouring"
                     size={18}
                     color={COLORS.textSecondary}
                   />
-                  <Text
-                    className="ml-1.5 text-sm font-bold"
-                    style={{ color: COLORS.textSecondary }}>
-                    산성비
-                  </Text>
+                  <Text className="ml-1.5 text-sm font-bold text-content-secondary">산성비</Text>
                 </TouchableOpacity>
               </>
             )}
@@ -664,11 +625,11 @@ export default function ChatDetail() {
                   {/* 날짜 구분선 */}
                   {showDate && (
                     <View className="my-5 flex-row items-center">
-                      <View className="flex-1 border-b" style={{ borderColor: COLORS.border }} />
-                      <Text className="mx-3 text-xs" style={{ color: COLORS.textMuted }}>
+                      <View className="flex-1 border-b border-line" />
+                      <Text className="mx-3 text-xs text-content-muted">
                         {formatDateSeparator(msg.created_at)}
                       </Text>
-                      <View className="flex-1 border-b" style={{ borderColor: COLORS.border }} />
+                      <View className="flex-1 border-b border-line" />
                     </View>
                   )}
 
@@ -677,7 +638,7 @@ export default function ChatDetail() {
                     className={`${showTime ? 'mb-3' : 'mb-1'} flex-row ${isMe ? 'justify-end' : 'justify-start'}`}>
                     {/* 상대방 아바타 */}
                     {!isMe && (
-                      <View className="mr-2 self-start" style={{ width: 40 }}>
+                      <View className="mr-2 w-10 self-start">
                         {showPartnerAvatar ? (
                           <ProfileAvatar uri={msg.sender_profile_image_url} size={40} />
                         ) : null}
@@ -694,26 +655,18 @@ export default function ChatDetail() {
                             borderBottomLeftRadius: isMe ? 16 : 4,
                           }}>
                           {isVideo ? (
-                            <View
-                              className="items-center justify-center"
-                              style={{
-                                width: 200,
-                                height: 150,
-                                backgroundColor: COLORS.backgroundSecondary,
-                              }}>
+                            <View className="h-[150px] w-[200px] items-center justify-center bg-background-secondary">
                               <MaterialCommunityIcons
                                 name="play-circle-outline"
                                 size={48}
                                 color={COLORS.textMuted}
                               />
-                              <Text className="mt-1 text-xs" style={{ color: COLORS.textMuted }}>
-                                동영상
-                              </Text>
+                              <Text className="mt-1 text-xs text-content-muted">동영상</Text>
                             </View>
                           ) : (
                             <Image
                               source={{ uri: msg.content }}
-                              style={{ width: 200, height: 200 }}
+                              className="h-[200px] w-[200px]"
                               contentFit="cover"
                               transition={IMAGE_TRANSITION_MS}
                               placeholder={IMAGE_PLACEHOLDER}
@@ -739,15 +692,11 @@ export default function ChatDetail() {
                       {showTime && (
                         <View
                           className={`mt-1 flex-row items-center ${isMe ? 'flex-row-reverse' : ''}`}>
-                          <Text className="text-xs" style={{ color: COLORS.textMuted }}>
+                          <Text className="text-xs text-content-muted">
                             {formatMessageTime(msg.created_at)}
                           </Text>
                           {isMe && !msg.is_read && (
-                            <Text
-                              className="mr-1 text-xs font-semibold"
-                              style={{ color: COLORS.primary }}>
-                              1
-                            </Text>
+                            <Text className="mr-1 text-xs font-semibold text-primary">1</Text>
                           )}
                         </View>
                       )}
@@ -761,9 +710,7 @@ export default function ChatDetail() {
         </ScrollView>
 
         {/* 메시지 입력 영역 */}
-        <View
-          className="flex-row items-end px-3 pb-1 pt-2"
-          style={{ borderTopWidth: 1, borderTopColor: COLORS.border }}>
+        <View className="flex-row items-end border-t border-line px-3 pb-1 pt-2">
           {/* 미디어 첨부 버튼 */}
           <TouchableOpacity
             className="mr-2 p-1"
@@ -779,11 +726,9 @@ export default function ChatDetail() {
               }
             />
           </TouchableOpacity>
-          <View
-            className="flex-1 flex-row items-center rounded-2xl px-4 py-2"
-            style={{ backgroundColor: COLORS.backgroundSecondary }}>
+          <View className="flex-1 flex-row items-center rounded-2xl bg-background-secondary px-4 py-2">
             <TextInput
-              className="flex-1 text-base"
+              className="max-h-[80px] min-h-[20px] flex-1 py-0 text-base leading-5 text-content"
               placeholder={
                 chatInfo?.i_blocked || chatInfo?.blocked_by_partner
                   ? '채팅을 하려면 차단을 해제해 주세요.'
@@ -794,14 +739,7 @@ export default function ChatDetail() {
               onChangeText={setMessageText}
               editable={!(chatInfo?.i_blocked || chatInfo?.blocked_by_partner)}
               multiline
-              style={{
-                color: COLORS.text,
-                lineHeight: 20,
-                maxHeight: 80,
-                minHeight: 20,
-                paddingVertical: 0,
-                textAlignVertical: 'center',
-              }}
+              style={{ textAlignVertical: 'center' }}
               onSubmitEditing={handleSend}
               returnKeyType="send"
             />

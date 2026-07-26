@@ -1,5 +1,4 @@
 import { View, Text, Image } from 'react-native';
-import { COLORS } from '@/constants/theme';
 import { getFertilityStage } from '@/constants/fertility';
 
 type FertilityBadgeProps = {
@@ -12,13 +11,9 @@ export default function FertilityBadge({ percent }: FertilityBadgeProps) {
   const stage = getFertilityStage(value);
 
   return (
-    <View
-      className="flex-row items-center rounded-full px-2 py-0.5"
-      style={{ backgroundColor: COLORS.primaryLight }}>
-      <Image source={stage.image} style={{ width: 16, height: 16 }} resizeMode="contain" />
-      <Text className="ml-1 text-xs font-bold" style={{ color: COLORS.primary }}>
-        {value}%
-      </Text>
+    <View className="flex-row items-center rounded-full bg-primary-light px-2 py-0.5">
+      <Image source={stage.image} className="h-4 w-4" resizeMode="contain" />
+      <Text className="ml-1 text-xs font-bold text-primary">{value}%</Text>
     </View>
   );
 }
